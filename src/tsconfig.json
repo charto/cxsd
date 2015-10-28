@@ -1,0 +1,19 @@
+{
+	"compileOnSave": true,
+	"compilerOptions": {
+		"declaration": true,
+		"lib": ["es5", "es2015.collection"],
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"noImplicitAny": true,
+		"noImplicitThis": true,
+		"outDir": "../dist",
+		"removeComments": false,
+		"sourceMap": false,
+		"strictNullChecks": true,
+		"target": "es5"
+	},
+	"files": [
+		"index.ts"
+	]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "cxsd",
+  "version": "0.1.1",
+  "description": "Streaming XSD parser and XML parser generator with TypeScript output",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "bin": {
+    "cxsd": "cxsd-cli.js"
+  },
+  "scripts": {
+    "tsc": "tsc",
+    "prepublish": "tsc -p src",
+    "test": "tsc -p test && node test/test.js"
+  },
+  "author": "Juha Järvi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/charto/cxsd.git"
+  },
+  "bugs": {
+    "url": "https://github.com/charto/cxsd/issues"
+  },
+  "homepage": "https://github.com/charto/cxsd#readme",
+  "keywords": [
+    "xsd",
+    "dts",
+    "xml",
+    "schema",
+    "parser",
+    "typescript"
+  ],
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "commander": "~2.9.0"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.8",
+    "@types/node": "^8.0.13",
+    "typescript": "^2.4.1"
+  }
+}
