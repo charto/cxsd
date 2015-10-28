@@ -1,0 +1,21 @@
+{
+  "name": "fast-xml",
+  "version": "0.0.1",
+  "description": "(incomplete) fast XML parser with XSD support",
+  "main": "index.js",
+  "scripts": {
+    "tsd": "tsd",
+    "prepublish": "tsc",
+    "test": "node index.js"
+  },
+  "author": "Juha Järvi",
+  "license": "MIT",
+  "dependencies": {
+    "node-expat": "^2.3.10",
+    "request": "^2.65.0"
+  },
+  "devDependencies": {
+    "tsd": "^0.6.5",
+    "typescript": "^1.6.2"
+  }
+}

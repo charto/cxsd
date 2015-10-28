@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"declaration": false,
+		"experimentalDecorators": true,
+		"module": "commonjs",
+		"noImplicitAny": true,
+		"outDir": "dist",
+		"target": "es5"
+	},
+	"files": [
+		"typings/node/node.d.ts",
+		"typings/request/request.d.ts",
+		"typings-custom/node-expat.d.ts",
+
+		"src/xsd.ts"
+	]
+}
