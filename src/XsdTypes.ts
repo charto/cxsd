@@ -37,6 +37,15 @@ export class XsdElementStore {
 		});
 	}
 
+	addElementsToParent(state: State) {
+		if(this.elementList) {
+			for(var element of this.elementList) {
+				(state.parent.xsdElement as any as XsdElementStore).addElement(element);
+			}
+		}
+	}
+
+
 	elementList: XsdElement[];
 }
 
@@ -134,6 +143,7 @@ export class XsdSchema extends XsdBase implements XsdElementStore, XsdTypeStore 
 
 	addElement: (element: XsdElement) => void;
 	replaceElement: (elementOld: XsdElement, elementNew: XsdElement) => void;
+	addElementsToParent: (state: State) => void;
 	elementList: XsdElement[];
 
 	addType: (type: XsdTypeBase) => void;
@@ -203,6 +213,7 @@ export class XsdGroupBase extends XsdElementBase implements XsdElementStore {
 
 	addElement: (element: XsdElement) => void;
 	replaceElement: (elementOld: XsdElement, elementNew: XsdElement) => void;
+	addElementsToParent: (state: State) => void;
 	elementList: XsdElement[];
 }
 
@@ -215,11 +226,7 @@ export class XsdGenericChildList extends XsdGroupBase {
 	];
 
 	finish(state: State) {
-		if(this.elementList) {
-			for(var element of this.elementList) {
-				(state.parent.xsdElement as any as XsdElementStore).addElement(element);
-			}
-		}
+		this.addElementsToParent(state);
 	}
 }
 
@@ -254,9 +261,7 @@ export class XsdGroup extends XsdGroupBase {
 			group = state.parent.scope.lookup(ref, 'group');
 		}
 
-		if(group) {
-			// TODO: add contents of group to parent
-		}
+		if(group) group.addElementsToParent(state);
 	}
 
 	name: string = null;
@@ -360,6 +365,7 @@ export class XsdComplexType extends XsdTypeBase implements XsdElementStore, XsdA
 
 	addElement: (element: XsdElement) => void;
 	replaceElement: (elementOld: XsdElement, elementNew: XsdElement) => void;
+	addElementsToParent: (state: State) => void;
 	elementList: XsdElement[];
 
 	addAttribute: (attribute: XsdAttribute) => void;
