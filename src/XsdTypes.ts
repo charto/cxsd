@@ -22,7 +22,7 @@ function mixin(...constructorList: any[]) {
 
 // Mixins
 
-class XsdElementStore {
+export class XsdElementStore {
 	addElement(element: XsdElement) {
 		if(!this.elementList) this.elementList = [];
 
@@ -40,7 +40,7 @@ class XsdElementStore {
 	elementList: XsdElement[];
 }
 
-class XsdAttributeStore {
+export class XsdAttributeStore {
 	addAttribute(attribute: XsdAttribute) {
 		if(!this.attributeList) this.attributeList = [];
 
@@ -50,7 +50,7 @@ class XsdAttributeStore {
 	attributeList: XsdAttribute[];
 }
 
-class XsdTypeStore {
+export class XsdTypeStore {
 	addType(type: XsdTypeBase) {
 		if(!this.typeList) this.typeList = [];
 
@@ -145,7 +145,7 @@ export class XsdSchema extends XsdBase implements XsdElementStore, XsdTypeStore 
 
 // Element support
 
-class XsdElementBase extends XsdBase {
+export class XsdElementBase extends XsdBase {
 	id: string = null;
 	minOccurs: number = 1;
 	maxOccurs: number = 1;
@@ -198,7 +198,7 @@ export class XsdElement extends XsdElementBase implements XsdTypeStore {
 }
 
 @mixin(XsdElementStore)
-class XsdGroupBase extends XsdElementBase implements XsdElementStore {
+export class XsdGroupBase extends XsdElementBase implements XsdElementStore {
 	// Mixed in members
 
 	addElement: (element: XsdElement) => void;
@@ -206,7 +206,7 @@ class XsdGroupBase extends XsdElementBase implements XsdElementStore {
 	elementList: XsdElement[];
 }
 
-class XsdGenericChildList extends XsdGroupBase {
+export class XsdGenericChildList extends XsdGroupBase {
 	static mayContain: () => XsdBaseClass[] = () => [
 		XsdElement,
 		XsdGroup,
