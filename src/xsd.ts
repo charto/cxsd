@@ -2,7 +2,6 @@
 // Released under the MIT license, see LICENSE.
 
 import * as expat from 'node-expat';
-import * as url from 'url';
 
 import {Cache} from './Cache';
 import * as types from './XsdTypes'
@@ -39,7 +38,7 @@ Namespace.register('http://www.w3.org/2001/XMLSchema', 'http://www.w3.org/2009/X
 
 var rootRule = parseRule(types.XsdRoot);
 
-class Xsd {
+export class Xsd {
 	constructor(remoteUrl: string, cache: Cache) {
 		var state = new State(null, rootRule);
 

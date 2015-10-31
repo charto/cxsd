@@ -1,7 +1,10 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import * as url from 'url';
+
 import {State, Namespace, Rule, Scope, QName} from './XsdState';
+import {Xsd} from './xsd';
 
 export type XmlAttribute = string | number;
 type XmlAttributeTbl = {[name: string]: XmlAttribute};
@@ -105,8 +108,8 @@ export class XsdRoot extends XsdBase {
 
 // <xsd:schema>
 
-@mixin(XsdElementStore, XsdTypeStore)
-export class XsdSchema extends XsdBase implements XsdElementStore, XsdTypeStore {
+@mixin(XsdElementStore, XsdAttributeStore, XsdTypeStore)
+export class XsdSchema extends XsdBase implements XsdElementStore, XsdAttributeStore, XsdTypeStore {
 	static mayContain = () => [
 		XsdImport,
 		XsdInclude,
@@ -157,6 +160,9 @@ export class XsdSchema extends XsdBase implements XsdElementStore, XsdTypeStore 
 	addElementsToParent: (state: State) => void;
 	elementList: XsdElement[];
 
+	addAttribute: (attribute: XsdAttribute) => void;
+	attributeList: XsdAttribute[];
+
 	addType: (type: XsdTypeBase) => void;
 	typeList: XsdTypeBase[];
 }
@@ -182,22 +188,20 @@ export class XsdElement extends XsdElementBase implements XsdTypeStore {
 	];
 
 	init(state: State) {
-		(state.parent.xsdElement as any as XsdElementStore).addElement(this);
-
 		if(this.name) state.parent.scope.add(new QName(this.name, state), 'element', this);
 	}
 
 	finish(state: State) {
+		var element = this;
+
 		if(this.ref) {
-			var ref = new QName(this.ref as string, state);
-			var element = state.parent.scope.lookup(ref, 'element');
+			// Replace this with another, referenced element.
 
-			// Replace element with another, referenced element.
-
-			if(element) {
-				(state.parent.xsdElement as any as XsdElementStore).replaceElement(this, element);
-			}
+			var ref = new QName(this.ref, state);
+			element = state.parent.scope.lookup(ref, 'element');
 		}
+
+		if(element) (state.parent.xsdElement as any as XsdElementStore).addElement(element);
 
 		if(this.type) {
 			var type = new QName(this.type as string, state);
@@ -292,7 +296,20 @@ export class XsdGroup extends XsdGroupBase {
 
 export class XsdAttribute extends XsdBase {
 	init(state: State) {
-		(state.parent.xsdElement as any as XsdAttributeStore).addAttribute(this);
+		if(this.name) state.parent.scope.add(new QName(this.name, state), 'attribute', this);
+	}
+
+	finish(state: State) {
+		var attribute = this;
+
+		if(this.ref) {
+			// Replace this with another, referenced attribute.
+
+			var ref = new QName(this.ref, state);
+			attribute = state.parent.scope.lookup(ref, 'attribute');
+		}
+
+		if(attribute) (state.parent.xsdElement as any as XsdAttributeStore).addAttribute(attribute);
 	}
 
 	id: string = null;
