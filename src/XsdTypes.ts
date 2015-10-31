@@ -6,6 +6,8 @@ import {State, Namespace, Rule, Scope, QName} from './XsdState';
 export type XmlAttribute = string | number;
 type XmlAttributeTbl = {[name: string]: XmlAttribute};
 
+// Mixin decorator
+
 function mixin(...constructorList: any[]) {
 	return((target: any) => {
 		for(var base of constructorList) {
@@ -120,13 +122,20 @@ export class XsdSchema extends XsdBase implements XsdElementStore, XsdTypeStore 
 	init(state: State) {
 		var attrTbl = state.attributeTbl;
 
+		// Unqualified tags are assumed to be in the default namespace.
+		// For the schema file itself, it should be http://www.w3.org/2001/XMLSchema
+
 		if(attrTbl['xmlns']) {
 			state.stateStatic.namespaceDefault = Namespace.register(attrTbl['xmlns']);
 		}
 
+		// Everything defined in the current file belongs to the target namespace by default.
+
 		if(attrTbl['targetnamespace']) {
 			state.stateStatic.namespaceTarget = Namespace.register(attrTbl['targetnamespace'], state.stateStatic.cache.remoteUrl);
 		}
+
+		// Read the current file's preferred shorthand codes for other XML namespaces.
 
 		for(var attr of Object.keys(attrTbl)) {
 			if(attr.match(/^xmlns:/i)) {
@@ -135,6 +144,9 @@ export class XsdSchema extends XsdBase implements XsdElementStore, XsdTypeStore 
 				state.stateStatic.namespaceMap[short] = Namespace.register(attrTbl[attr]);
 			}
 		}
+
+		// Ultimately the schema exports elements and types in the global scope
+		// (meaning they are children of this, the root element).
 
 		state.stateStatic.root = this;
 	}
@@ -180,6 +192,8 @@ export class XsdElement extends XsdElementBase implements XsdTypeStore {
 		if(this.ref) {
 			var ref = new QName(this.ref as string, state);
 			var element = state.parent.scope.lookup(ref, 'element');
+
+			// Replace element with another, referenced element.
 
 			if(element) {
 				(state.parent.xsdElement as any as XsdElementStore).replaceElement(this, element);
