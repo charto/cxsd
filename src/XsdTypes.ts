@@ -274,7 +274,9 @@ export class XsdGroup extends XsdGroupBase {
 			group = state.parent.scope.lookup(ref, 'group');
 		}
 
-		if(group) group.addElementsToParent(state);
+		// Named groups are only models for referencing elsewhere.
+
+		if(!this.name && group) group.addElementsToParent(state);
 	}
 
 	name: string = null;
@@ -321,7 +323,11 @@ export class XsdAttributeGroup extends XsdBase implements XsdAttributeStore {
 			attributeGroup = state.parent.scope.lookup(ref, 'attributegroup');
 		}
 
+		// Named attribute groups are only models for referencing elsewhere.
+
 		if(!this.name && attributeGroup && attributeGroup.attributeList) {
+			// Add attribute group contents to parent.
+
 			for(var attribute of attributeGroup.attributeList) {
 				(state.parent.xsdElement as any as XsdAttributeStore).addAttribute(attribute);
 			}
