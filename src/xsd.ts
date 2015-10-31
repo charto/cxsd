@@ -12,22 +12,18 @@ import * as util from 'util';
 
 var xsdTbl: {[url: string]: boolean} = {}
 
-function parseClassName(name: string) {
-	return(name.replace(
-		/([A-Za-z][a-z]*)([A-Za-z]+)/,
-		(nameFull, namespace, name) => Namespace.tbl[namespace.toLowerCase()].id + ':' + name.toLowerCase()
-	));
-}
-
 function parseRule(ctor: types.XsdBaseClass) {
 	if(ctor.rule) return(ctor.rule as Rule);
 
-	var rule = new Rule(parseClassName(ctor.name), ctor);
+	var rule = new Rule(new QName().parseClass(ctor.name), ctor);
 
 	ctor.rule = rule;
 
 	for(var follower of ctor.mayContain()) {
-		rule.followerTbl[parseClassName(follower.name)] = parseRule(follower);
+		var followerName = new QName().parseClass(follower.name);
+
+		rule.followerTbl[followerName.nameFull] = parseRule(follower);
+		rule.followerTbl[followerName.name] = parseRule(follower);
 	}
 
 	var obj = new ctor();
@@ -42,8 +38,6 @@ function parseRule(ctor: types.XsdBaseClass) {
 Namespace.register('http://www.w3.org/2001/XMLSchema', 'http://www.w3.org/2009/XMLSchema/XMLSchema.xsd', 'xsd');
 
 var rootRule = parseRule(types.XsdRoot);
-
-rootRule.followerTbl['*'] = rootRule.followerTbl[Namespace.tbl['xsd'].id + ':schema'];
 
 class Xsd {
 	constructor(remoteUrl: string, cache: Cache) {

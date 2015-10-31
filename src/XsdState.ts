@@ -77,12 +77,12 @@ export class Namespace {
 }
 
 export class Rule {
-	constructor(name: string, proto: any) {
-		this.name = name;
+	constructor(qName: QName, proto: any) {
+		this.qName = qName;
 		this.proto = proto;
 	}
 
-	name: string;
+	qName: QName;
 	proto: any;
 
 	attributeList: string[] = [];
@@ -106,7 +106,7 @@ export class Scope {
 	}
 
 	lookup(name: QName, type: string): any {
-		var scope = this;
+		var scope: Scope = this;
 
 		while(scope) {
 			if(scope.data[type]) {
@@ -150,6 +150,18 @@ export class QName {
 		this.namespace = namespace;
 		this.name = name;
 		this.nameFull = namespace ? (namespace.id + ':' + name) : name;
+
+		return(this);
+	}
+
+	parseClass(name: string) {
+		var partList = name.match(/([A-Za-z][a-z]*)([A-Za-z]+)/);
+
+		this.namespace = Namespace.tbl[partList[1].toLowerCase()];
+		this.name = partList[2].toLowerCase();
+		this.nameFull = this.namespace.id + ':' + this.name;
+
+		return(this);
 	}
 
 	namespace: Namespace;
