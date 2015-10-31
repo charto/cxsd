@@ -47,7 +47,6 @@ export class XsdElementStore {
 		}
 	}
 
-
 	elementList: XsdElement[];
 }
 
@@ -322,8 +321,10 @@ export class XsdAttributeGroup extends XsdBase implements XsdAttributeStore {
 			attributeGroup = state.parent.scope.lookup(ref, 'attributegroup');
 		}
 
-		if(attributeGroup) {
-			// TODO: add contents of attributeGroup to parent
+		if(!this.name && attributeGroup && attributeGroup.attributeList) {
+			for(var attribute of attributeGroup.attributeList) {
+				(state.parent.xsdElement as any as XsdAttributeStore).addAttribute(attribute);
+			}
 		}
 	}
 
