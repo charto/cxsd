@@ -129,6 +129,8 @@ export class Cache {
 		);
 	}
 
+	// Store HTTP redirects as files containing the new URL.
+
 	addLinks(redirectList: string[], target: string) {
 		return(Promise.map(redirectList, (src: string) => {
 			this.makeCachePath(src).then((cachePath: string) =>
@@ -144,6 +146,9 @@ export class Cache {
 			(err: NodeJS.ErrnoException) => false
 		));
 	}
+
+	// Get local cache file path where a remote URL should be downloaded.
+	// Also create the directory containing it.
 
 	makeCachePath(urlRemote: string) {
 		var cachePath = path.join(
@@ -174,6 +179,9 @@ export class Cache {
 		return((urlParts.protocol || 'http:') + '//' + url.resolve('', origin));
 	}
 
+	// Fetch URL from cache or download it if not available yet.
+	// Returns the file's URL after redirections and a readable stream of its contents.
+
 	fetch(urlRemote: string) {
 		urlRemote = this.sanitizeUrl(urlRemote);
 
@@ -193,6 +201,8 @@ export class Cache {
 			cachePath,
 			cachePath.then((cachePath: string) => fsa.open(cachePath, 'r'))
 		]).spread((cachePath: string, fd: number) => {
+			// Check if there's a cached link redirecting the URL.
+
 			var buf = new Buffer(6);
 
 			return(fsa.read(fd, buf, 0, 6, 0).then(() => {
@@ -266,6 +276,9 @@ export class Cache {
 
 				streamOut.on('finish', () => {
 					console.log('FINISHED ' + urlRemote);
+
+					// Output stream file handle stays open after piping unless manually closed.
+
 					streamOut.close();
 				});
 

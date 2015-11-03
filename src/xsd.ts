@@ -9,8 +9,6 @@ import {State, Namespace, Rule, Scope, QName} from './XsdState'
 
 import * as util from 'util';
 
-var xsdTbl: {[url: string]: boolean} = {}
-
 function parseRule(ctor: types.XsdBaseClass) {
 	if(ctor.rule) return(ctor.rule as Rule);
 
