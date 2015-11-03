@@ -10,6 +10,7 @@
 	"files": [
 		"typings/node/node.d.ts",
 		"typings/request/request.d.ts",
+		"typings/bluebird/bluebird.d.ts",
 		"typings-custom/node-expat.d.ts",
 
 		"src/xsd.ts"

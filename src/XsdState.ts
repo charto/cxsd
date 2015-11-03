@@ -28,7 +28,6 @@ export class State {
 
 	stateStatic: {
 		remoteUrl: string;
-		cache: Cache;
 		qName: QName;
 
 		root: types.XsdSchema;
@@ -69,6 +68,7 @@ export class Namespace {
 
 	static list: Namespace[] = [];
 	static tbl: {[name: string]: Namespace} = {};
+	static cache = new Cache('cache/xsd', '_index.xsd');
 
 	id: number;
 	name: string;

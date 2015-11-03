@@ -3,7 +3,7 @@
 
 import * as expat from 'node-expat';
 
-import {Cache} from './Cache';
+import {Cache, CacheResult} from './Cache';
 import * as types from './XsdTypes'
 import {State, Namespace, Rule, Scope, QName} from './XsdState'
 
@@ -39,12 +39,11 @@ Namespace.register('http://www.w3.org/2001/XMLSchema', 'http://www.w3.org/2009/X
 var rootRule = parseRule(types.XsdRoot);
 
 export class Xsd {
-	constructor(remoteUrl: string, cache: Cache) {
+	constructor(remoteUrl: string) {
 		var state = new State(null, rootRule);
 
 		state.stateStatic = {
 			remoteUrl: remoteUrl,
-			cache: cache,
 			qName: new QName(),
 
 			root: null,
@@ -57,7 +56,10 @@ export class Xsd {
 		var stateStatic = state.stateStatic;
 		var qName = stateStatic.qName;
 
-		var stream = cache.fetch(remoteUrl);
+Namespace.cache.fetch(remoteUrl).then((result: CacheResult) => {
+		remoteUrl = result.url;
+		state.stateStatic.remoteUrl = remoteUrl;
+		var stream = result.stream;
 		var xml = new expat.Parser('utf-8');
 
 		var pendingList: State[] = [];
@@ -152,9 +154,10 @@ try {
 			console.log(stateStatic.namespaceMap);
 			console.log(util.inspect(stateStatic.root, {depth: 4, colors: true}));
 		});
+});
 	}
 }
 
 var xsdCache = new Cache('cache/xsd', '_index.xsd');
 
-new Xsd(process.argv[2], xsdCache);
+new Xsd(process.argv[2]);

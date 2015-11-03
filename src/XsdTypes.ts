@@ -134,7 +134,7 @@ export class XsdSchema extends XsdBase implements XsdElementStore, XsdAttributeS
 		// Everything defined in the current file belongs to the target namespace by default.
 
 		if(attrTbl['targetnamespace']) {
-			state.stateStatic.namespaceTarget = Namespace.register(attrTbl['targetnamespace'], state.stateStatic.cache.remoteUrl);
+			state.stateStatic.namespaceTarget = Namespace.register(attrTbl['targetnamespace'], state.stateStatic.remoteUrl);
 		}
 
 		// Read the current file's preferred shorthand codes for other XML namespaces.

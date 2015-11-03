@@ -11,6 +11,7 @@
   "author": "Juha Järvi",
   "license": "MIT",
   "dependencies": {
+    "bluebird": "^3.0.5",
     "node-expat": "^2.3.10",
     "request": "^2.65.0"
   },
