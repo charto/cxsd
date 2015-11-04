@@ -35,6 +35,8 @@ export class State {
 		namespaceTarget: Namespace;
 		namespaceDefault: Namespace;
 		namespaceMap: {[name: string]: Namespace};
+
+		addImport: (namespaceTarget: Namespace, urlRemote: string) => void;
 	};
 }
 
@@ -72,9 +74,16 @@ export class Namespace {
 		return(namespace.register(name, url, short));
 	}
 
-	getSchema() {
+	importSchema(urlRemote?: string) {
+		if(!urlRemote) urlRemote = this.url;
+
+		var result = this.resultTbl[urlRemote];
+
+		if(result) return(result);
+
 		if(!Namespace.parser) Namespace.parser = new XsdParser();
-		Namespace.parser.parse(this);
+
+		this.resultTbl[urlRemote] = Namespace.parser.parse(this, urlRemote);
 	}
 
 	static list: Namespace[] = [];
@@ -86,6 +95,8 @@ export class Namespace {
 	id: number;
 	name: string;
 	url: string;
+
+	resultTbl: {[url: string]: Promise<any>} = {};
 }
 
 export class Rule {

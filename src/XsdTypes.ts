@@ -27,6 +27,9 @@ function mixin(...constructorList: any[]) {
 
 // Mixins
 
+// TODO: maybe just use these classes directly as members,
+// instead of mixing in their contents.
+
 export class XsdElementStore {
 	addElement(element: XsdElement) {
 		if(!this.elementList) this.elementList = [];
@@ -466,7 +469,13 @@ export class XsdRestriction extends XsdDerivationBase {
 
 export class XsdImport extends XsdBase {
 	init(state: State) {
-		Namespace.register(this.namespace, this.schemaLocation);
+		if(this.schemaLocation) {
+			// TODO: handle importing namespaces like http://www.w3.org/XML/1998/namespace
+			// without a schemaLocation.
+
+			var urlRemote = url.resolve(state.stateStatic.namespaceTarget.url, this.schemaLocation);
+			state.stateStatic.addImport(Namespace.register(this.namespace, urlRemote), urlRemote);
+		}
 	}
 
 	id: string = null;
@@ -477,6 +486,13 @@ export class XsdImport extends XsdBase {
 // <xsd:include>
 
 export class XsdInclude extends XsdBase {
+	init(state: State) {
+		if(this.schemaLocation) {
+			var urlRemote = url.resolve(state.stateStatic.namespaceTarget.url, this.schemaLocation);
+			state.stateStatic.addImport(state.stateStatic.namespaceTarget, urlRemote);
+		}
+	}
+
 	id: string = null;
 	schemaLocation: string = null;
 }

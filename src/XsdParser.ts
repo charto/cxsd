@@ -2,6 +2,7 @@
 // Released under the MIT license, see LICENSE.
 
 import * as expat from 'node-expat';
+import * as Promise from 'bluebird';
 
 import {Cache, CacheResult} from './Cache';
 import * as types from './XsdTypes';
@@ -37,7 +38,7 @@ export class XsdParser {
 		this.rootRule = parseRule(types.XsdRoot);
 	}
 
-	parse(namespace: Namespace) {
+	parse(namespace: Namespace, urlRemote?: string) {
 		var state = new State(null, this.rootRule);
 
 		state.stateStatic = {
@@ -47,20 +48,35 @@ export class XsdParser {
 
 			namespaceTarget: namespace,
 			namespaceDefault: null,
-			namespaceMap: {}
+			namespaceMap: {},
+
+			addImport: (namespaceTarget: Namespace, urlRemote: string) => {
+				this.importList.push({namespace: namespaceTarget, url: urlRemote});
+			}
 		};
 
 		var stateStatic = state.stateStatic;
 		var qName = stateStatic.qName;
 
-Namespace.cache.fetch(namespace.url).then((result: CacheResult) => {
-console.log('Parsing ' + namespace.url + ' -> ' + result.url);
+		if(!urlRemote) urlRemote = namespace.url;
+
+console.log('FETCH  into ' + namespace.name + ' from ' + urlRemote);
+
+return(Namespace.cache.fetch(urlRemote).then((result: CacheResult) => {
+		var resolve: (result: any) => void;
+		var reject: (err: any) => void;
+		var promise = new Promise<CacheResult>((res, rej) => {
+			resolve = res;
+			reject = rej;
+		})
+
+console.log('PARSE  into ' + namespace.name + ' from ' + urlRemote + ' -> ' + result.url);
 		var stream = result.stream;
 		var xml = new expat.Parser('utf-8');
 
 		var pendingList: State[] = [];
 
-		namespace.url = result.url;
+		if(!namespace.url || namespace.url == urlRemote) namespace.url = result.url;
 
 		xml.on('startElement', (name: string, attrTbl: {[name: string]: string}) => {
 try {
@@ -148,14 +164,22 @@ try {
 
 			// Run all finish hooks.
 
-			pendingList.forEach((state: State) => state.xsdElement.finish(state));
+			Promise.map(this.importList, (spec: {namespace: Namespace, url: string}) => {
+				console.log('IMPORT into ' + spec.namespace.name + ' from ' + spec.url);
+				return(spec.namespace.importSchema(spec.url));
+			}).then(() => {
+				pendingList.forEach((state: State) => state.xsdElement.finish(state));
+			}).then(resolve);
 
 // TODO: debug with these!
 //			console.log(stateStatic.namespaceMap);
 //			console.log(util.inspect(stateStatic.root, {depth: 4, colors: true}));
 		});
-});
+
+		return(promise);
+}));
 	}
 
+	importList: {namespace: Namespace, url: string}[] = [];
 	rootRule: Rule;
 }
