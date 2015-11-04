@@ -34,12 +34,93 @@ function repeat<T>(fn: (again: () => {}) => Promise.Thenable<T>): Promise.Thenab
 	));
 }
 
-export interface CacheResult {
+class Task<ResultType> {
+	constructor(func?: () => Promise<ResultType>) {
+		this.func = func;
+	}
+
+	start(onFinish: () => void) {
+		return(this.func().finally(onFinish));
+	}
+
+	delay() {
+		return(new Promise((resolve: (result: ResultType) => void, reject: (err: any) => void) => {
+			this.resolve = resolve;
+			this.reject = reject;
+		}));
+	}
+
+	resume(onFinish: () => void) {
+		return(this.start(onFinish).then(this.resolve).catch(this.reject));
+	}
+
+	func: () => Promise<ResultType>;
+
+	resolve: (result: ResultType) => void;
+	reject: (err: any) => void;
+}
+
+class TaskQueue {
+	add(task: Task<any>) {
+		if(this.busyCount < TaskQueue.concurrency) {
+			// Start the task immediately.
+
+			++this.busyCount;
+			return(task.start(() => this.next()));
+		} else {
+			// Schedule the task and return a promise that will behave exactly
+			// like what task.start() returns.
+
+			this.backlog.push(task);
+			return(task.delay());
+		}
+	}
+
+	next() {
+		var task = this.backlog.shift();
+
+		if(task) task.resume(() => this.next());
+		else --this.busyCount;
+	}
+
+	static concurrency = 2;
+
+	backlog: Task<any>[] = [];
+	busyCount = 0;
+}
+
+export class CacheResult {
+	constructor(streamOut: stream.Readable, urlRemote: string) {
+		this.stream = streamOut;
+		this.url = urlRemote;
+	}
+
 	stream: stream.Readable;
 	url: string;
 }
 
-// TODO: limit simultaneous downloads.
+class FetchTask extends Task<CacheResult> {
+	constructor(cache: Cache, remoteUrl: string) {
+		super();
+
+		this.cache = cache;
+		this.url = remoteUrl;
+	}
+
+	start(onFinish: () => void) {
+		var result = this.cache.fetchCached(this.url, onFinish).catch((err: NodeJS.ErrnoException) => {
+			// Re-throw unexpected errors.
+			if(err.code != 'ENOENT') throw(err);
+
+			return(this.cache.fetchRemote(this.url, onFinish));
+		});
+
+		return(result);
+	}
+
+	cache: Cache;
+	url: string;
+}
 
 export class Cache {
 
@@ -185,17 +266,12 @@ export class Cache {
 	fetch(urlRemote: string) {
 		urlRemote = this.sanitizeUrl(urlRemote);
 
-		var result = this.fetchCached(urlRemote).catch((err: NodeJS.ErrnoException) => {
-			// Re-throw unexpected errors.
-			if(err.code != 'ENOENT') throw(err);
-
-			return(this.fetchRemote(urlRemote));
-		});
-
-		return(result);
+		return(this.fetchQueue.add(new FetchTask(this, urlRemote)));
 	}
 
-	fetchCached(urlRemote: string) {
+	fetchCached(urlRemote: string, onFinish: () => void) {
+		console.log('BEGIN CACHED ' + urlRemote);
+
 		var cachePath = this.makeCachePath(urlRemote);
 		var targetPath = Promise.all([
 			cachePath,
@@ -209,31 +285,38 @@ export class Cache {
 				fsa.close(fd);
 
 				if(buf.equals(new Buffer('LINK: ', 'ascii'))) {
-					fsa.readFile(cachePath, {encoding: 'utf-8'}).then((link: string) => {
+					return(fsa.readFile(cachePath, {encoding: 'utf-8'}).then((link: string) => {
 						urlRemote = link.substr(6).replace(/\s+$/, '');
 
 						return(this.makeCachePath(urlRemote));
-					});
+					}));
 				} else return(cachePath);
 			}));
 		});
 
-		var cachedResult = targetPath.then((targetPath: string): CacheResult => {
-			return({
-				stream: fs.createReadStream(targetPath, {encoding: 'utf-8'}),
-				url: urlRemote
-			})
-		});
+		return(targetPath.then((targetPath: string) => {
+			var streamIn = fs.createReadStream(targetPath, {encoding: 'utf-8'});
 
-		return(cachedResult);
+			streamIn.on('end', () => {
+				console.log('FINISH CACHED ' + urlRemote);
+				onFinish();
+			});
+
+			return(new CacheResult(
+				streamIn,
+				urlRemote
+			));
+		}));
 	}
 
-	fetchRemote(urlRemote: string) {
+	fetchRemote(urlRemote: string, onFinish: () => void) {
+		console.log('BEGIN REMOTE ' + urlRemote);
+
 		var redirectList: string[] = [];
 		var found = false;
 		var resolve: (result: any) => void;
 		var reject: (err: any) => void;
-		var promise = new Promise((res, rej) => {
+		var promise = new Promise<CacheResult>((res, rej) => {
 			resolve = res;
 			reject = rej;
 		})
@@ -244,7 +327,7 @@ export class Cache {
 				redirectList.push(urlRemote);
 				urlRemote = url.resolve(urlRemote, res.headers.location);
 
-				this.fetchCached(urlRemote).then((result: CacheResult) => {
+				this.fetchCached(urlRemote, onFinish).then((result: CacheResult) => {
 					if(found) return;
 					found = true;
 
@@ -271,28 +354,34 @@ export class Cache {
 
 			this.makeCachePath(urlRemote).then((cachePath: string) => {
 				var streamOut = fs.createWriteStream(cachePath);
-				streamRequest.pipe(streamOut);
-				streamRequest.resume();
 
 				streamOut.on('finish', () => {
-					console.log('FINISHED ' + urlRemote);
-
 					// Output stream file handle stays open after piping unless manually closed.
 
 					streamOut.close();
 				});
 
+				streamRequest.pipe(streamOut);
+				streamRequest.resume();
+
 				return(this.addLinks(redirectList, urlRemote));
 			}).then(() => {
-				resolve({
-					stream: streamRequest,
-					url: urlRemote
-				});
+				resolve(new CacheResult(
+					streamRequest as any as stream.Readable,
+					urlRemote
+				));
 			});
+		});
+
+		streamRequest.on('end', () => {
+			console.log('FINISH REMOTE ' + urlRemote);
+			onFinish();
 		});
 
 		return(promise);
 	}
+
+	fetchQueue = new TaskQueue();
 
 	pathBase: string;
 	indexName: string;
