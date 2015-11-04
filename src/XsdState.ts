@@ -3,6 +3,7 @@
 
 import * as types from './XsdTypes';
 import {Cache} from './Cache';
+import {XsdParser} from './XsdParser';
 
 export class State {
 	constructor(parent: State, rule: Rule) {
@@ -27,7 +28,6 @@ export class State {
 	index: number;
 
 	stateStatic: {
-		remoteUrl: string;
 		qName: QName;
 
 		root: types.XsdSchema;
@@ -39,41 +39,53 @@ export class State {
 }
 
 export class Namespace {
-	constructor(id: number, name: string, url: string, short: string) {
+	constructor(id: number) {
 		this.id = id;
-		this.name = name;
-		this.url = url;
-		this.short = short;
+	}
+
+	register(name: string, url?: string, short?: string) {
+		if(name) {
+			if(!this.name) this.name = name;
+			Namespace.tbl[name] = this;
+		}
+
+		if(url) {
+			if(!this.url) this.url = url;
+			Namespace.tbl[url] = this;
+		}
+
+		if(short) Namespace.tbl[short] = this;
+
+		return(this);
 	}
 
 	static register(name: string, url?: string, short?: string) {
-		var namespace = Namespace.tbl[name];
+		var namespace = Namespace.tbl[name] || Namespace.tbl[url];
 
-		if(namespace) {
-			if(url && !namespace.url) namespace.url = url;
-			return(namespace);
+		if(!namespace) {
+			var id = Namespace.list.length;
+
+			namespace = new Namespace(id);
+			Namespace.list[id] = namespace;
 		}
 
-		var id = Namespace.list.length;
+		return(namespace.register(name, url, short));
+	}
 
-		namespace = new Namespace(id, name, url, short);
-
-		Namespace.list[id] = namespace;
-		Namespace.tbl[name] = namespace;
-
-		if(short) Namespace.tbl[short] = namespace;
-
-		return(namespace);
+	getSchema() {
+		if(!Namespace.parser) Namespace.parser = new XsdParser();
+		Namespace.parser.parse(this);
 	}
 
 	static list: Namespace[] = [];
 	static tbl: {[name: string]: Namespace} = {};
 	static cache = new Cache('cache/xsd', '_index.xsd');
 
+	static parser: XsdParser;
+
 	id: number;
 	name: string;
 	url: string;
-	short: string;
 }
 
 export class Rule {
@@ -144,7 +156,7 @@ export class QName {
 			namespace = stateStatic.namespaceMap[name.substr(0, splitter)];
 			name = name.substr(splitter + 1);
 		} else if(!namespace) {
-			namespace = state.stateStatic.namespaceTarget;
+			namespace = stateStatic.namespaceTarget;
 		}
 
 		this.namespace = namespace;

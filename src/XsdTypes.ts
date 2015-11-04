@@ -4,7 +4,7 @@
 import * as url from 'url';
 
 import {State, Namespace, Rule, Scope, QName} from './XsdState';
-import {Xsd} from './xsd';
+import {XsdParser} from './XsdParser';
 
 export type XmlAttribute = string | number;
 type XmlAttributeTbl = {[name: string]: XmlAttribute};
@@ -134,7 +134,7 @@ export class XsdSchema extends XsdBase implements XsdElementStore, XsdAttributeS
 		// Everything defined in the current file belongs to the target namespace by default.
 
 		if(attrTbl['targetnamespace']) {
-			state.stateStatic.namespaceTarget = Namespace.register(attrTbl['targetnamespace'], state.stateStatic.remoteUrl);
+			state.stateStatic.namespaceTarget.register(attrTbl['targetnamespace']);
 		}
 
 		// Read the current file's preferred shorthand codes for other XML namespaces.
