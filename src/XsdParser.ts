@@ -125,10 +125,14 @@ try {
 			}
 
 //			if(namespace == 'xsd') console.log((rule ? ' ' : '!') + new Array(stateStatic.depth + 1).join(' ') + '<' + nameFull + Object.keys(attrTbl).map((key: string) => ' ' + key + '="' + attrTbl[key] + '"').join('') + '>');
-} catch(e) {throw(e);}
+} catch(err) {
+	// Exceptions escaping from node-expat's event handlers cause weird effects.
+	console.error(err);
+}
 		});
 
 		xml.on('endElement', function(name: string) {
+try {
 //			console.log('</' + name + '>');
 
 			if(state.xsdElement && state.xsdElement.finish) {
@@ -141,6 +145,10 @@ try {
 			}
 
 			state = state.parent;
+} catch(err) {
+	// Exceptions escaping from node-expat's event handlers cause weird effects.
+	console.error(err);
+}
 		});
 
 		xml.on('text', function(text: string) {
@@ -150,7 +158,6 @@ try {
 
 		xml.on('error', function(err: any) {
 			console.error(err);
-			throw(err);
 		});
 
 		stream.on('data', (data: string) => {

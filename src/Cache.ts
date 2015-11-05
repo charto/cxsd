@@ -10,6 +10,8 @@ import * as stream from 'stream';
 import * as request from 'request';
 import * as Promise from 'bluebird';
 
+// TODO: continue interrupted downloads.
+
 Promise.longStackTraces();
 
 var fsa = {
@@ -26,7 +28,7 @@ var fsa = {
 var againSymbol = {};
 var again = () => againSymbol;
 
-function repeat<T>(fn: (again: () => {}) => Promise.Thenable<T>): Promise.Thenable<T> {
+function repeat<T>(fn: (again: () => {}) => Promise<T>): Promise<T> {
 	return(Promise.try(() =>
 		fn(again)
 	).then((result: T) =>
@@ -39,7 +41,8 @@ class Task<ResultType> {
 		this.func = func;
 	}
 
-	start(onFinish: () => void) {
+	start(onFinish: (err?: NodeJS.ErrnoException) => void) {
+		// These fix atom-typescript syntax highlight: ))
 		return(this.func().finally(onFinish));
 	}
 
@@ -50,7 +53,8 @@ class Task<ResultType> {
 		}));
 	}
 
-	resume(onFinish: () => void) {
+	resume(onFinish: (err?: NodeJS.ErrnoException) => void) {
+		// These fix atom-typescript syntax highlight: ))
 		return(this.start(onFinish).then(this.resolve).catch(this.reject));
 	}
 
@@ -107,10 +111,14 @@ class FetchTask extends Task<CacheResult> {
 		this.url = remoteUrl;
 	}
 
-	start(onFinish: () => void) {
+	start(onFinish: (err?: NodeJS.ErrnoException) => void) {
+		// These fix atom-typescript syntax highlight: ))
 		var result = this.cache.fetchCached(this.url, onFinish).catch((err: NodeJS.ErrnoException) => {
 			// Re-throw unexpected errors.
-			if(err.code != 'ENOENT') throw(err);
+			if(err.code != 'ENOENT') {
+				onFinish(err);
+				throw(err);
+			}
 
 			return(this.cache.fetchRemote(this.url, onFinish));
 		});
@@ -252,7 +260,10 @@ export class Cache {
 
 	sanitizeUrl(urlRemote: string) {
 		var urlParts = url.parse(urlRemote, false, true);
-		var origin = urlParts.hostname || '';
+		var origin = '';
+
+		if(urlParts.hostname) origin = urlParts.hostname;
+		if(urlParts.port) origin += ':' + urlParts.port;
 
 		if(urlParts.pathname.charAt(0) != '/') origin += '/';
 
@@ -269,8 +280,11 @@ export class Cache {
 		return(this.fetchQueue.add(new FetchTask(this, urlRemote)));
 	}
 
-	fetchCached(urlRemote: string, onFinish: () => void) {
+	fetchCached(urlRemote: string, onFinish: (err?: NodeJS.ErrnoException) => void) {
+		// These fix atom-typescript syntax highlight: ))
 		console.log('BEGIN CACHED ' + urlRemote);
+
+		// Any errors shouldn't be handled here, but instead in the caller.
 
 		var cachePath = this.makeCachePath(urlRemote);
 		var targetPath = Promise.all([
@@ -309,7 +323,8 @@ export class Cache {
 		}));
 	}
 
-	fetchRemote(urlRemote: string, onFinish: () => void) {
+	fetchRemote(urlRemote: string, onFinish: (err?: NodeJS.ErrnoException) => void) {
+		// These fix atom-typescript syntax highlight: ))
 		console.log('BEGIN REMOTE ' + urlRemote);
 
 		var redirectList: string[] = [];
@@ -321,23 +336,41 @@ export class Cache {
 			reject = rej;
 		})
 
-		var streamRequest = request({
+		function die(err: NodeJS.ErrnoException) {
+			// Abort and report.
+			if(streamRequest) streamRequest.abort();
+console.error('Got error:');
+console.error(err);
+console.error('Downloading URL:');
+console.error(urlRemote);
+			reject(err);
+			onFinish(err);
+			throw(err);
+		}
+
+		var streamBuffer = new stream.PassThrough();
+
+		var streamRequest = request.get({
 			url: urlRemote,
 			followRedirect: (res: http.IncomingMessage) => {
 				redirectList.push(urlRemote);
 				urlRemote = url.resolve(urlRemote, res.headers.location);
 
 				this.fetchCached(urlRemote, onFinish).then((result: CacheResult) => {
+					// File was already found in cache so stop downloading.
+
+					streamRequest.abort();
+
 					if(found) return;
 					found = true;
 
-					this.addLinks(redirectList, urlRemote).then(() => {
+					this.addLinks(redirectList, urlRemote).finally(() => {
 						resolve(result);
 					});
 				}).catch((err: NodeJS.ErrnoException) => {
 					if(err.code != 'ENOENT' && err.code != 'ENOTDIR') {
 						// Weird!
-						reject(err);
+						die(err);
 					}
 				});
 
@@ -345,12 +378,41 @@ export class Cache {
 			}
 		});
 
+		streamRequest.on('error', (err: NodeJS.ErrnoException) => {
+			// Check if retrying makes sense for this error.
+			if((
+				'EAI_AGAIN ECONNREFUSED ECONNRESET EHOSTUNREACH ' +
+				'ENOTFOUND EPIPE ESOCKETTIMEDOUT ETIMEDOUT '
+			).indexOf(err.code) < 0) {
+				die(err);
+			}
+
+			console.error('SHOULD RETRY');
+
+			throw(err);
+		});
+
 		streamRequest.on('response', (res: http.IncomingMessage) => {
 			if(found) return;
 			found = true;
 
-//			var streamBuffer = new stream.PassThrough();
-			streamRequest.pause();
+			var code = res.statusCode;
+
+			if(code != 200) {
+				if(code < 500 || code >= 600) {
+					var err = new Error(code + ' ' + res.statusMessage);
+
+					// TODO: Cache the HTTP error.
+
+					die(err);
+				}
+
+				console.error('SHOULD RETRY');
+
+				throw(err);
+			}
+
+			streamRequest.pipe(streamBuffer);
 
 			this.makeCachePath(urlRemote).then((cachePath: string) => {
 				var streamOut = fs.createWriteStream(cachePath);
@@ -361,16 +423,15 @@ export class Cache {
 					streamOut.close();
 				});
 
-				streamRequest.pipe(streamOut);
-				streamRequest.resume();
+				streamBuffer.pipe(streamOut);
 
-				return(this.addLinks(redirectList, urlRemote));
-			}).then(() => {
-				resolve(new CacheResult(
-					streamRequest as any as stream.Readable,
-					urlRemote
-				));
-			});
+				return(this.addLinks(redirectList, urlRemote).finally(() => {
+					resolve(new CacheResult(
+						streamBuffer as any as stream.Readable,
+						urlRemote
+					));
+				}));
+			}).catch(die);
 		});
 
 		streamRequest.on('end', () => {
