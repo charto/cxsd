@@ -2,7 +2,7 @@
 // Released under the MIT license, see LICENSE.
 
 import * as types from './XsdTypes';
-import {Cache} from './Cache';
+import {FetchOptions, Cache} from './Cache';
 import {XsdParser} from './XsdParser';
 
 export class State {
@@ -37,6 +37,8 @@ export class State {
 		namespaceMap: {[name: string]: Namespace};
 
 		addImport: (namespaceTarget: Namespace, urlRemote: string) => void;
+
+		options: FetchOptions;
 	};
 }
 
@@ -74,16 +76,17 @@ export class Namespace {
 		return(namespace.register(name, url, short));
 	}
 
-	importSchema(urlRemote?: string) {
-		if(!urlRemote) urlRemote = this.url;
+	importSchema(options?: FetchOptions) {
+		if(!options) options = {};
+		if(!options.url) options.url = this.url;
 
-		var result = this.resultTbl[urlRemote];
+		var result = this.resultTbl[options.url];
 
 		if(result) return(result);
 
 		if(!Namespace.parser) Namespace.parser = new XsdParser();
 
-		this.resultTbl[urlRemote] = Namespace.parser.parse(this, urlRemote);
+		this.resultTbl[options.url] = Namespace.parser.parse(this, options);
 	}
 
 	static list: Namespace[] = [];

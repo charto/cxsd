@@ -4,7 +4,7 @@
 import * as expat from 'node-expat';
 import * as Promise from 'bluebird';
 
-import {Cache, CacheResult} from './Cache';
+import {FetchOptions, Cache, CacheResult} from './Cache';
 import * as types from './XsdTypes';
 import {State, Namespace, Rule, Scope, QName} from './XsdState';
 
@@ -38,7 +38,8 @@ export class XsdParser {
 		this.rootRule = parseRule(types.XsdRoot);
 	}
 
-	parse(namespace: Namespace, urlRemote?: string) {
+	parse(namespace: Namespace, options: FetchOptions) {
+		var urlRemote = options.url;
 		var state = new State(null, this.rootRule);
 
 		state.stateStatic = {
@@ -52,7 +53,9 @@ export class XsdParser {
 
 			addImport: (namespaceTarget: Namespace, urlRemote: string) => {
 				this.importList.push({namespace: namespaceTarget, url: urlRemote});
-			}
+			},
+
+			options: options
 		};
 
 		var stateStatic = state.stateStatic;
@@ -62,7 +65,7 @@ export class XsdParser {
 
 console.log('FETCH  into ' + namespace.name + ' from ' + urlRemote);
 
-return(Namespace.cache.fetch(urlRemote).then((result: CacheResult) => {
+return(Namespace.cache.fetch(options).then((result: CacheResult) => {
 		var resolve: (result: any) => void;
 		var reject: (err: any) => void;
 		var promise = new Promise<CacheResult>((res, rej) => {
@@ -173,7 +176,11 @@ try {
 
 			Promise.map(this.importList, (spec: {namespace: Namespace, url: string}) => {
 				console.log('IMPORT into ' + spec.namespace.name + ' from ' + spec.url);
-				return(spec.namespace.importSchema(spec.url));
+				return(spec.namespace.importSchema({
+					url: spec.url,
+					forceHost: stateStatic.options.forceHost,
+					forcePort: stateStatic.options.forcePort
+				}));
 			}).then(() => {
 				pendingList.forEach((state: State) => state.xsdElement.finish(state));
 			}).then(resolve);

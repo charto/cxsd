@@ -14,7 +14,13 @@ import * as Promise from 'bluebird';
 
 Promise.longStackTraces();
 
-var fsa = {
+export interface FetchOptions {
+	url?: string;
+	forceHost?: string;
+	forcePort?: number;
+}
+
+export var fsa = {
 	stat: Promise.promisify(fs.stat),
 	open: Promise.promisify(fs.open),
 	close: Promise.promisify(fs.close),
@@ -104,30 +110,30 @@ export class CacheResult {
 }
 
 class FetchTask extends Task<CacheResult> {
-	constructor(cache: Cache, remoteUrl: string) {
+	constructor(cache: Cache, options: FetchOptions) {
 		super();
 
 		this.cache = cache;
-		this.url = remoteUrl;
+		this.options = options;
 	}
 
 	start(onFinish: (err?: NodeJS.ErrnoException) => void) {
 		// These fix atom-typescript syntax highlight: ))
-		var result = this.cache.fetchCached(this.url, onFinish).catch((err: NodeJS.ErrnoException) => {
+		var result = this.cache.fetchCached(this.options, onFinish).catch((err: NodeJS.ErrnoException) => {
 			// Re-throw unexpected errors.
 			if(err.code != 'ENOENT') {
 				onFinish(err);
 				throw(err);
 			}
 
-			return(this.cache.fetchRemote(this.url, onFinish));
+			return(this.cache.fetchRemote(this.options, onFinish));
 		});
 
 		return(result);
 	}
 
 	cache: Cache;
-	url: string;
+	options: FetchOptions;
 }
 
 export class Cache {
@@ -222,7 +228,7 @@ export class Cache {
 
 	addLinks(redirectList: string[], target: string) {
 		return(Promise.map(redirectList, (src: string) => {
-			this.makeCachePath(src).then((cachePath: string) =>
+			this.createCachePath(src).then((cachePath: string) =>
 				fsa.writeFile(cachePath, 'LINK: ' + target + '\n', {encoding: 'utf-8'})
 			)
 		}));
@@ -237,9 +243,8 @@ export class Cache {
 	}
 
 	// Get local cache file path where a remote URL should be downloaded.
-	// Also create the directory containing it.
 
-	makeCachePath(urlRemote: string) {
+	getCachePath(urlRemote: string) {
 		var cachePath = path.join(
 			this.pathBase,
 			this.sanitizePath(urlRemote.substr(urlRemote.indexOf(':') + 1))
@@ -248,14 +253,22 @@ export class Cache {
 		var makeValidPath = (isDir: boolean) => {
 			if(isDir) cachePath = path.join(cachePath, this.indexName);
 
-			return(this.mkdirp(path.dirname(cachePath)).then(() => cachePath));
+			return(cachePath);
 		};
 
 		if(urlRemote.charAt(urlRemote.length - 1) == '/') {
-			return(makeValidPath(true));
+			return(Promise.resolve(makeValidPath(true)));
 		}
 
 		return(this.isDir(urlRemote).then(makeValidPath));
+	}
+
+	// Like getCachePath, but create the path if is doesn't exist.
+
+	createCachePath(urlRemote: string) {
+		return(this.getCachePath(urlRemote).then((cachePath: string) => {
+			return(this.mkdirp(path.dirname(cachePath)).then(() => cachePath));
+		}));
 	}
 
 	sanitizeUrl(urlRemote: string) {
@@ -271,28 +284,10 @@ export class Cache {
 		return((urlParts.protocol || 'http:') + '//' + url.resolve('', origin));
 	}
 
-	// Fetch URL from cache or download it if not available yet.
-	// Returns the file's URL after redirections and a readable stream of its contents.
+	// Check if there's a cached link redirecting the URL.
 
-	fetch(urlRemote: string) {
-		urlRemote = this.sanitizeUrl(urlRemote);
-
-		return(this.fetchQueue.add(new FetchTask(this, urlRemote)));
-	}
-
-	fetchCached(urlRemote: string, onFinish: (err?: NodeJS.ErrnoException) => void) {
-		// These fix atom-typescript syntax highlight: ))
-		console.log('BEGIN CACHED ' + urlRemote);
-
-		// Any errors shouldn't be handled here, but instead in the caller.
-
-		var cachePath = this.makeCachePath(urlRemote);
-		var targetPath = Promise.all([
-			cachePath,
-			cachePath.then((cachePath: string) => fsa.open(cachePath, 'r'))
-		]).spread((cachePath: string, fd: number) => {
-			// Check if there's a cached link redirecting the URL.
-
+	static checkRemoteLink(cachePath: string) {
+		return(fsa.open(cachePath, 'r').then((fd: number) => {
 			var buf = new Buffer(6);
 
 			return(fsa.read(fd, buf, 0, 6, 0).then(() => {
@@ -300,12 +295,37 @@ export class Cache {
 
 				if(buf.equals(new Buffer('LINK: ', 'ascii'))) {
 					return(fsa.readFile(cachePath, {encoding: 'utf-8'}).then((link: string) => {
-						urlRemote = link.substr(6).replace(/\s+$/, '');
+						var urlRemote = link.substr(6).replace(/\s+$/, '');
 
-						return(this.makeCachePath(urlRemote));
+						return(urlRemote);
 					}));
-				} else return(cachePath);
+				} else return(null);
 			}));
+		}));
+	}
+
+	// Fetch URL from cache or download it if not available yet.
+	// Returns the file's URL after redirections and a readable stream of its contents.
+
+	fetch(options: FetchOptions) {
+		return(this.fetchQueue.add(new FetchTask(this, {
+			url: this.sanitizeUrl(options.url),
+			forceHost: options.forceHost,
+			forcePort: options.forcePort
+		})));
+	}
+
+	fetchCached(options: FetchOptions, onFinish: (err?: NodeJS.ErrnoException) => void) {
+		// These fix atom-typescript syntax highlight: ))
+		var urlRemote = options.url;
+		console.log('BEGIN CACHED ' + urlRemote);
+
+		// Any errors shouldn't be handled here, but instead in the caller.
+
+		var cachePath = this.getCachePath(urlRemote);
+		var targetPath = cachePath.then(Cache.checkRemoteLink).then((urlRemote: string) => {
+			if(urlRemote) return(this.getCachePath(urlRemote));
+			else return(cachePath);
 		});
 
 		return(targetPath.then((targetPath: string) => {
@@ -323,8 +343,9 @@ export class Cache {
 		}));
 	}
 
-	fetchRemote(urlRemote: string, onFinish: (err?: NodeJS.ErrnoException) => void) {
+	fetchRemote(options: FetchOptions, onFinish: (err?: NodeJS.ErrnoException) => void) {
 		// These fix atom-typescript syntax highlight: ))
+		var urlRemote = options.url;
 		console.log('BEGIN REMOTE ' + urlRemote);
 
 		var redirectList: string[] = [];
@@ -351,12 +372,16 @@ console.error(urlRemote);
 		var streamBuffer = new stream.PassThrough();
 
 		var streamRequest = request.get({
-			url: urlRemote,
+			url: Cache.forceRedirect(urlRemote, options),
 			followRedirect: (res: http.IncomingMessage) => {
 				redirectList.push(urlRemote);
 				urlRemote = url.resolve(urlRemote, res.headers.location);
 
-				this.fetchCached(urlRemote, onFinish).then((result: CacheResult) => {
+				this.fetchCached({
+					url: urlRemote,
+					forceHost: options.forceHost,
+					forcePort: options.forcePort
+				}, onFinish).then((result: CacheResult) => {
 					// File was already found in cache so stop downloading.
 
 					streamRequest.abort();
@@ -414,7 +439,7 @@ console.error(urlRemote);
 
 			streamRequest.pipe(streamBuffer);
 
-			this.makeCachePath(urlRemote).then((cachePath: string) => {
+			this.createCachePath(urlRemote).then((cachePath: string) => {
 				var streamOut = fs.createWriteStream(cachePath);
 
 				streamOut.on('finish', () => {
@@ -439,13 +464,62 @@ console.error(urlRemote);
 			onFinish();
 		});
 
+		if(options.forceHost || options.forcePort) {
+			// Monkey-patch request to support forceHost when running tests.
+
+			(streamRequest as any).chartoOptions = options;
+		}
+
 		return(promise);
+	}
+
+	static forceRedirect(urlRemote: string, options: FetchOptions) {
+		if(!options.forceHost && !options.forcePort) return(urlRemote);
+
+		var urlParts = url.parse(urlRemote);
+		var changed = false;
+
+		if(!urlParts.hostname) return(urlRemote);
+
+		if(options.forceHost && urlParts.hostname != options.forceHost) {
+			urlParts.hostname = options.forceHost;
+			changed = true;
+		}
+
+		if(options.forcePort && urlParts.port != '' + options.forcePort) {
+			urlParts.port = '' + options.forcePort;
+			changed = true;
+		}
+
+		if(!changed) return(urlRemote);
+
+		urlParts.search = '?host=' + encodeURIComponent(urlParts.host);
+		urlParts.host = null;
+
+		return(url.format(urlParts));
 	}
 
 	fetchQueue = new TaskQueue();
 
 	pathBase: string;
 	indexName: string;
+
+	// Monkey-patch request to support forceHost when running tests.
+
+	static patchRequest() {
+		var proto = require('request/lib/redirect.js').Redirect.prototype;
+
+		var func = proto.redirectTo;
+
+		proto.redirectTo = function() {
+			var urlRemote = func.apply(this, Array.prototype.slice.apply(arguments));
+			var options: FetchOptions = this.request.chartoOptions;
+
+			if(urlRemote && options) return(Cache.forceRedirect(urlRemote, options));
+
+			return(urlRemote);
+		};
+	}
 
 }
 

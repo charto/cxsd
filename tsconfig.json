@@ -13,6 +13,7 @@
 		"typings/bluebird/bluebird.d.ts",
 		"typings-custom/node-expat.d.ts",
 
+		"src/serve.ts",
 		"src/xsd.ts"
 	]
 }
