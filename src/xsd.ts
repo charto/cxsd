@@ -1,7 +1,7 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {Cache} from './Cache';
+import {Cache} from 'cget';
 import {Namespace} from './XsdState';
 
 Cache.patchRequest();

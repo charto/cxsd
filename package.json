@@ -11,12 +11,13 @@
   "author": "Juha Järvi",
   "license": "MIT",
   "dependencies": {
-    "bluebird": "^3.0.5",
-    "node-expat": "^2.3.10",
-    "request": "^2.65.0"
+    "bluebird": "~3.0.5",
+    "cget": "~0.0.2",
+    "node-expat": "~2.3.10",
+    "request": "~2.65.0"
   },
   "devDependencies": {
-    "tsd": "^0.6.5",
-    "typescript": "^1.6.2"
+    "tsd": "~0.6.5",
+    "typescript": "^1.8.0-dev.20151128"
   }
 }

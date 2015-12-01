@@ -4,7 +4,7 @@
 import * as expat from 'node-expat';
 import * as Promise from 'bluebird';
 
-import {FetchOptions, Cache, CacheResult} from './Cache';
+import {FetchOptions, Cache, CacheResult} from 'cget';
 import * as types from './XsdTypes';
 import {State, Namespace, Rule, Scope, QName} from './XsdState';
 

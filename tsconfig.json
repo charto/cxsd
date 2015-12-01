@@ -3,6 +3,7 @@
 		"declaration": false,
 		"experimentalDecorators": true,
 		"module": "commonjs",
+		"moduleResolution": "node",
 		"noImplicitAny": true,
 		"outDir": "dist",
 		"target": "es5"
@@ -13,7 +14,6 @@
 		"typings/bluebird/bluebird.d.ts",
 		"typings-custom/node-expat.d.ts",
 
-		"src/serve.ts",
 		"src/xsd.ts"
 	]
 }

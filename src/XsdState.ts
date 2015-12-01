@@ -2,7 +2,7 @@
 // Released under the MIT license, see LICENSE.
 
 import * as types from './XsdTypes';
-import {FetchOptions, Cache} from './Cache';
+import {FetchOptions, Cache} from 'cget';
 import {XsdParser} from './XsdParser';
 
 export class State {
