@@ -4,6 +4,7 @@
 import * as types from './XsdTypes';
 import {FetchOptions, Cache} from 'cget';
 import {XsdParser} from './XsdParser';
+import {Namespace} from './xsd/Namespace'
 
 export class State {
 	constructor(parent: State, rule: Rule) {
@@ -28,8 +29,6 @@ export class State {
 	index: number;
 
 	stateStatic: {
-		qName: QName;
-
 		root: types.XsdSchema;
 
 		namespaceTarget: Namespace;
@@ -40,66 +39,6 @@ export class State {
 
 		options: FetchOptions;
 	};
-}
-
-export class Namespace {
-	constructor(id: number) {
-		this.id = id;
-	}
-
-	register(name: string, url?: string, short?: string) {
-		if(name) {
-			if(!this.name) this.name = name;
-			Namespace.tbl[name] = this;
-		}
-
-		if(url) {
-			if(!this.url) this.url = url;
-			Namespace.tbl[url] = this;
-		}
-
-		if(short) Namespace.tbl[short] = this;
-
-		return(this);
-	}
-
-	static register(name: string, url?: string, short?: string) {
-		var namespace = Namespace.tbl[name] || Namespace.tbl[url];
-
-		if(!namespace) {
-			var id = Namespace.list.length;
-
-			namespace = new Namespace(id);
-			Namespace.list[id] = namespace;
-		}
-
-		return(namespace.register(name, url, short));
-	}
-
-	importSchema(options?: FetchOptions) {
-		if(!options) options = {};
-		if(!options.url) options.url = this.url;
-
-		var result = this.resultTbl[options.url];
-
-		if(result) return(result);
-
-		if(!Namespace.parser) Namespace.parser = new XsdParser();
-
-		this.resultTbl[options.url] = Namespace.parser.parse(this, options);
-	}
-
-	static list: Namespace[] = [];
-	static tbl: {[name: string]: Namespace} = {};
-	static cache = new Cache('cache/xsd', '_index.xsd');
-
-	static parser: XsdParser;
-
-	id: number;
-	name: string;
-	url: string;
-
-	resultTbl: {[url: string]: Promise<any>} = {};
 }
 
 export class Rule {
@@ -154,6 +93,8 @@ export class Scope {
 	attributeGroupTbl: {[name: string]: types.XsdAttributeGroup};
 	groupTbl: {[name: string]: types.XsdGroup};
 }
+
+/** Qualified name, including reference to a namespace. */
 
 export class QName {
 	constructor(name?: string, state?: State) {

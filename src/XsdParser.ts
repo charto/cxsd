@@ -6,7 +6,8 @@ import * as Promise from 'bluebird';
 
 import {FetchOptions, Cache, CacheResult} from 'cget';
 import * as types from './XsdTypes';
-import {State, Namespace, Rule, Scope, QName} from './XsdState';
+import {State, Rule, Scope, QName} from './XsdState';
+import {Namespace} from './xsd/Namespace';
 
 import * as util from 'util';
 
@@ -43,8 +44,6 @@ export class XsdParser {
 		var state = new State(null, this.rootRule);
 
 		state.stateStatic = {
-			qName: new QName(),
-
 			root: null,
 
 			namespaceTarget: namespace,
@@ -59,11 +58,9 @@ export class XsdParser {
 		};
 
 		var stateStatic = state.stateStatic;
-		var qName = stateStatic.qName;
+		var tempName = new QName();
 
 		if(!urlRemote) urlRemote = namespace.url;
-
-console.log('FETCH  into ' + namespace.name + ' from ' + urlRemote);
 
 return(Namespace.cache.fetch(options).then((result: CacheResult) => {
 		var resolve: (result: any) => void;
@@ -73,7 +70,6 @@ return(Namespace.cache.fetch(options).then((result: CacheResult) => {
 			reject = rej;
 		})
 
-console.log('PARSE  into ' + namespace.name + ' from ' + urlRemote + ' -> ' + result.url);
 		var stream = result.stream;
 		var xml = new expat.Parser('utf-8');
 
@@ -83,14 +79,14 @@ console.log('PARSE  into ' + namespace.name + ' from ' + urlRemote + ' -> ' + re
 
 		xml.on('startElement', (name: string, attrTbl: {[name: string]: string}) => {
 try {
-			qName.parse(name, state, stateStatic.namespaceDefault);
+			tempName.parse(name, state, stateStatic.namespaceDefault);
 
 			var rule = state.rule;
 
 			if(rule) {
 				rule = (
-					rule.followerTbl[qName.nameFull] ||
-					rule.followerTbl[qName.name] ||
+					rule.followerTbl[tempName.nameFull] ||
+					rule.followerTbl[tempName.name] ||
 					rule.followerTbl['*']
 				);
 			}

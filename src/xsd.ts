@@ -2,7 +2,7 @@
 // Released under the MIT license, see LICENSE.
 
 import {Cache} from 'cget';
-import {Namespace} from './XsdState';
+import {Namespace} from './xsd/Namespace';
 
 Cache.patchRequest();
 

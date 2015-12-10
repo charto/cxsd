@@ -3,7 +3,8 @@
 
 import * as url from 'url';
 
-import {State, Namespace, Rule, Scope, QName} from './XsdState';
+import {State, Rule, Scope, QName} from './XsdState';
+import {Namespace} from './xsd/Namespace';
 import {XsdParser} from './XsdParser';
 
 export type XmlAttribute = string | number;
@@ -205,6 +206,7 @@ export class XsdElement extends XsdElementBase implements XsdTypeStore {
 		}
 
 		if(element) (state.parent.xsdElement as any as XsdElementStore).addElement(element);
+//if(!element) console.log(ref)
 
 		if(this.type) {
 			var type = new QName(this.type as string, state);
@@ -284,6 +286,7 @@ export class XsdGroup extends XsdGroupBase {
 		// Named groups are only models for referencing elsewhere.
 
 		if(!this.name && group) group.addElementsToParent(state);
+//if(!group) console.log(ref)
 	}
 
 	name: string = null;
@@ -313,6 +316,7 @@ export class XsdAttribute extends XsdBase {
 		}
 
 		if(attribute) (state.parent.xsdElement as any as XsdAttributeStore).addAttribute(attribute);
+//if(!attribute) console.log(ref)
 	}
 
 	id: string = null;
@@ -345,6 +349,7 @@ export class XsdAttributeGroup extends XsdBase implements XsdAttributeStore {
 
 		// Named attribute groups are only models for referencing elsewhere.
 
+//if(!attributeGroup) console.log(ref)
 		if(!this.name && attributeGroup && attributeGroup.attributeList) {
 			// Add attribute group contents to parent.
 
