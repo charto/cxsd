@@ -6,8 +6,10 @@ import * as Promise from 'bluebird';
 
 import {FetchOptions, Cache, CacheResult} from 'cget';
 import * as types from './XsdTypes';
-import {State, Rule, Scope, QName} from './XsdState';
+import {State, Rule} from './XsdState';
 import {Namespace} from './xsd/Namespace';
+import {Source} from './xsd/Source';
+import {QName} from './xsd/QName'
 
 import * as util from 'util';
 
@@ -46,9 +48,7 @@ export class XsdParser {
 		state.stateStatic = {
 			root: null,
 
-			namespaceTarget: namespace,
-			namespaceDefault: null,
-			namespaceMap: {},
+			source: new Source(namespace),
 
 			addImport: (namespaceTarget: Namespace, urlRemote: string) => {
 				this.importList.push({namespace: namespaceTarget, url: urlRemote});
@@ -79,7 +79,7 @@ return(Namespace.cache.fetch(options).then((result: CacheResult) => {
 
 		xml.on('startElement', (name: string, attrTbl: {[name: string]: string}) => {
 try {
-			tempName.parse(name, state, stateStatic.namespaceDefault);
+			tempName.parse(name, stateStatic.source, stateStatic.source.defaultNamespace);
 
 			var rule = state.rule;
 

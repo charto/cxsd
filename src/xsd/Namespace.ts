@@ -9,7 +9,7 @@ export class Namespace {
 		this.id = id;
 	}
 
-	register(name: string, url?: string, short?: string) {
+	init(name: string, url?: string, short?: string) {
 		if(name) {
 			if(!this.name) this.name = name;
 			Namespace.tbl[name] = this;
@@ -35,7 +35,11 @@ export class Namespace {
 			Namespace.list[id] = namespace;
 		}
 
-		return(namespace.register(name, url, short));
+		return(namespace.init(name, url, short));
+	}
+
+	static lookup(name: string) {
+		return(Namespace.tbl[name]);
 	}
 
 	importSchema(options?: FetchOptions) {
@@ -51,8 +55,8 @@ export class Namespace {
 		this.resultTbl[options.url] = Namespace.parser.parse(this, options);
 	}
 
-	static list: Namespace[] = [];
-	static tbl: {[name: string]: Namespace} = {};
+	private static list: Namespace[] = [];
+	private static tbl: {[name: string]: Namespace} = {};
 	static cache = new Cache('cache/xsd', '_index.xsd');
 
 	static parser: XsdParser;

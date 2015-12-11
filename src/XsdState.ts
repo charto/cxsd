@@ -1,10 +1,13 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as types from './XsdTypes';
-import {FetchOptions, Cache} from 'cget';
-import {XsdParser} from './XsdParser';
+import * as types from './XsdTypes'
+import {FetchOptions, Cache} from 'cget'
+import {XsdParser} from './XsdParser'
 import {Namespace} from './xsd/Namespace'
+import {Source} from './xsd/Source'
+import {Scope} from './xsd/Scope'
+import {QName} from './xsd/QName'
 
 export class State {
 	constructor(parent: State, rule: Rule) {
@@ -31,9 +34,11 @@ export class State {
 	stateStatic: {
 		root: types.XsdSchema;
 
-		namespaceTarget: Namespace;
-		namespaceDefault: Namespace;
-		namespaceMap: {[name: string]: Namespace};
+		source: Source;
+
+//		namespaceTarget: Namespace;
+//		namespaceDefault: Namespace;
+//		namespaceMap: {[name: string]: Namespace};
 
 		addImport: (namespaceTarget: Namespace, urlRemote: string) => void;
 
@@ -52,86 +57,4 @@ export class Rule {
 
 	attributeList: string[] = [];
 	followerTbl: {[id: string]: Rule} = {};
-}
-
-export class Scope {
-	constructor(parent: Scope) {
-		this.parent = parent;
-	}
-
-	add(name: QName, type: string, target: any) {
-		var tbl = this.data[type];
-
-		if(!tbl) {
-			tbl = {} as {[name: string]: any};
-			this.data[type] = tbl;
-		}
-
-		tbl[name.nameFull] = target;
-	}
-
-	lookup(name: QName, type: string): any {
-		var scope: Scope = this;
-
-		while(scope) {
-			if(scope.data[type]) {
-				var result = scope.data[type][name.nameFull];
-
-				if(result) return(result);
-			}
-
-			scope = scope.parent;
-		}
-
-		return(null);
-	}
-
-	parent: Scope;
-
-	data: {[type: string]: {[name: string]: any}} = {};
-
-	attributeGroupTbl: {[name: string]: types.XsdAttributeGroup};
-	groupTbl: {[name: string]: types.XsdGroup};
-}
-
-/** Qualified name, including reference to a namespace. */
-
-export class QName {
-	constructor(name?: string, state?: State) {
-		if(name) this.parse(name, state);
-	}
-
-	parse(name: string, state: State, namespace?: Namespace) {
-		var stateStatic = state.stateStatic;
-		var splitter = name.indexOf(':');
-
-		name = name.toLowerCase();
-
-		if(splitter >= 0) {
-			namespace = stateStatic.namespaceMap[name.substr(0, splitter)];
-			name = name.substr(splitter + 1);
-		} else if(!namespace) {
-			namespace = stateStatic.namespaceTarget;
-		}
-
-		this.namespace = namespace;
-		this.name = name;
-		this.nameFull = namespace ? (namespace.id + ':' + name) : name;
-
-		return(this);
-	}
-
-	parseClass(name: string) {
-		var partList = name.match(/([A-Za-z][a-z]*)([A-Za-z]+)/);
-
-		this.namespace = Namespace.tbl[partList[1].toLowerCase()];
-		this.name = partList[2].toLowerCase();
-		this.nameFull = this.namespace.id + ':' + this.name;
-
-		return(this);
-	}
-
-	namespace: Namespace;
-	name: string;
-	nameFull: string;
 }
