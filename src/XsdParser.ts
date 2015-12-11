@@ -127,6 +127,7 @@ try {
 } catch(err) {
 	// Exceptions escaping from node-expat's event handlers cause weird effects.
 	console.error(err);
+	console.error(err.stack);
 }
 		});
 
