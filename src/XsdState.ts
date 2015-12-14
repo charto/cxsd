@@ -22,9 +22,11 @@ export class State {
 		this.rule = rule;
 	}
 
+	getScope() { return(this.scope); }
+
 	parent: State;
 	rule: Rule;
-	scope: Scope;
+	private scope: Scope;
 
 	attributeTbl: {[name: string]: string};
 	xsdElement: types.XsdBase;

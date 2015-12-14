@@ -13,73 +13,6 @@ import {QName} from './xsd/QName'
 export type XmlAttribute = string | number;
 type XmlAttributeTbl = {[name: string]: XmlAttribute};
 
-// Mixin decorator
-
-function mixin(...constructorList: any[]) {
-	return((target: any) => {
-		for(var base of constructorList) {
-			var proto = base.prototype;
-			for(var key of Object.keys(proto)) {
-				target.prototype[key] = proto[key];
-			}
-		}
-	});
-}
-
-
-
-
-// Mixins
-
-// TODO: maybe just use these classes directly as members,
-// instead of mixing in their contents.
-
-export class XsdElementStore {
-	addElement(element: XsdElement) {
-		if(!this.elementList) this.elementList = [];
-
-		this.elementList.push(element);
-	}
-
-	replaceElement(elementOld: XsdElement, elementNew: XsdElement) {
-		if(!this.elementList) return;
-
-		this.elementList.forEach((element: XsdElement, index: number) => {
-			if(element == elementOld) this.elementList[index] = elementNew;
-		});
-	}
-
-	addElementsToParent(state: State) {
-		if(this.elementList) {
-			for(var element of this.elementList) {
-				(state.parent.xsdElement as any as XsdElementStore).addElement(element);
-			}
-		}
-	}
-
-	elementList: XsdElement[];
-}
-
-export class XsdAttributeStore {
-	addAttribute(attribute: XsdAttribute) {
-		if(!this.attributeList) this.attributeList = [];
-
-		this.attributeList.push(attribute);
-	}
-
-	attributeList: XsdAttribute[];
-}
-
-export class XsdTypeStore {
-	addType(type: XsdTypeBase) {
-		if(!this.typeList) this.typeList = [];
-
-		this.typeList.push(type);
-	}
-
-	typeList: XsdTypeBase[];
-}
-
 
 
 
@@ -95,8 +28,13 @@ export interface XsdBaseClass {
 
 export class XsdBase {
 	static mayContain = () => ([] as XsdBaseClass[]);
+	constructor(scope: Scope) {
+		this.scope = scope;
+	}
 	init(state: State) {}
 	finish(state: State) {}
+
+	scope: Scope;
 
 	static name: string;
 	static rule: Rule;
@@ -115,8 +53,7 @@ export class XsdRoot extends XsdBase {
 
 // <xsd:schema>
 
-@mixin(XsdElementStore, XsdAttributeStore, XsdTypeStore)
-export class XsdSchema extends XsdBase implements XsdElementStore, XsdAttributeStore, XsdTypeStore {
+export class XsdSchema extends XsdBase {
 	static mayContain = () => [
 		XsdImport,
 		XsdInclude,
@@ -135,19 +72,6 @@ export class XsdSchema extends XsdBase implements XsdElementStore, XsdAttributeS
 		state.stateStatic.root = this;
 		state.stateStatic.source.parse(state.attributeTbl);
 	}
-
-	// Mixed in members
-
-	addElement: (element: XsdElement) => void;
-	replaceElement: (elementOld: XsdElement, elementNew: XsdElement) => void;
-	addElementsToParent: (state: State) => void;
-	elementList: XsdElement[];
-
-	addAttribute: (attribute: XsdAttribute) => void;
-	attributeList: XsdAttribute[];
-
-	addType: (type: XsdTypeBase) => void;
-	typeList: XsdTypeBase[];
 }
 
 
@@ -163,15 +87,14 @@ export class XsdElementBase extends XsdBase {
 
 // <xsd:element>
 
-@mixin(XsdTypeStore)
-export class XsdElement extends XsdElementBase implements XsdTypeStore {
+export class XsdElement extends XsdElementBase {
 	static mayContain = () => [
 		XsdSimpleType,
 		XsdComplexType
 	];
 
 	init(state: State) {
-		if(this.name) state.parent.scope.add(new QName(this.name, state.stateStatic.source), 'element', this);
+		if(this.name) this.scope.addToParent(new QName(this.name, state.stateStatic.source), 'element', this);
 	}
 
 	finish(state: State) {
@@ -181,19 +104,23 @@ export class XsdElement extends XsdElementBase implements XsdTypeStore {
 			// Replace this with another, referenced element.
 
 			var ref = new QName(this.ref, state.stateStatic.source);
-			element = state.parent.scope.lookup(ref, 'element');
+			element = this.scope.lookup(ref, 'element');
 		}
 
-		if(element) (state.parent.xsdElement as any as XsdElementStore).addElement(element);
+		if(element) this.scope.addElementToParent(element);
 //if(!element) console.log(ref)
+
+		// If the element has a type set through an attribute, look it up in scope.
 
 		if(this.type) {
 			var type = new QName(this.type as string, state.stateStatic.source);
-			this.type = state.parent.scope.lookup(type, 'type') as XsdTypeBase || type;
+			this.type = this.scope.lookup(type, 'type') as XsdTypeBase || type;
 		}
 
-		if(!this.type && this.typeList && this.typeList.length == 1) {
-			this.type = this.typeList[0];
+		// If there's a single type as a child, use it as the element's type.
+
+		if(!this.type && this.scope.getTypeCount() == 1) {
+			this.type = this.scope.getTypeList()[0];
 		}
 	}
 
@@ -201,21 +128,9 @@ export class XsdElement extends XsdElementBase implements XsdTypeStore {
 	ref: string = null;
 	type: string | QName | XsdTypeBase = null;
 	default: string = null;
-
-	// Mixed in members
-
-	addType: (type: XsdTypeBase) => void;
-	typeList: XsdTypeBase[];
 }
 
-@mixin(XsdElementStore)
-export class XsdGroupBase extends XsdElementBase implements XsdElementStore {
-	// Mixed in members
-
-	addElement: (element: XsdElement) => void;
-	replaceElement: (elementOld: XsdElement, elementNew: XsdElement) => void;
-	addElementsToParent: (state: State) => void;
-	elementList: XsdElement[];
+export class XsdGroupBase extends XsdElementBase {
 }
 
 export class XsdGenericChildList extends XsdGroupBase {
@@ -227,7 +142,7 @@ export class XsdGenericChildList extends XsdGroupBase {
 	];
 
 	finish(state: State) {
-		this.addElementsToParent(state);
+		this.scope.addElementsToParent();
 	}
 }
 
@@ -243,7 +158,6 @@ export class XsdChoice extends XsdGenericChildList {
 
 // <xsd:group>
 
-@mixin(XsdElementStore)
 export class XsdGroup extends XsdGroupBase {
 	static mayContain: () => XsdBaseClass[] = () => [
 		XsdSequence,
@@ -251,7 +165,9 @@ export class XsdGroup extends XsdGroupBase {
 	];
 
 	init(state: State) {
-		if(this.name) state.parent.scope.add(new QName(this.name, state.stateStatic.source), 'group', this);
+		if(this.name) {
+			this.scope.addToParent(new QName(this.name, state.stateStatic.source), 'group', this);
+		}
 	}
 
 	finish(state: State) {
@@ -259,12 +175,12 @@ export class XsdGroup extends XsdGroupBase {
 
 		if(this.ref) {
 			var ref = new QName(this.ref, state.stateStatic.source);
-			group = state.parent.scope.lookup(ref, 'group');
+			group = this.scope.lookup(ref, 'group');
 		}
 
 		// Named groups are only models for referencing elsewhere.
 
-		if(!this.name && group) group.addElementsToParent(state);
+		if(!this.name && group) group.scope.addElementsToParent(this.scope);
 //if(!group) console.log(ref)
 	}
 
@@ -281,7 +197,7 @@ export class XsdGroup extends XsdGroupBase {
 
 export class XsdAttribute extends XsdBase {
 	init(state: State) {
-		if(this.name) state.parent.scope.add(new QName(this.name, state.stateStatic.source), 'attribute', this);
+		if(this.name) this.scope.addToParent(new QName(this.name, state.stateStatic.source), 'attribute', this);
 	}
 
 	finish(state: State) {
@@ -291,10 +207,10 @@ export class XsdAttribute extends XsdBase {
 			// Replace this with another, referenced attribute.
 
 			var ref = new QName(this.ref, state.stateStatic.source);
-			attribute = state.parent.scope.lookup(ref, 'attribute');
+			attribute = this.scope.lookup(ref, 'attribute');
 		}
 
-		if(attribute) (state.parent.xsdElement as any as XsdAttributeStore).addAttribute(attribute);
+		if(attribute) this.scope.addAttributeToParent(attribute);
 //if(!attribute) console.log(ref)
 	}
 
@@ -308,14 +224,13 @@ export class XsdAttribute extends XsdBase {
 
 // <xsd:attributegroup>
 
-@mixin(XsdAttributeStore)
-export class XsdAttributeGroup extends XsdBase implements XsdAttributeStore {
+export class XsdAttributeGroup extends XsdBase {
 	static mayContain = () => [
 		XsdAttribute
 	];
 
 	init(state: State) {
-		if(this.name) state.parent.scope.add(new QName(this.name, state.stateStatic.source), 'attributegroup', this);
+		if(this.name) this.scope.addToParent(new QName(this.name, state.stateStatic.source), 'attributegroup', this);
 	}
 
 	finish(state: State) {
@@ -323,29 +238,20 @@ export class XsdAttributeGroup extends XsdBase implements XsdAttributeStore {
 
 		if(this.ref) {
 			var ref = new QName(this.ref, state.stateStatic.source);
-			attributeGroup = state.parent.scope.lookup(ref, 'attributegroup');
+			attributeGroup = this.scope.lookup(ref, 'attributegroup');
 		}
 
 		// Named attribute groups are only models for referencing elsewhere.
+		//if(!attributeGroup) console.log(ref)
 
-//if(!attributeGroup) console.log(ref)
-		if(!this.name && attributeGroup && attributeGroup.attributeList) {
-			// Add attribute group contents to parent.
-
-			for(var attribute of attributeGroup.attributeList) {
-				(state.parent.xsdElement as any as XsdAttributeStore).addAttribute(attribute);
-			}
+		if(!this.name && attributeGroup) {
+			attributeGroup.scope.addAttributesToParent(this.scope);
 		}
 	}
 
 	id: string = null;
 	name: string = null;
 	ref: string = null;
-
-	// Mixed in members
-
-	addAttribute: (attribute: XsdAttribute) => void;
-	attributeList: XsdAttribute[];
 }
 
 
@@ -355,8 +261,8 @@ export class XsdAttributeGroup extends XsdBase implements XsdAttributeStore {
 
 export class XsdTypeBase extends XsdBase {
 	init(state: State) {
-		(state.parent.xsdElement as any as XsdTypeStore).addType(this);
-		if(this.name) state.parent.scope.add(new QName(this.name, state.stateStatic.source), 'type', this);
+		this.scope.addTypeToParent(this);
+		if(this.name) this.scope.addToParent(new QName(this.name, state.stateStatic.source), 'type', this);
 	}
 
 	id: string = null;
@@ -373,8 +279,7 @@ export class XsdSimpleType extends XsdTypeBase {
 
 // <xsd:complextype>
 
-@mixin(XsdElementStore, XsdAttributeStore)
-export class XsdComplexType extends XsdTypeBase implements XsdElementStore, XsdAttributeStore {
+export class XsdComplexType extends XsdTypeBase {
 	static mayContain = () => [
 		XsdSimpleContent,
 		XsdComplexContent,
@@ -385,16 +290,6 @@ export class XsdComplexType extends XsdTypeBase implements XsdElementStore, XsdA
 		XsdAttributeGroup,
 		XsdGroup
 	];
-
-	// Mixed in members
-
-	addElement: (element: XsdElement) => void;
-	replaceElement: (elementOld: XsdElement, elementNew: XsdElement) => void;
-	addElementsToParent: (state: State) => void;
-	elementList: XsdElement[];
-
-	addAttribute: (attribute: XsdAttribute) => void;
-	attributeList: XsdAttribute[];
 }
 
 export class XsdContentBase extends XsdBase {
@@ -429,7 +324,7 @@ export class XsdComplexContent extends XsdContentBase {
 export class XsdDerivationBase extends XsdBase {
 	finish(state: State) {
 		var base = new QName(this.base, state.stateStatic.source);
-		(state.parent.xsdElement as XsdContentBase).parent = state.parent.scope.lookup(base, 'type') as XsdTypeBase || base;
+		(state.parent.xsdElement as XsdContentBase).parent = this.scope.lookup(base, 'type') as XsdTypeBase || base;
 	}
 
 	id: string = null;

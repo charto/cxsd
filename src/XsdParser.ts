@@ -94,7 +94,7 @@ try {
 			state = new State(state, rule);
 
 			if(rule && rule.proto) {
-				var xsdElem = new rule.proto();
+				var xsdElem = new rule.proto(state.getScope());
 
 				state.xsdElement = xsdElem;
 
