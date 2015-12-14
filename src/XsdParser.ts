@@ -46,8 +46,6 @@ export class XsdParser {
 		var state = new State(null, this.rootRule, new Source(namespace));
 
 		state.stateStatic = {
-			root: null,
-
 			addImport: (namespaceTarget: Namespace, urlRemote: string) => {
 				this.importList.push({namespace: namespaceTarget, url: urlRemote});
 			},
@@ -180,7 +178,10 @@ try {
 			}).then(resolve).catch((err: any) => {
 				console.error(err);
 				console.error(err.stack);
+				reject(err);
 			});
+
+			this.importList = [];
 
 // TODO: debug with these!
 //			console.log(stateStatic.namespaceMap);

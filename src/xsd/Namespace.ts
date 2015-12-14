@@ -3,6 +3,7 @@
 
 import {FetchOptions, Cache} from 'cget';
 import {XsdParser} from '../XsdParser';
+import {Scope} from './Scope';
 
 export class Namespace {
 	constructor(id: number) {
@@ -49,14 +50,20 @@ export class Namespace {
 		if(!options) options = {};
 		if(!options.url) options.url = this.url;
 
-		var result = this.resultTbl[options.url];
+		var result = Namespace.parsedTbl[options.url];
 
-		if(result) return(result);
+		if(!result) {
+//			if(!Namespace.parser) Namespace.parser = new XsdParser();
 
-		if(!Namespace.parser) Namespace.parser = new XsdParser();
+//			result = Namespace.parser.parse(this, options);
+			result = new XsdParser().parse(this, options);
+			Namespace.parsedTbl[options.url] = result;
+		}
 
-		this.resultTbl[options.url] = Namespace.parser.parse(this, options);
+		return(result);
 	}
+
+	getScope() { return(this.scope); }
 
 	private static list: Namespace[] = [];
 	private static tbl: {[name: string]: Namespace} = {};
@@ -68,6 +75,7 @@ export class Namespace {
 	name: string;
 	url: string;
 	private short: string;
+	private scope: Scope = new Scope(null, this);
 
-	resultTbl: {[url: string]: Promise<any>} = {};
+	private static parsedTbl: {[url: string]: Promise<any>} = {};
 }

@@ -27,6 +27,7 @@ export class State {
 	}
 
 	getScope() { return(this.scope); }
+	setScope(scope: Scope) { this.scope = scope; }
 
 	parent: State;
 	rule: Rule;
@@ -39,8 +40,6 @@ export class State {
 	index: number;
 
 	stateStatic: {
-		root: types.XsdSchema;
-
 		addImport: (namespaceTarget: Namespace, urlRemote: string) => void;
 		getLineNumber: () => number;
 
