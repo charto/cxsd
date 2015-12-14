@@ -13,7 +13,7 @@ export class Scope {
 		this.namespace = namespace;
 	}
 
-	add(name: QName, type: string, target: any) {
+	addString(name: string, type: string, target: any) {
 		var tbl = this.data[type];
 
 		if(!tbl) {
@@ -21,11 +21,25 @@ export class Scope {
 			this.data[type] = tbl;
 		}
 
-		tbl[name.nameFull] = target;
+		tbl[name] = target;
+	}
+
+	add(name: QName, type: string, target: any) {
+		this.addString(name.nameFull, type, target);
 	}
 
 	addToParent(name: QName, type: string, target: any) {
 		this.parent.add(name, type, target);
+	}
+
+	addAllToParent(type: string, target?: Scope) {
+		if(!this.data[type]) return;
+		if(!target) target = this;
+		target = target.parent;
+
+		for(var name of Object.keys(this.data[type])) {
+			target.addString(name, type, this.data[type][name]);
+		}
 	}
 
 	lookup(name: QName, type: string): any {
@@ -33,7 +47,6 @@ export class Scope {
 
 		if(name.namespace && name.namespace != this.namespace) {
 			scope = name.namespace.getScope();
-			console.log('LOOKUP ' + name.format() + ' from ' + this.namespace.name);
 		}
 
 		while(scope) {
@@ -49,94 +62,21 @@ export class Scope {
 		return(null);
 	}
 
-	// Elements
-
-	addElement(element: types.XsdElement) {
-		if(!this.elementList) this.elementList = [];
-
-		this.elementList.push(element);
-	}
-
-	replaceElement(elementOld: types.XsdElement, elementNew: types.XsdElement) {
-		if(!this.elementList) return;
-
-		this.elementList.forEach((element: types.XsdElement, index: number) => {
-			if(element == elementOld) this.elementList[index] = elementNew;
-		});
-	}
-
-	addElementToParent(element: types.XsdElement) {
-		this.parent.addElement(element);
-	}
-
-	/** Add group contents to parent. */
-
-	addElementsToParent(target?: Scope) {
-		if(!this.elementList) return;
-		if(!target) target = this;
-		target = target.parent;
-
-		for(var element of this.elementList) {
-			target.addElement(element);
-		}
-	}
-
-	// Attributes
-
-	addAttribute(attribute: types.XsdAttribute) {
-		if(!this.data.attribute) this.data.attribute = {};
-
-		this.data.attribute[attribute.name] = attribute;
-	}
-
-	addAttributeToParent(attribute: types.XsdAttribute) {
-		this.parent.addAttribute(attribute);
-	}
-
-	/** Add attribute group contents to parent. */
-
-	addAttributesToParent(target?: Scope) {
-		if(!this.data.attribute) return;
-		if(!target) target = this;
-		target = target.parent;
-
-		for(var attribute of Object.keys(this.data.attribute)) {
-			target.addAttribute(this.data.attribute[attribute]);
-		}
-	}
-
 	// Types
 
-	addType(type: types.XsdTypeBase) {
-		if(!this.typeList) this.typeList = [];
-
-		this.typeList.push(type);
+	setType(type: types.XsdTypeBase) {
+		// TODO: set to some invalid value if called more than once.
+		if(!this.type) this.type = type;
 	}
 
-	addTypeToParent(type: types.XsdTypeBase) {
-		this.parent.addType(type);
-	}
-
-	getTypeList() {
-		return(this.typeList);
-	}
-
-	getTypeCount() {
-		return(this.typeList ? this.typeList.length : 0);
-	}
+	getType() { return(this.type); }
 
 	private parent: Scope;
 	private namespace: Namespace;
 
 	private data = {} as {
-		[type: string]: {[name: string]: any},
-
-		attribute: {[name: string]: types.XsdAttribute}
+		[type: string]: {[name: string]: any}
 	};
 
-	private attributeGroupTbl: {[name: string]: types.XsdAttributeGroup};
-	private groupTbl: {[name: string]: types.XsdGroup};
-
-	private elementList: types.XsdElement[];
-	private typeList: types.XsdTypeBase[];
+	private type: types.XsdTypeBase;
 }

@@ -46,11 +46,17 @@ export class XsdBase {
 		this.scope = state.getScope();
 		this.lineNumber = state.stateStatic.getLineNumber();
 	}
+
 	init(state: State) {}
 	finish(state: State) {}
 
+	bind(state: State, type: string, scope?: Scope) {
+		if(this.name) (scope || this.scope).addToParent(new QName(this.name, state.source), type, this);
+	}
+
 	scope: Scope;
 	lineNumber: number;
+	name: string;
 
 	static name: string;
 	static rule: Rule;
@@ -113,7 +119,7 @@ export class XsdElement extends XsdElementBase {
 	];
 
 	init(state: State) {
-		if(this.name) this.scope.addToParent(new QName(this.name, state.source), 'element', this);
+		this.bind(state, 'element');
 	}
 
 	finish(state: State) {
@@ -124,22 +130,19 @@ export class XsdElement extends XsdElementBase {
 
 			var ref = new QName(this.ref, state.source);
 			element = this.scope.lookup(ref, 'element');
-		}
 
-		if(element) this.scope.addElementToParent(element);
-		else throw new MissingReferenceError(this, state, 'element', ref);
+			if(element) element.bind(state, 'element', this.scope);
+			else throw new MissingReferenceError(this, state, 'element', ref);
+		}
 
 		// If the element has a type set through an attribute, look it up in scope.
 
 		if(this.type) {
 			var type = new QName(this.type as string, state.source);
 			this.type = this.scope.lookup(type, 'type') as XsdTypeBase || type;
-		}
-
-		// If there's a single type as a child, use it as the element's type.
-
-		if(!this.type && this.scope.getTypeCount() == 1) {
-			this.type = this.scope.getTypeList()[0];
+		} else {
+			// If there's a single type as a child, use it as the element's type.
+			this.type = this.scope.getType();
 		}
 	}
 
@@ -161,7 +164,7 @@ export class XsdGenericChildList extends XsdGroupBase {
 	];
 
 	finish(state: State) {
-		this.scope.addElementsToParent();
+		this.scope.addAllToParent('element');
 	}
 }
 
@@ -184,9 +187,7 @@ export class XsdGroup extends XsdGroupBase {
 	];
 
 	init(state: State) {
-		if(this.name) {
-			this.scope.addToParent(new QName(this.name, state.source), 'group', this);
-		}
+		this.bind(state, 'group');
 	}
 
 	finish(state: State) {
@@ -200,7 +201,7 @@ export class XsdGroup extends XsdGroupBase {
 		// Named groups are only models for referencing elsewhere.
 
 		if(!this.name) {
-			if(group) group.scope.addElementsToParent(this.scope);
+			if(group) group.scope.addAllToParent('element', this.scope);
 			else throw new MissingReferenceError(this, state, 'group', ref);
 		}
 	}
@@ -218,7 +219,7 @@ export class XsdGroup extends XsdGroupBase {
 
 export class XsdAttribute extends XsdBase {
 	init(state: State) {
-		if(this.name) this.scope.addToParent(new QName(this.name, state.source), 'attribute', this);
+		this.bind(state, 'attribute');
 	}
 
 	finish(state: State) {
@@ -229,10 +230,10 @@ export class XsdAttribute extends XsdBase {
 
 			var ref = new QName(this.ref, state.source);
 			attribute = this.scope.lookup(ref, 'attribute');
-		}
 
-		if(attribute) this.scope.addAttributeToParent(attribute);
-		else throw new MissingReferenceError(this, state, 'attribute', ref);
+			if(attribute) attribute.bind(state, 'attribute', this.scope);
+			else throw new MissingReferenceError(this, state, 'attribute', ref);
+		}
 	}
 
 	id: string = null;
@@ -251,7 +252,7 @@ export class XsdAttributeGroup extends XsdBase {
 	];
 
 	init(state: State) {
-		if(this.name) this.scope.addToParent(new QName(this.name, state.source), 'attributegroup', this);
+		this.bind(state, 'attributegroup');
 	}
 
 	finish(state: State) {
@@ -265,7 +266,7 @@ export class XsdAttributeGroup extends XsdBase {
 		// Named attribute groups are only models for referencing elsewhere.
 
 		if(!this.name) {
-			if(attributeGroup) attributeGroup.scope.addAttributesToParent(this.scope);
+			if(attributeGroup) attributeGroup.scope.addAllToParent('attribute', this.scope);
 			else throw new MissingReferenceError(this, state, 'attributeGroup', ref);
 		}
 	}
@@ -282,8 +283,8 @@ export class XsdAttributeGroup extends XsdBase {
 
 export class XsdTypeBase extends XsdBase {
 	init(state: State) {
-		this.scope.addTypeToParent(this);
-		if(this.name) this.scope.addToParent(new QName(this.name, state.source), 'type', this);
+		this.bind(state, 'type');
+		this.scope.setType(this);
 	}
 
 	id: string = null;
