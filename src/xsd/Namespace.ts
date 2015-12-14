@@ -1,7 +1,7 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {FetchOptions, Cache} from 'cget';
+import {FetchOptions, Cache, CacheResult} from 'cget';
 import {XsdParser} from '../XsdParser';
 import {Scope} from './Scope';
 
@@ -53,10 +53,10 @@ export class Namespace {
 		var result = Namespace.parsedTbl[options.url];
 
 		if(!result) {
-//			if(!Namespace.parser) Namespace.parser = new XsdParser();
+			result = Namespace.cache.fetch(options).then((result: CacheResult) =>
+				new XsdParser().parse(result, this, options)
+			);
 
-//			result = Namespace.parser.parse(this, options);
-			result = new XsdParser().parse(this, options);
 			Namespace.parsedTbl[options.url] = result;
 		}
 
@@ -67,9 +67,8 @@ export class Namespace {
 
 	private static list: Namespace[] = [];
 	private static tbl: {[name: string]: Namespace} = {};
-	static cache = new Cache('cache/xsd', '_index.xsd');
 
-	static parser: XsdParser;
+	private static cache = new Cache('cache/xsd', '_index.xsd');
 
 	id: number;
 	name: string;

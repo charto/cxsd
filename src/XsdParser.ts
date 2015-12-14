@@ -41,7 +41,57 @@ export class XsdParser {
 		this.rootRule = parseRule(types.XsdRoot);
 	}
 
-	parse(namespace: Namespace, options: FetchOptions) {
+	startElement(state: State, name: string, attrTbl: {[name: string]: string}) {
+		var qName = this.qName;
+
+		qName.parse(name, state.source, state.source.defaultNamespace);
+
+		var rule = state.rule;
+
+		if(rule) {
+			rule = (
+				rule.followerTbl[qName.nameFull] ||
+				rule.followerTbl[qName.name] ||
+				rule.followerTbl['*']
+			);
+		}
+
+		state = new State(state, rule);
+
+		if(!rule || !rule.proto) return(state);
+
+		var xsdElem = new rule.proto(state);
+
+		state.xsdElement = xsdElem;
+
+		// Make all attributes lowercase.
+
+		for(var key of Object.keys(attrTbl)) {
+			var keyLower = key.toLowerCase();
+
+			if(key != keyLower && !attrTbl.hasOwnProperty(keyLower)) {
+				attrTbl[keyLower] = attrTbl[key];
+			}
+		}
+
+		// Copy known attributes to XSD element.
+
+		for(var key of rule.attributeList) {
+			if(attrTbl.hasOwnProperty(key)) {
+				xsdElem[key] = attrTbl[key];
+			}
+		}
+
+		if(xsdElem.init) {
+			state.attributeTbl = attrTbl;
+
+			xsdElem.init(state);
+		}
+
+		return(state);
+	}
+
+	parse(result: CacheResult, namespace: Namespace, options: FetchOptions) {
 		var urlRemote = options.url;
 		var state = new State(null, this.rootRule, new Source(namespace));
 
@@ -58,11 +108,9 @@ export class XsdParser {
 		};
 
 		var stateStatic = state.stateStatic;
-		var tempName = new QName();
 
 		if(!urlRemote) urlRemote = namespace.url;
 
-return(Namespace.cache.fetch(options).then((result: CacheResult) => {
 		var resolve: (result: any) => void;
 		var reject: (err: any) => void;
 		var promise = new Promise<CacheResult>((res, rej) => {
@@ -78,62 +126,16 @@ return(Namespace.cache.fetch(options).then((result: CacheResult) => {
 		if(!namespace.url || namespace.url == urlRemote) namespace.url = result.url;
 
 		this.expat.on('startElement', (name: string, attrTbl: {[name: string]: string}) => {
-try {
-			tempName.parse(name, state.source, state.source.defaultNamespace);
-
-			var rule = state.rule;
-
-			if(rule) {
-				rule = (
-					rule.followerTbl[tempName.nameFull] ||
-					rule.followerTbl[tempName.name] ||
-					rule.followerTbl['*']
-				);
+			try {
+				state = this.startElement(state, name, attrTbl);
+			} catch(err) {
+				// Exceptions escaping from node-expat's event handlers cause weird effects.
+				console.error(err);
+				console.error(err.stack);
 			}
-
-			state = new State(state, rule);
-
-			if(rule && rule.proto) {
-				var xsdElem = new rule.proto(state);
-
-				state.xsdElement = xsdElem;
-
-				// Make all attributes lowercase.
-
-				for(var key of Object.keys(attrTbl)) {
-					var keyLower = key.toLowerCase();
-
-					if(key != keyLower && !attrTbl.hasOwnProperty(keyLower)) {
-						attrTbl[keyLower] = attrTbl[key];
-					}
-				}
-
-				// Copy known attributes to XSD element.
-
-				for(var key of rule.attributeList) {
-					if(attrTbl.hasOwnProperty(key)) {
-						xsdElem[key] = attrTbl[key];
-					}
-				}
-
-				if(xsdElem.init) {
-					state.attributeTbl = attrTbl;
-
-					xsdElem.init(state);
-				}
-			}
-
-//			if(namespace == 'xsd') console.log((rule ? ' ' : '!') + new Array(stateStatic.depth + 1).join(' ') + '<' + nameFull + Object.keys(attrTbl).map((key: string) => ' ' + key + '="' + attrTbl[key] + '"').join('') + '>');
-} catch(err) {
-	// Exceptions escaping from node-expat's event handlers cause weird effects.
-	console.error(err);
-	console.error(err.stack);
-}
 		});
 
 		this.expat.on('endElement', function(name: string) {
-//			console.log('</' + name + '>');
-
 			if(state.xsdElement && state.xsdElement.finish) {
 				// Schedule finish hook to run after parsing is done.
 				// It might depend on definitions in scope but appearing later,
@@ -182,17 +184,13 @@ try {
 			});
 
 			this.importList = [];
-
-// TODO: debug with these!
-//			console.log(stateStatic.namespaceMap);
-//			console.log(util.inspect(stateStatic.root, {depth: 4, colors: true}));
 		});
 
 		return(promise);
-}));
 	}
 
-	importList: {namespace: Namespace, url: string}[] = [];
-	rootRule: Rule;
-	expat: expat.Parser;
+	private qName = new QName();
+	private importList: {namespace: Namespace, url: string}[] = [];
+	private rootRule: Rule;
+	private expat: expat.Parser;
 }
