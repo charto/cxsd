@@ -70,7 +70,7 @@ export class XsdSchema extends XsdBase {
 		// (meaning they are children of this, the root element).
 
 		state.stateStatic.root = this;
-		state.stateStatic.source.parse(state.attributeTbl);
+		state.source.parse(state.attributeTbl);
 	}
 }
 
@@ -94,7 +94,7 @@ export class XsdElement extends XsdElementBase {
 	];
 
 	init(state: State) {
-		if(this.name) this.scope.addToParent(new QName(this.name, state.stateStatic.source), 'element', this);
+		if(this.name) this.scope.addToParent(new QName(this.name, state.source), 'element', this);
 	}
 
 	finish(state: State) {
@@ -103,7 +103,7 @@ export class XsdElement extends XsdElementBase {
 		if(this.ref) {
 			// Replace this with another, referenced element.
 
-			var ref = new QName(this.ref, state.stateStatic.source);
+			var ref = new QName(this.ref, state.source);
 			element = this.scope.lookup(ref, 'element');
 		}
 
@@ -113,7 +113,7 @@ export class XsdElement extends XsdElementBase {
 		// If the element has a type set through an attribute, look it up in scope.
 
 		if(this.type) {
-			var type = new QName(this.type as string, state.stateStatic.source);
+			var type = new QName(this.type as string, state.source);
 			this.type = this.scope.lookup(type, 'type') as XsdTypeBase || type;
 		}
 
@@ -166,7 +166,7 @@ export class XsdGroup extends XsdGroupBase {
 
 	init(state: State) {
 		if(this.name) {
-			this.scope.addToParent(new QName(this.name, state.stateStatic.source), 'group', this);
+			this.scope.addToParent(new QName(this.name, state.source), 'group', this);
 		}
 	}
 
@@ -174,7 +174,7 @@ export class XsdGroup extends XsdGroupBase {
 		var group = this;
 
 		if(this.ref) {
-			var ref = new QName(this.ref, state.stateStatic.source);
+			var ref = new QName(this.ref, state.source);
 			group = this.scope.lookup(ref, 'group');
 		}
 
@@ -197,7 +197,7 @@ export class XsdGroup extends XsdGroupBase {
 
 export class XsdAttribute extends XsdBase {
 	init(state: State) {
-		if(this.name) this.scope.addToParent(new QName(this.name, state.stateStatic.source), 'attribute', this);
+		if(this.name) this.scope.addToParent(new QName(this.name, state.source), 'attribute', this);
 	}
 
 	finish(state: State) {
@@ -206,7 +206,7 @@ export class XsdAttribute extends XsdBase {
 		if(this.ref) {
 			// Replace this with another, referenced attribute.
 
-			var ref = new QName(this.ref, state.stateStatic.source);
+			var ref = new QName(this.ref, state.source);
 			attribute = this.scope.lookup(ref, 'attribute');
 		}
 
@@ -230,14 +230,14 @@ export class XsdAttributeGroup extends XsdBase {
 	];
 
 	init(state: State) {
-		if(this.name) this.scope.addToParent(new QName(this.name, state.stateStatic.source), 'attributegroup', this);
+		if(this.name) this.scope.addToParent(new QName(this.name, state.source), 'attributegroup', this);
 	}
 
 	finish(state: State) {
 		var attributeGroup = this;
 
 		if(this.ref) {
-			var ref = new QName(this.ref, state.stateStatic.source);
+			var ref = new QName(this.ref, state.source);
 			attributeGroup = this.scope.lookup(ref, 'attributegroup');
 		}
 
@@ -262,7 +262,7 @@ export class XsdAttributeGroup extends XsdBase {
 export class XsdTypeBase extends XsdBase {
 	init(state: State) {
 		this.scope.addTypeToParent(this);
-		if(this.name) this.scope.addToParent(new QName(this.name, state.stateStatic.source), 'type', this);
+		if(this.name) this.scope.addToParent(new QName(this.name, state.source), 'type', this);
 	}
 
 	id: string = null;
@@ -323,7 +323,7 @@ export class XsdComplexContent extends XsdContentBase {
 
 export class XsdDerivationBase extends XsdBase {
 	finish(state: State) {
-		var base = new QName(this.base, state.stateStatic.source);
+		var base = new QName(this.base, state.source);
 		(state.parent.xsdElement as XsdContentBase).parent = this.scope.lookup(base, 'type') as XsdTypeBase || base;
 	}
 
@@ -353,7 +353,7 @@ export class XsdImport extends XsdBase {
 			// without a schemaLocation.
 
 			// TODO: don't resolve URL here but instead inside addImport, calling targetNamespace.resolve!
-			var urlRemote = url.resolve(state.stateStatic.source.targetNamespace.url, this.schemaLocation);
+			var urlRemote = url.resolve(state.source.targetNamespace.url, this.schemaLocation);
 			state.stateStatic.addImport(Namespace.register(this.namespace, urlRemote), urlRemote);
 		}
 	}
@@ -369,8 +369,8 @@ export class XsdInclude extends XsdBase {
 	init(state: State) {
 		if(this.schemaLocation) {
 			// TODO: don't resolve URL here but instead inside addImport, calling targetNamespace.resolve!
-			var urlRemote = url.resolve(state.stateStatic.source.targetNamespace.url, this.schemaLocation);
-			state.stateStatic.addImport(state.stateStatic.source.targetNamespace, urlRemote);
+			var urlRemote = url.resolve(state.source.targetNamespace.url, this.schemaLocation);
+			state.stateStatic.addImport(state.source.targetNamespace, urlRemote);
 		}
 	}
 

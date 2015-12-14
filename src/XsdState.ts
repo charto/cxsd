@@ -10,12 +10,14 @@ import {Scope} from './xsd/Scope'
 import {QName} from './xsd/QName'
 
 export class State {
-	constructor(parent: State, rule: Rule) {
+	constructor(parent: State, rule: Rule, source?: Source) {
 		if(parent) {
 			this.stateStatic = parent.stateStatic;
 			this.parent = parent;
+			this.source = parent.source;
 			this.scope = new Scope(parent.scope);
 		} else {
+			this.source = source;
 			this.scope = new Scope(null);
 		}
 
@@ -26,6 +28,7 @@ export class State {
 
 	parent: State;
 	rule: Rule;
+	source: Source;
 	private scope: Scope;
 
 	attributeTbl: {[name: string]: string};
@@ -35,12 +38,6 @@ export class State {
 
 	stateStatic: {
 		root: types.XsdSchema;
-
-		source: Source;
-
-//		namespaceTarget: Namespace;
-//		namespaceDefault: Namespace;
-//		namespaceMap: {[name: string]: Namespace};
 
 		addImport: (namespaceTarget: Namespace, urlRemote: string) => void;
 

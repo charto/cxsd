@@ -43,12 +43,10 @@ export class XsdParser {
 
 	parse(namespace: Namespace, options: FetchOptions) {
 		var urlRemote = options.url;
-		var state = new State(null, this.rootRule);
+		var state = new State(null, this.rootRule, new Source(namespace));
 
 		state.stateStatic = {
 			root: null,
-
-			source: new Source(namespace),
 
 			addImport: (namespaceTarget: Namespace, urlRemote: string) => {
 				this.importList.push({namespace: namespaceTarget, url: urlRemote});
@@ -79,7 +77,7 @@ return(Namespace.cache.fetch(options).then((result: CacheResult) => {
 
 		xml.on('startElement', (name: string, attrTbl: {[name: string]: string}) => {
 try {
-			tempName.parse(name, stateStatic.source, stateStatic.source.defaultNamespace);
+			tempName.parse(name, state.source, state.source.defaultNamespace);
 
 			var rule = state.rule;
 
