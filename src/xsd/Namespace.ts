@@ -20,7 +20,10 @@ export class Namespace {
 			Namespace.tbl[url] = this;
 		}
 
-		if(short) Namespace.tbl[short] = this;
+		if(short) {
+			if(!this.short) this.short = short;
+			Namespace.tbl[short] = this;
+		}
 
 		return(this);
 	}
@@ -64,6 +67,7 @@ export class Namespace {
 	id: number;
 	name: string;
 	url: string;
+	private short: string;
 
 	resultTbl: {[url: string]: Promise<any>} = {};
 }

@@ -16,6 +16,18 @@ type XmlAttributeTbl = {[name: string]: XmlAttribute};
 
 
 
+export class MissingReferenceError extends Error {
+	constructor(tag: XsdBase, state: State, type: string, ref: QName) {
+		this.name = 'MissingReferenceError';
+		this.message = 'Missing ' + type + ': ' + ref.format() + ' on line ' + tag.lineNumber;
+
+		super(this.message);
+	}
+}
+
+
+
+
 // Common base for all schema tags
 
 export interface XsdBaseClass {
@@ -28,13 +40,17 @@ export interface XsdBaseClass {
 
 export class XsdBase {
 	static mayContain = () => ([] as XsdBaseClass[]);
-	constructor(scope: Scope) {
-		this.scope = scope;
+	constructor(state: State) {
+		if(!state) return;
+
+		this.scope = state.getScope();
+		this.lineNumber = state.stateStatic.getLineNumber();
 	}
 	init(state: State) {}
 	finish(state: State) {}
 
 	scope: Scope;
+	lineNumber: number;
 
 	static name: string;
 	static rule: Rule;
@@ -108,7 +124,7 @@ export class XsdElement extends XsdElementBase {
 		}
 
 		if(element) this.scope.addElementToParent(element);
-//if(!element) console.log(ref)
+		else throw new MissingReferenceError(this, state, 'element', ref);
 
 		// If the element has a type set through an attribute, look it up in scope.
 
@@ -180,8 +196,10 @@ export class XsdGroup extends XsdGroupBase {
 
 		// Named groups are only models for referencing elsewhere.
 
-		if(!this.name && group) group.scope.addElementsToParent(this.scope);
-//if(!group) console.log(ref)
+		if(!this.name) {
+			if(group) group.scope.addElementsToParent(this.scope);
+			else throw new MissingReferenceError(this, state, 'group', ref);
+		}
 	}
 
 	name: string = null;
@@ -211,7 +229,7 @@ export class XsdAttribute extends XsdBase {
 		}
 
 		if(attribute) this.scope.addAttributeToParent(attribute);
-//if(!attribute) console.log(ref)
+		else throw new MissingReferenceError(this, state, 'attribute', ref);
 	}
 
 	id: string = null;
@@ -242,10 +260,10 @@ export class XsdAttributeGroup extends XsdBase {
 		}
 
 		// Named attribute groups are only models for referencing elsewhere.
-		//if(!attributeGroup) console.log(ref)
 
-		if(!this.name && attributeGroup) {
-			attributeGroup.scope.addAttributesToParent(this.scope);
+		if(!this.name) {
+			if(attributeGroup) attributeGroup.scope.addAttributesToParent(this.scope);
+			else throw new MissingReferenceError(this, state, 'attributeGroup', ref);
 		}
 	}
 

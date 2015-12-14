@@ -1,8 +1,10 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as types from './XsdTypes'
+import * as expat from 'node-expat';
 import {FetchOptions, Cache} from 'cget'
+
+import * as types from './XsdTypes'
 import {XsdParser} from './XsdParser'
 import {Namespace} from './xsd/Namespace'
 import {Source} from './xsd/Source'
@@ -40,6 +42,7 @@ export class State {
 		root: types.XsdSchema;
 
 		addImport: (namespaceTarget: Namespace, urlRemote: string) => void;
+		getLineNumber: () => number;
 
 		options: FetchOptions;
 	};

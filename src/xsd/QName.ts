@@ -44,6 +44,11 @@ export class QName {
 		return(this);
 	}
 
+	format() {
+		if(this.namespace) return(this.namespace.name + ':' + this.name);
+		else return(this.name);
+	}
+
 	namespace: Namespace;
 	name: string;
 	nameFull: string;

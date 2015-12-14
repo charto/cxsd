@@ -52,6 +52,10 @@ export class XsdParser {
 				this.importList.push({namespace: namespaceTarget, url: urlRemote});
 			},
 
+			getLineNumber: () => {
+				return(this.expat.getCurrentLineNumber());
+			},
+
 			options: options
 		};
 
@@ -69,13 +73,13 @@ return(Namespace.cache.fetch(options).then((result: CacheResult) => {
 		})
 
 		var stream = result.stream;
-		var xml = new expat.Parser('utf-8');
+		this.expat = new expat.Parser('utf-8');
 
 		var pendingList: State[] = [];
 
 		if(!namespace.url || namespace.url == urlRemote) namespace.url = result.url;
 
-		xml.on('startElement', (name: string, attrTbl: {[name: string]: string}) => {
+		this.expat.on('startElement', (name: string, attrTbl: {[name: string]: string}) => {
 try {
 			tempName.parse(name, state.source, state.source.defaultNamespace);
 
@@ -92,7 +96,7 @@ try {
 			state = new State(state, rule);
 
 			if(rule && rule.proto) {
-				var xsdElem = new rule.proto(state.getScope());
+				var xsdElem = new rule.proto(state);
 
 				state.xsdElement = xsdElem;
 
@@ -129,8 +133,7 @@ try {
 }
 		});
 
-		xml.on('endElement', function(name: string) {
-try {
+		this.expat.on('endElement', function(name: string) {
 //			console.log('</' + name + '>');
 
 			if(state.xsdElement && state.xsdElement.finish) {
@@ -143,29 +146,25 @@ try {
 			}
 
 			state = state.parent;
-} catch(err) {
-	// Exceptions escaping from node-expat's event handlers cause weird effects.
-	console.error(err);
-}
 		});
 
-		xml.on('text', function(text: string) {
+		this.expat.on('text', function(text: string) {
 //			text = text.replace(/\s+$/, '');
 //			if(text) console.log(text);
 		});
 
-		xml.on('error', function(err: any) {
+		this.expat.on('error', function(err: any) {
 			console.error(err);
 		});
 
 		stream.on('data', (data: string) => {
-			xml.parse(data, false);
+			this.expat.parse(data, false);
 		});
 
 		stream.on('end', () => {
 			// Finish parsing the file (synchronous call).
 
-			xml.parse('', true);
+			this.expat.parse('', true);
 
 			// Run all finish hooks.
 
@@ -178,7 +177,10 @@ try {
 				}));
 			}).then(() => {
 				pendingList.forEach((state: State) => state.xsdElement.finish(state));
-			}).then(resolve);
+			}).then(resolve).catch((err: any) => {
+				console.error(err);
+				console.error(err.stack);
+			});
 
 // TODO: debug with these!
 //			console.log(stateStatic.namespaceMap);
@@ -191,4 +193,5 @@ try {
 
 	importList: {namespace: Namespace, url: string}[] = [];
 	rootRule: Rule;
+	expat: expat.Parser;
 }

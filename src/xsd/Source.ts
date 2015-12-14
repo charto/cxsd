@@ -36,7 +36,7 @@ export class Source {
 	}
 
 	lookupNamespace(ref: string) {
-		return(this.namespaceRefTbl[ref]);
+		return(this.namespaceRefTbl[ref] || Namespace.lookup(ref));
 	}
 
 	/** New definitions are exported into the target namespace. */
