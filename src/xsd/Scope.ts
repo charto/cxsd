@@ -71,6 +71,10 @@ export class Scope {
 
 	getType() { return(this.type); }
 
+	dumpTypes() {
+		return(this.data['type'] as {[name: string]: types.XsdTypeBase});
+	}
+
 	private parent: Scope;
 	private namespace: Namespace;
 

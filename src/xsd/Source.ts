@@ -1,6 +1,8 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import * as url from 'url';
+
 import {Namespace} from './Namespace'
 import {Loader} from './Loader'
 
@@ -10,6 +12,7 @@ export class Source {
 	constructor(targetNamespace: Namespace, urlRemote: string) {
 		this.targetNamespace = targetNamespace;
 		this.url = urlRemote;
+		this.urlOriginal = urlRemote;
 	}
 
 	parse(attrTbl: {[name: string]: string}) {
@@ -41,7 +44,14 @@ export class Source {
 		return(this.namespaceRefTbl[ref] || Namespace.lookup(ref));
 	}
 
+	urlResolve(urlRemote: string) {
+		return(url.resolve(this.targetNamespace.url, urlRemote));
+	}
+
+	updateUrl(urlRemote: string) { this.url = urlRemote; }
+
 	url: string;
+	urlOriginal: string;
 
 	/** New definitions are exported into the target namespace. */
 	targetNamespace: Namespace;
@@ -54,6 +64,5 @@ export class Source {
 	/** Table of namespace shorthand references (xmlns:...) used in this file. */
 	private namespaceRefTbl: {[name: string]: Namespace} = {};
 
-	private dependencyList: Source[] = [];
-	private dependentList: Source[] = [];
+	parsed: Promise<any>;
 }

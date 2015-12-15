@@ -1,8 +1,6 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as url from 'url';
-
 import {State, Rule} from './XsdState';
 import {XsdParser} from './XsdParser';
 import {Namespace} from './xsd/Namespace';
@@ -19,7 +17,7 @@ type XmlAttributeTbl = {[name: string]: XmlAttribute};
 export class MissingReferenceError extends Error {
 	constructor(tag: XsdBase, state: State, type: string, ref: QName) {
 		this.name = 'MissingReferenceError';
-		this.message = 'Missing ' + type + ': ' + ref.format() + ' on line ' + tag.lineNumber + ' of ' + state.stateStatic.options.url;
+		this.message = 'Missing ' + type + ': ' + ref.format() + ' on line ' + tag.lineNumber + ' of ' + state.source.url;
 
 		super(this.message);
 	}
@@ -374,8 +372,7 @@ export class XsdImport extends XsdBase {
 			// TODO: handle importing namespaces like http://www.w3.org/XML/1998/namespace
 			// without a schemaLocation.
 
-			// TODO: don't resolve URL here but instead inside addImport, calling targetNamespace.resolve!
-			var urlRemote = url.resolve(state.source.targetNamespace.url, this.schemaLocation);
+			var urlRemote = state.source.urlResolve(this.schemaLocation);
 			state.stateStatic.addImport(Namespace.register(this.namespace, urlRemote), urlRemote);
 		}
 	}
@@ -390,8 +387,7 @@ export class XsdImport extends XsdBase {
 export class XsdInclude extends XsdBase {
 	init(state: State) {
 		if(this.schemaLocation) {
-			// TODO: don't resolve URL here but instead inside addImport, calling targetNamespace.resolve!
-			var urlRemote = url.resolve(state.source.targetNamespace.url, this.schemaLocation);
+			var urlRemote = state.source.urlResolve(this.schemaLocation);
 			state.stateStatic.addImport(state.source.targetNamespace, urlRemote);
 		}
 	}

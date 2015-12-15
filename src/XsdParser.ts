@@ -92,37 +92,36 @@ export class XsdParser {
 		return(state);
 	}
 
-	parse(cached: CacheResult, source: Source, loader: Loader) {
+	preprocess(cached: CacheResult, source: Source, loader: Loader) {
 		var state = new State(null, this.rootRule, source);
+		var importList: {namespace: Namespace, url: string}[] = [];
+
+		var xml = new expat.Parser('utf-8');
 
 		state.stateStatic = {
 			addImport: (namespaceTarget: Namespace, urlRemote: string) => {
-				this.importList.push({namespace: namespaceTarget, url: urlRemote});
+				importList.push({namespace: namespaceTarget, url: urlRemote});
 			},
 
 			getLineNumber: () => {
-				return(this.expat.getCurrentLineNumber());
-			},
-
-			// TODO: remove this property.
-			options: loader.getOptions()
+				return(xml.getCurrentLineNumber());
+			}
 		};
 
 		var stateStatic = state.stateStatic;
-
-		var resolve: (result: any) => void;
+		var resolve: (result: Source[]) => void;
 		var reject: (err: any) => void;
-		var promise = new Promise<CacheResult>((res, rej) => {
+
+		var promise = new Promise<Source[]>((res, rej) => {
 			resolve = res;
 			reject = rej;
 		})
 
 		var stream = cached.stream;
-		this.expat = new expat.Parser('utf-8');
 
-		var pendingList: State[] = [];
+		var pendingList = this.pendingList;
 
-		this.expat.on('startElement', (name: string, attrTbl: {[name: string]: string}) => {
+		xml.on('startElement', (name: string, attrTbl: {[name: string]: string}) => {
 			try {
 				state = this.startElement(state, name, attrTbl);
 			} catch(err) {
@@ -132,7 +131,7 @@ export class XsdParser {
 			}
 		});
 
-		this.expat.on('endElement', function(name: string) {
+		xml.on('endElement', function(name: string) {
 			if(state.xsdElement && state.xsdElement.finish) {
 				// Schedule finish hook to run after parsing is done.
 				// It might depend on definitions in scope but appearing later,
@@ -145,48 +144,44 @@ export class XsdParser {
 			state = state.parent;
 		});
 
-		this.expat.on('text', function(text: string) {
+		xml.on('text', function(text: string) {
 //			text = text.replace(/\s+$/, '');
 //			if(text) console.log(text);
 		});
 
-		this.expat.on('error', function(err: any) {
+		xml.on('error', function(err: any) {
 			console.error(err);
 		});
 
 		stream.on('data', (data: string) => {
-			this.expat.parse(data, false);
+			xml.parse(data, false);
 		});
 
 		stream.on('end', () => {
 			// Finish parsing the file (synchronous call).
 
-			this.expat.parse('', true);
+			xml.parse('', true);
 
-			// Run all finish hooks.
-
-			Promise.map(this.importList, (spec: {namespace: Namespace, url: string}) => {
+			resolve(importList.map((spec: {namespace: Namespace, url: string}) => {
 				console.log('IMPORT into ' + spec.namespace.name + ' from ' + spec.url);
 				return(spec.namespace.importSchema(loader, spec.url));
-			}).then((imported: any) => resolve({
-				parsed: Promise.resolve(() => {
-					pendingList.forEach((state: State) => state.xsdElement.finish(state));
-				})
-			})).catch((err: any) => {
-				console.error(err);
-				console.error(err.stack);
-				reject(err);
-			});
-
-
-			this.importList = [];
+			}))
 		});
 
 		return(promise);
 	}
 
+	finish() {
+		try {
+			this.pendingList.forEach((state: State) => state.xsdElement.finish(state));
+			this.pendingList = [];
+		} catch(err) {
+			console.error(err);
+			console.error(err.stack);
+		}
+	}
+
 	private qName = new QName();
-	private importList: {namespace: Namespace, url: string}[] = [];
+	private pendingList: State[] = [];
 	private rootRule: Rule;
-	private expat: expat.Parser;
 }

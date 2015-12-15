@@ -46,7 +46,7 @@ export class Namespace {
 	}
 
 	importSchema(loader: Loader, urlRemote?: string) {
-		return(loader.import(this, urlRemote || this.url));
+		return(loader.importFile(this, urlRemote || this.url));
 	}
 
 	updateUrl(urlOld: string, urlNew: string) {
@@ -54,7 +54,16 @@ export class Namespace {
 	}
 
 	exportTS() {
-		console.log('declare module "' + this.url + '" {');
+		console.log('declare module "' + this.name + '" {');
+
+		var typeTbl = this.scope.dumpTypes();
+
+		for(var key of Object.keys(typeTbl)) {
+			var type = typeTbl[key];
+			console.log('\texport interface ' + type.name + ' {');
+			console.log('\t}');
+		}
+
 		console.log('}');
 	}
 

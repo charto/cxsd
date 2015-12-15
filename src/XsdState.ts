@@ -42,8 +42,6 @@ export class State {
 	stateStatic: {
 		addImport: (namespaceTarget: Namespace, urlRemote: string) => void;
 		getLineNumber: () => number;
-
-		options: FetchOptions;
 	};
 }
 
