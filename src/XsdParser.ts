@@ -8,6 +8,7 @@ import {FetchOptions, Cache, CacheResult} from 'cget';
 import * as types from './XsdTypes';
 import {State, Rule} from './XsdState';
 import {Namespace} from './xsd/Namespace';
+import {Loader} from './xsd/Loader';
 import {Source} from './xsd/Source';
 import {QName} from './xsd/QName'
 
@@ -91,9 +92,8 @@ export class XsdParser {
 		return(state);
 	}
 
-	parse(result: CacheResult, namespace: Namespace, options: FetchOptions) {
-		var urlRemote = options.url;
-		var state = new State(null, this.rootRule, new Source(namespace));
+	parse(cached: CacheResult, source: Source, loader: Loader) {
+		var state = new State(null, this.rootRule, source);
 
 		state.stateStatic = {
 			addImport: (namespaceTarget: Namespace, urlRemote: string) => {
@@ -104,12 +104,11 @@ export class XsdParser {
 				return(this.expat.getCurrentLineNumber());
 			},
 
-			options: options
+			// TODO: remove this property.
+			options: loader.getOptions()
 		};
 
 		var stateStatic = state.stateStatic;
-
-		if(!urlRemote) urlRemote = namespace.url;
 
 		var resolve: (result: any) => void;
 		var reject: (err: any) => void;
@@ -118,12 +117,10 @@ export class XsdParser {
 			reject = rej;
 		})
 
-		var stream = result.stream;
+		var stream = cached.stream;
 		this.expat = new expat.Parser('utf-8');
 
 		var pendingList: State[] = [];
-
-		if(!namespace.url || namespace.url == urlRemote) namespace.url = result.url;
 
 		this.expat.on('startElement', (name: string, attrTbl: {[name: string]: string}) => {
 			try {
@@ -170,18 +167,17 @@ export class XsdParser {
 
 			Promise.map(this.importList, (spec: {namespace: Namespace, url: string}) => {
 				console.log('IMPORT into ' + spec.namespace.name + ' from ' + spec.url);
-				return(spec.namespace.importSchema({
-					url: spec.url,
-					forceHost: stateStatic.options.forceHost,
-					forcePort: stateStatic.options.forcePort
-				}));
-			}).then(() => {
-				pendingList.forEach((state: State) => state.xsdElement.finish(state));
-			}).then(resolve).catch((err: any) => {
+				return(spec.namespace.importSchema(loader, spec.url));
+			}).then((imported: any) => resolve({
+				parsed: Promise.resolve(() => {
+					pendingList.forEach((state: State) => state.xsdElement.finish(state));
+				})
+			})).catch((err: any) => {
 				console.error(err);
 				console.error(err.stack);
 				reject(err);
 			});
+
 
 			this.importList = [];
 		});

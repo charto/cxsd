@@ -1,8 +1,7 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {FetchOptions, Cache, CacheResult} from 'cget';
-import {XsdParser} from '../XsdParser';
+import {Loader} from './Loader';
 import {Scope} from './Scope';
 
 export class Namespace {
@@ -46,21 +45,17 @@ export class Namespace {
 		return(Namespace.tbl[name]);
 	}
 
-	importSchema(options?: FetchOptions) {
-		if(!options) options = {};
-		if(!options.url) options.url = this.url;
+	importSchema(loader: Loader, urlRemote?: string) {
+		return(loader.import(this, urlRemote || this.url));
+	}
 
-		var result = Namespace.parsedTbl[options.url];
+	updateUrl(urlOld: string, urlNew: string) {
+		if(!this.url || this.url == urlOld) this.url = urlNew;
+	}
 
-		if(!result) {
-			result = Namespace.cache.fetch(options).then((result: CacheResult) =>
-				new XsdParser().parse(result, this, options)
-			);
-
-			Namespace.parsedTbl[options.url] = result;
-		}
-
-		return(result);
+	exportTS() {
+		console.log('declare module "' + this.url + '" {');
+		console.log('}');
 	}
 
 	getScope() { return(this.scope); }
@@ -68,13 +63,9 @@ export class Namespace {
 	private static list: Namespace[] = [];
 	private static tbl: {[name: string]: Namespace} = {};
 
-	private static cache = new Cache('cache/xsd', '_index.xsd');
-
 	id: number;
 	name: string;
 	url: string;
 	private short: string;
 	private scope: Scope = new Scope(null, this);
-
-	private static parsedTbl: {[url: string]: Promise<any>} = {};
 }

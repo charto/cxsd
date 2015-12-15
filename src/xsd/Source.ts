@@ -2,12 +2,14 @@
 // Released under the MIT license, see LICENSE.
 
 import {Namespace} from './Namespace'
+import {Loader} from './Loader'
 
 /** Details of a single XSD source file. */
 
 export class Source {
-	constructor(targetNamespace: Namespace) {
+	constructor(targetNamespace: Namespace, urlRemote: string) {
 		this.targetNamespace = targetNamespace;
+		this.url = urlRemote;
 	}
 
 	parse(attrTbl: {[name: string]: string}) {
@@ -39,12 +41,19 @@ export class Source {
 		return(this.namespaceRefTbl[ref] || Namespace.lookup(ref));
 	}
 
+	url: string;
+
 	/** New definitions are exported into the target namespace. */
 	targetNamespace: Namespace;
 
 	/** Unqualified names are assumed to belong to the default namespace. */
 	defaultNamespace: Namespace;
 
+	private loader: Loader;
+
 	/** Table of namespace shorthand references (xmlns:...) used in this file. */
 	private namespaceRefTbl: {[name: string]: Namespace} = {};
+
+	private dependencyList: Source[] = [];
+	private dependentList: Source[] = [];
 }
