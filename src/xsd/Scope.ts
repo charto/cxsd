@@ -1,7 +1,7 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as types from '../XsdTypes';
+import * as types from './types';
 import {Namespace} from './Namespace'
 import {QName} from './QName'
 
@@ -73,6 +73,10 @@ export class Scope {
 
 	dumpTypes() {
 		return(this.data['type'] as {[name: string]: types.XsdTypeBase});
+	}
+
+	dumpElements() {
+		return(this.data['element'] as {[name: string]: types.XsdElement});
 	}
 
 	private parent: Scope;

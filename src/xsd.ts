@@ -4,6 +4,7 @@
 import {Cache} from 'cget';
 import {Namespace} from './xsd/Namespace';
 import {Loader} from './xsd/Loader';
+import {ExporterTS} from './xsd/ExporterTS'
 
 Cache.patchRequest();
 
@@ -16,5 +17,5 @@ var loader = new Loader({
 });
 
 loader.import(process.argv[2]).then((namespace: Namespace) => {
-	namespace.exportTS();
+	new ExporterTS().export(namespace);
 });

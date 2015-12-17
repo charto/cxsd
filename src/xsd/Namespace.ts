@@ -53,20 +53,6 @@ export class Namespace {
 		if(!this.url || this.url == urlOld) this.url = urlNew;
 	}
 
-	exportTS() {
-		console.log('declare module "' + this.name + '" {');
-
-		var typeTbl = this.scope.dumpTypes();
-
-		for(var key of Object.keys(typeTbl)) {
-			var type = typeTbl[key];
-			console.log('\texport interface ' + type.name + ' {');
-			console.log('\t}');
-		}
-
-		console.log('}');
-	}
-
 	getScope() { return(this.scope); }
 
 	private static list: Namespace[] = [];

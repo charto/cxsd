@@ -1,12 +1,15 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {State, Rule} from './XsdState';
-import {XsdParser} from './XsdParser';
-import {Namespace} from './xsd/Namespace';
-import {Source} from './xsd/Source';
-import {Scope} from './xsd/Scope'
-import {QName} from './xsd/QName'
+import {State, Rule} from '../XsdState';
+import {XsdParser} from '../XsdParser';
+import {Namespace} from './Namespace';
+import {Source} from './Source';
+import {Scope} from './Scope';
+import {QName} from './QName';
+
+import {Base, BaseClass} from './types/Base';
+export {Base, BaseClass};
 
 export type XmlAttribute = string | number;
 type XmlAttributeTbl = {[name: string]: XmlAttribute};
@@ -15,7 +18,7 @@ type XmlAttributeTbl = {[name: string]: XmlAttribute};
 
 
 export class MissingReferenceError extends Error {
-	constructor(tag: XsdBase, state: State, type: string, ref: QName) {
+	constructor(tag: Base, state: State, type: string, ref: QName) {
 		this.name = 'MissingReferenceError';
 		this.message = 'Missing ' + type + ': ' + ref.format() + ' on line ' + tag.lineNumber + ' of ' + state.source.url;
 
@@ -26,46 +29,9 @@ export class MissingReferenceError extends Error {
 
 
 
-// Common base for all schema tags
-
-export interface XsdBaseClass {
-	new(...args: any[]): XsdBase;
-	mayContain(): XsdBaseClass[];
-
-	name: string;
-	rule: Rule;
-}
-
-export class XsdBase {
-	static mayContain = () => ([] as XsdBaseClass[]);
-	constructor(state: State) {
-		if(!state) return;
-
-		this.scope = state.getScope();
-		this.lineNumber = state.stateStatic.getLineNumber();
-	}
-
-	init(state: State) {}
-	finish(state: State) {}
-
-	bind(state: State, type: string, scope?: Scope) {
-		if(this.name) (scope || this.scope).addToParent(new QName(this.name, state.source), type, this);
-	}
-
-	scope: Scope;
-	lineNumber: number;
-	name: string;
-
-	static name: string;
-	static rule: Rule;
-}
-
-
-
-
 // Schema root
 
-export class XsdRoot extends XsdBase {
+export class XsdRoot extends Base {
 	static mayContain = () => [
 		XsdSchema
 	];
@@ -73,7 +39,7 @@ export class XsdRoot extends XsdBase {
 
 // <xsd:schema>
 
-export class XsdSchema extends XsdBase {
+export class XsdSchema extends Base {
 	static mayContain = () => [
 		XsdImport,
 		XsdInclude,
@@ -102,7 +68,7 @@ export class XsdSchema extends XsdBase {
 
 // Element support
 
-export class XsdElementBase extends XsdBase {
+export class XsdElementBase extends Base {
 	id: string = null;
 	minOccurs: number = 1;
 	maxOccurs: number = 1;
@@ -118,6 +84,7 @@ export class XsdElement extends XsdElementBase {
 
 	init(state: State) {
 		this.bind(state, 'element');
+		this.surrogateKey = XsdElement.nextKey++;
 	}
 
 	finish(state: State) {
@@ -148,13 +115,16 @@ export class XsdElement extends XsdElementBase {
 	ref: string = null;
 	type: string | QName | XsdTypeBase = null;
 	default: string = null;
+
+	surrogateKey: number;
+	private static nextKey = 0;
 }
 
 export class XsdGroupBase extends XsdElementBase {
 }
 
 export class XsdGenericChildList extends XsdGroupBase {
-	static mayContain: () => XsdBaseClass[] = () => [
+	static mayContain: () => BaseClass[] = () => [
 		XsdElement,
 		XsdGroup,
 		XsdSequence,
@@ -179,7 +149,7 @@ export class XsdChoice extends XsdGenericChildList {
 // <xsd:group>
 
 export class XsdGroup extends XsdGroupBase {
-	static mayContain: () => XsdBaseClass[] = () => [
+	static mayContain: () => BaseClass[] = () => [
 		XsdSequence,
 		XsdChoice
 	];
@@ -215,9 +185,10 @@ export class XsdGroup extends XsdGroupBase {
 
 // <xsd:attribute>
 
-export class XsdAttribute extends XsdBase {
+export class XsdAttribute extends Base {
 	init(state: State) {
 		this.bind(state, 'attribute');
+		this.surrogateKey = XsdAttribute.nextKey++;
 	}
 
 	finish(state: State) {
@@ -240,11 +211,14 @@ export class XsdAttribute extends XsdBase {
 	type: string = null;
 	use: string = null;
 	default: XmlAttribute = null;
+
+	surrogateKey: number;
+	private static nextKey = 0;
 }
 
 // <xsd:attributegroup>
 
-export class XsdAttributeGroup extends XsdBase {
+export class XsdAttributeGroup extends Base {
 	static mayContain = () => [
 		XsdAttribute
 	];
@@ -279,10 +253,11 @@ export class XsdAttributeGroup extends XsdBase {
 
 // Type support
 
-export class XsdTypeBase extends XsdBase {
+export class XsdTypeBase extends Base {
 	init(state: State) {
 		this.bind(state, 'type');
 		this.scope.setType(this);
+		this.surrogateKey = XsdTypeBase.nextKey++;
 	}
 
 	id: string = null;
@@ -290,6 +265,8 @@ export class XsdTypeBase extends XsdBase {
 
 	// Internally used members
 	parent: XsdTypeBase | QName;
+	surrogateKey: number;
+	private static nextKey = 0;
 }
 
 // <xsd:simpletype>
@@ -312,7 +289,7 @@ export class XsdComplexType extends XsdTypeBase {
 	];
 }
 
-export class XsdContentBase extends XsdBase {
+export class XsdContentBase extends Base {
 	static mayContain = () => [
 		XsdExtension,
 		XsdRestriction
@@ -341,7 +318,7 @@ export class XsdComplexContent extends XsdContentBase {
 
 // Derived type support
 
-export class XsdDerivationBase extends XsdBase {
+export class XsdDerivationBase extends Base {
 	finish(state: State) {
 		var base = new QName(this.base, state.source);
 		(state.parent.xsdElement as XsdContentBase).parent = this.scope.lookup(base, 'type') as XsdTypeBase || base;
@@ -366,7 +343,7 @@ export class XsdRestriction extends XsdDerivationBase {
 
 // <xsd:import>
 
-export class XsdImport extends XsdBase {
+export class XsdImport extends Base {
 	init(state: State) {
 		if(this.schemaLocation) {
 			// TODO: handle importing namespaces like http://www.w3.org/XML/1998/namespace
@@ -384,7 +361,7 @@ export class XsdImport extends XsdBase {
 
 // <xsd:include>
 
-export class XsdInclude extends XsdBase {
+export class XsdInclude extends Base {
 	init(state: State) {
 		if(this.schemaLocation) {
 			var urlRemote = state.source.urlResolve(this.schemaLocation);

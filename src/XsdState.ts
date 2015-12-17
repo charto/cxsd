@@ -4,7 +4,7 @@
 import * as expat from 'node-expat';
 import {FetchOptions, Cache} from 'cget'
 
-import * as types from './XsdTypes'
+import * as types from './xsd/types'
 import {XsdParser} from './XsdParser'
 import {Namespace} from './xsd/Namespace'
 import {Source} from './xsd/Source'
@@ -35,7 +35,7 @@ export class State {
 	private scope: Scope;
 
 	attributeTbl: {[name: string]: string};
-	xsdElement: types.XsdBase;
+	xsdElement: types.Base;
 	depth: number;
 	index: number;
 

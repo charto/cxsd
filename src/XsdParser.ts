@@ -5,7 +5,7 @@ import * as expat from 'node-expat';
 import * as Promise from 'bluebird';
 
 import {FetchOptions, Cache, CacheResult} from 'cget';
-import * as types from './XsdTypes';
+import * as types from './xsd/types';
 import {State, Rule} from './XsdState';
 import {Namespace} from './xsd/Namespace';
 import {Loader} from './xsd/Loader';
@@ -14,7 +14,7 @@ import {QName} from './xsd/QName'
 
 import * as util from 'util';
 
-function parseRule(ctor: types.XsdBaseClass) {
+function parseRule(ctor: types.BaseClass) {
 	if(ctor.rule) return(ctor.rule as Rule);
 
 	var rule = new Rule(new QName().parseClass(ctor.name), ctor);
