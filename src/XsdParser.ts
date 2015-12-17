@@ -17,12 +17,12 @@ import * as util from 'util';
 function parseRule(ctor: types.BaseClass) {
 	if(ctor.rule) return(ctor.rule as Rule);
 
-	var rule = new Rule(new QName().parseClass(ctor.name), ctor);
+	var rule = new Rule(new QName().parseClass(ctor.name, ctor.namespace), ctor);
 
 	ctor.rule = rule;
 
 	for(var follower of ctor.mayContain()) {
-		var followerName = new QName().parseClass(follower.name);
+		var followerName = new QName().parseClass(follower.name, follower.namespace);
 
 		rule.followerTbl[followerName.nameFull] = parseRule(follower);
 		rule.followerTbl[followerName.name] = parseRule(follower);
@@ -39,7 +39,7 @@ function parseRule(ctor: types.BaseClass) {
 
 export class XsdParser {
 	constructor() {
-		this.rootRule = parseRule(types.XsdRoot);
+		this.rootRule = parseRule(types.Root);
 	}
 
 	startElement(state: State, name: string, attrTbl: {[name: string]: string}) {

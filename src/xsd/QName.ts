@@ -34,12 +34,13 @@ export class QName {
 
 	/** Parse a class name internally used by the XSD parser. */
 
-	parseClass(name: string) {
-		var partList = name.match(/([A-Za-z][a-z]*)([A-Za-z]+)/);
+	parseClass(name: string, namespace: Namespace) {
+		// TODO: remove following line.
+		name = name.replace(/^Xsd/, '').toLowerCase();
 
-		this.namespace = Namespace.lookup(partList[1].toLowerCase());
-		this.name = partList[2].toLowerCase();
-		this.nameFull = this.namespace.id + ':' + this.name;
+		this.namespace = namespace;
+		this.name = name;
+		this.nameFull = namespace.id + ':' + name;
 
 		return(this);
 	}

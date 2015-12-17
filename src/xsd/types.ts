@@ -10,6 +10,8 @@ import {QName} from './QName';
 
 import {Base, BaseClass} from './types/Base';
 export {Base, BaseClass};
+import {Schema, Root} from './types/Schema';
+export {Schema, Root};
 
 export type XmlAttribute = string | number;
 type XmlAttributeTbl = {[name: string]: XmlAttribute};
@@ -23,43 +25,6 @@ export class MissingReferenceError extends Error {
 		this.message = 'Missing ' + type + ': ' + ref.format() + ' on line ' + tag.lineNumber + ' of ' + state.source.url;
 
 		super(this.message);
-	}
-}
-
-
-
-
-// Schema root
-
-export class XsdRoot extends Base {
-	static mayContain = () => [
-		XsdSchema
-	];
-}
-
-// <xsd:schema>
-
-export class XsdSchema extends Base {
-	static mayContain = () => [
-		XsdImport,
-		XsdInclude,
-		XsdAttributeGroup,
-		XsdSimpleType,
-		XsdComplexType,
-		XsdGroup,
-		XsdAttribute,
-		XsdElement
-	];
-
-	init(state: State) {
-		// Ultimately the schema exports elements and types in the global scope
-		// (meaning they are children of this, the root element).
-
-		state.source.parse(state.attributeTbl);
-		var scope = state.source.targetNamespace.getScope();
-
-		state.setScope(scope);
-		this.scope = scope;
 	}
 }
 

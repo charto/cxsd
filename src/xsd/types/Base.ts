@@ -2,8 +2,9 @@
 // Released under the MIT license, see LICENSE.
 
 import {State, Rule} from '../../XsdState';
-import {Scope} from '../Scope'
-import {QName} from '../QName'
+import {Namespace} from '../Namespace';
+import {Scope} from '../Scope';
+import {QName} from '../QName';
 
 /** Common base for all schema tags */
 
@@ -11,6 +12,7 @@ export interface BaseClass {
 	new(...args: any[]): Base;
 	mayContain(): BaseClass[];
 
+	namespace: Namespace;
 	name: string;
 	rule: Rule;
 }
@@ -35,6 +37,7 @@ export class Base {
 	lineNumber: number;
 	name: string;
 
+	static namespace: Namespace = Namespace.register('http://www.w3.org/2001/XMLSchema', 'http://www.w3.org/2009/XMLSchema/XMLSchema.xsd', 'xsd');
 	static name: string;
 	static rule: Rule;
 }
