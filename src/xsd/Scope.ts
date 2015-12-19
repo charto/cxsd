@@ -64,7 +64,7 @@ export class Scope {
 
 	// Types
 
-	setType(type: types.XsdTypeBase) {
+	setType(type: types.TypeBase) {
 		// TODO: set to some invalid value if called more than once.
 		if(!this.type) this.type = type;
 	}
@@ -72,11 +72,11 @@ export class Scope {
 	getType() { return(this.type); }
 
 	dumpTypes() {
-		return(this.data['type'] as {[name: string]: types.XsdTypeBase});
+		return(this.data['type'] as {[name: string]: types.TypeBase});
 	}
 
 	dumpElements() {
-		return(this.data['element'] as {[name: string]: types.XsdElement});
+		return(this.data['element'] as {[name: string]: types.Element});
 	}
 
 	private parent: Scope;
@@ -86,5 +86,5 @@ export class Scope {
 		[type: string]: {[name: string]: any}
 	};
 
-	private type: types.XsdTypeBase;
+	private type: types.TypeBase;
 }

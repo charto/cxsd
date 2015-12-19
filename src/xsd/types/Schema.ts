@@ -16,14 +16,14 @@ export class Root extends types.Base {
 
 export class Schema extends types.Base {
 	static mayContain = () => [
-		types.XsdImport,
-		types.XsdInclude,
-		types.XsdAttributeGroup,
-		types.XsdSimpleType,
-		types.XsdComplexType,
-		types.XsdGroup,
-		types.XsdAttribute,
-		types.XsdElement
+		types.Import,
+		types.Include,
+		types.AttributeGroup,
+		types.SimpleType,
+		types.ComplexType,
+		types.Group,
+		types.Attribute,
+		types.Element
 	];
 
 	init(state: State) {
