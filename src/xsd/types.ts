@@ -1,11 +1,7 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {State, Rule} from '../XsdState';
-import {XsdParser} from '../XsdParser';
-import {Namespace} from './Namespace';
-import {Source} from './Source';
-import {Scope} from './Scope';
+import {State} from './State';
 import {QName} from './QName';
 
 import {Base, BaseClass} from './types/Base';

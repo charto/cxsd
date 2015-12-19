@@ -4,12 +4,12 @@
 import * as expat from 'node-expat';
 import {FetchOptions, Cache} from 'cget'
 
-import * as types from './xsd/types'
-import {XsdParser} from './XsdParser'
-import {Namespace} from './xsd/Namespace'
-import {Source} from './xsd/Source'
-import {Scope} from './xsd/Scope'
-import {QName} from './xsd/QName'
+import * as types from './types'
+import {Parser} from './Parser'
+import {Namespace} from './Namespace'
+import {Source} from './Source'
+import {Scope} from './Scope'
+import {QName} from './QName'
 
 export class State {
 	constructor(parent: State, rule: Rule, source?: Source) {

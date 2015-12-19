@@ -8,7 +8,6 @@ import {ExporterTS} from './xsd/ExporterTS'
 
 Cache.patchRequest();
 
-Namespace.register('http://www.w3.org/2001/XMLSchema', 'http://www.w3.org/2009/XMLSchema/XMLSchema.xsd', 'xsd');
 Namespace.register('http://www.w3.org/XML/1998/namespace', 'http://www.w3.org/2001/xml.xsd', 'xml');
 
 var loader = new Loader({

@@ -5,12 +5,12 @@ import * as expat from 'node-expat';
 import * as Promise from 'bluebird';
 
 import {FetchOptions, Cache, CacheResult} from 'cget';
-import * as types from './xsd/types';
-import {State, Rule} from './XsdState';
-import {Namespace} from './xsd/Namespace';
-import {Loader} from './xsd/Loader';
-import {Source} from './xsd/Source';
-import {QName} from './xsd/QName'
+import * as types from './types';
+import {State, Rule} from './State';
+import {Namespace} from './Namespace';
+import {Loader} from './Loader';
+import {Source} from './Source';
+import {QName} from './QName'
 
 import * as util from 'util';
 
@@ -37,7 +37,7 @@ function parseRule(ctor: types.BaseClass) {
 	return(rule);
 }
 
-export class XsdParser {
+export class Parser {
 	constructor() {
 		this.rootRule = parseRule(types.Root);
 	}

@@ -4,12 +4,12 @@
 import {FetchOptions, Cache, CacheResult, util} from 'cget'
 import {Namespace} from './Namespace'
 import {Source} from './Source'
-import {XsdParser} from '../XsdParser'
+import {Parser} from './Parser'
 
 export class Loader {
 	constructor(options?: FetchOptions) {
 		this.options = util.clone(options);
-		this.parser = new XsdParser();
+		this.parser = new Parser();
 	}
 
 	import(urlRemote: string) {
@@ -65,7 +65,7 @@ export class Loader {
 	private static sourceTbl: {[url: string]: Source} = {};
 
 	private options: FetchOptions;
-	private parser: XsdParser;
+	private parser: Parser;
 
 	private targetNamespace: Namespace;
 	private pendingCount = 0;
