@@ -11,11 +11,11 @@ export type XmlAttribute = string | number;
 
 export class Attribute extends types.Base {
 	init(state: State) {
-		this.bind(state, 'attribute');
+		this.define(state, 'attribute');
 		this.surrogateKey = Attribute.nextKey++;
 	}
 
-	finish(state: State) {
+	resolve(state: State) {
 		var attribute = this;
 
 		if(this.ref) {
@@ -24,7 +24,7 @@ export class Attribute extends types.Base {
 			var ref = new QName(this.ref, state.source);
 			attribute = this.scope.lookup(ref, 'attribute');
 
-			if(attribute) attribute.bind(state, 'attribute', this.scope);
+			if(attribute) attribute.define(state, 'attribute', this.scope);
 			else throw new types.MissingReferenceError(this, state, 'attribute', ref);
 		}
 	}
@@ -48,10 +48,10 @@ export class AttributeGroup extends types.Base {
 	];
 
 	init(state: State) {
-		this.bind(state, 'attributegroup');
+		this.define(state, 'attributegroup');
 	}
 
-	finish(state: State) {
+	resolve(state: State) {
 		var attributeGroup = this;
 
 		if(this.ref) {

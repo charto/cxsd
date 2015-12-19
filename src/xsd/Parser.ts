@@ -92,7 +92,7 @@ export class Parser {
 		return(state);
 	}
 
-	preprocess(cached: CacheResult, source: Source, loader: Loader) {
+	init(cached: CacheResult, source: Source, loader: Loader) {
 		var state = new State(null, this.rootRule, source);
 		var importList: {namespace: Namespace, url: string}[] = [];
 
@@ -132,7 +132,7 @@ export class Parser {
 		});
 
 		xml.on('endElement', function(name: string) {
-			if(state.xsdElement && state.xsdElement.finish) {
+			if(state.xsdElement && state.xsdElement.resolve) {
 				// Schedule finish hook to run after parsing is done.
 				// It might depend on definitions in scope but appearing later,
 				// and selectively postponing only hooks that cannot run yet
@@ -171,9 +171,9 @@ export class Parser {
 		return(promise);
 	}
 
-	finish() {
+	resolve() {
 		try {
-			this.pendingList.forEach((state: State) => state.xsdElement.finish(state));
+			this.pendingList.forEach((state: State) => state.xsdElement.resolve(state));
 			this.pendingList = [];
 		} catch(err) {
 			console.error(err);

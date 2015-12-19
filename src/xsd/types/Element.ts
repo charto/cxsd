@@ -20,11 +20,11 @@ export class Element extends ElementBase {
 	];
 
 	init(state: State) {
-		this.bind(state, 'element');
+		this.define(state, 'element');
 		this.surrogateKey = Element.nextKey++;
 	}
 
-	finish(state: State) {
+	resolve(state: State) {
 		var element = this;
 
 		if(this.ref) {
@@ -33,7 +33,7 @@ export class Element extends ElementBase {
 			var ref = new QName(this.ref, state.source);
 			element = this.scope.lookup(ref, 'element');
 
-			if(element) element.bind(state, 'element', this.scope);
+			if(element) element.define(state, 'element', this.scope);
 			else throw new types.MissingReferenceError(this, state, 'element', ref);
 		}
 

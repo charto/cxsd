@@ -7,7 +7,7 @@ import * as types from '../types';
 
 export class TypeBase extends types.Base {
 	init(state: State) {
-		this.bind(state, 'type');
+		this.define(state, 'type');
 		this.scope.setType(this);
 		this.surrogateKey = TypeBase.nextKey++;
 	}
@@ -47,7 +47,7 @@ class ContentBase extends types.Base {
 		Restriction
 	]
 
-	finish(state: State) {
+	resolve(state: State) {
 		(state.parent.xsdElement as TypeBase).parent = this.parent;
 	}
 
@@ -68,7 +68,7 @@ export class ComplexContent extends ContentBase {
 // Derived type support
 
 export class XsdDerivationBase extends types.Base {
-	finish(state: State) {
+	resolve(state: State) {
 		var base = new QName(this.base, state.source);
 		(state.parent.xsdElement as ContentBase).parent = this.scope.lookup(base, 'type') as TypeBase || base;
 	}

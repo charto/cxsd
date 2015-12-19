@@ -16,7 +16,7 @@ class GenericChildList extends GroupBase {
 		Choice
 	];
 
-	finish(state: State) {
+	resolve(state: State) {
 		this.scope.addAllToParent('element');
 	}
 }
@@ -40,10 +40,10 @@ export class Group extends GroupBase {
 	];
 
 	init(state: State) {
-		this.bind(state, 'group');
+		this.define(state, 'group');
 	}
 
-	finish(state: State) {
+	resolve(state: State) {
 		var group = this;
 
 		if(this.ref) {

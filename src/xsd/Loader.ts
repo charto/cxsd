@@ -39,7 +39,7 @@ export class Loader {
 				source.updateUrl(cached.url);
 				namespace.updateUrl(urlRemote, cached.url);
 
-				return(this.parser.preprocess(cached, source, this));
+				return(this.parser.init(cached, source, this));
 			}).then((dependencyList: Source[]) => {
 				// TODO: The source could be parsed already if all dependencies
 				// (and recursively their dependencies) have been preprocessed.
@@ -55,7 +55,7 @@ export class Loader {
 	}
 
 	finish() {
-		this.parser.finish();
+		this.parser.resolve();
 		this.resolve(this.targetNamespace);
 	}
 

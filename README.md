@@ -20,6 +20,14 @@ The static `mayContain` member function of syntax element types (classes derived
 
 Syntax elements may also have attributes. They should be initialized to `null` in the class definition (the TypeScript compiler will automatically generate a constructor to initialize them). The parser will construct an instance of each class it finds, and examine its automatically constructed dynamic members. During parsing, they will then be automatically initialized to attributes found in the schema being parsed. Unknown attributes will be ignored.
 
+The XSD parser proceeds in stages (the parser and all syntax element classes have correspondingly named methods):
+
+- `init` which calls `define` to bind named elements, attributes, types etc. to their scope and handles `import` and `include` declarations. The imports form a directed, possibly cyclic graph and can modify root scopes of arbitrary namespaces, so it's impossible to generally resolve references to other named things visible in scope before all imports have been processed.
+- `resolve` which resolves references by name. Because possible attributes and child elements can be defined through deeply nested references that can point to other namespaces, it's generally impossible to know them all before all references in all namespaces have been resolved.
+- TODO: `transform` which renames things to avoid naming conflicts between child elements and attributes (which will be merged into members of a single JSON object) and possibly deals with scope issues for TypeScript definition output.
+
+TODO: after parsing, the resulting data structure should be exportable as JSON or a TypeScript definition file with ambient declarations of the XML namespaces.
+
 License
 =======
 

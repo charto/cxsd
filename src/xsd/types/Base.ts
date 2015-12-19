@@ -27,9 +27,9 @@ export class Base {
 	}
 
 	init(state: State) {}
-	finish(state: State) {}
+	resolve(state: State) {}
 
-	bind(state: State, type: string, scope?: Scope) {
+	define(state: State, type: string, scope?: Scope) {
 		if(this.name) (scope || this.scope).addToParent(new QName(this.name, state.source), type, this);
 	}
 
