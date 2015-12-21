@@ -5,10 +5,10 @@ import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
 
-class GroupBase extends types.ElementBase {
+export class GroupBase extends types.ElementBase {
 }
 
-class GenericChildList extends GroupBase {
+export class GenericChildList extends GroupBase {
 	static mayContain: () => types.BaseClass[] = () => [
 		types.Element,
 		Group,

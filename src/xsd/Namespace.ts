@@ -2,6 +2,7 @@
 // Released under the MIT license, see LICENSE.
 
 import {Loader} from './Loader';
+import {Source} from './Source';
 import {Scope} from './Scope';
 
 export class Namespace {

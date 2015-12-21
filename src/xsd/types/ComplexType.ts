@@ -4,6 +4,8 @@
 import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
+import {Group, Sequence, Choice} from './Group';
+import {Attribute, AttributeGroup} from './Attribute';
 
 export class TypeBase extends types.Base {
 	init(state: State) {
@@ -41,7 +43,7 @@ export class ComplexType extends TypeBase {
 	];
 }
 
-class ContentBase extends types.Base {
+export class ContentBase extends types.Base {
 	static mayContain = () => [
 		Extension,
 		Restriction

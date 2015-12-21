@@ -3,6 +3,10 @@
 
 import {State} from '../State';
 import * as types from '../types';
+import {Group} from './Group';
+import {Attribute, AttributeGroup} from './Attribute';
+import {SimpleType, ComplexType} from './ComplexType';
+import {Import, Include} from './Import';
 
 /** Schema root element */
 

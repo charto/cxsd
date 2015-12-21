@@ -4,6 +4,8 @@
 import * as types from './types';
 import {Namespace} from './Namespace'
 import {QName} from './QName'
+import {Element} from './types/Element';
+import {TypeBase} from './types/ComplexType';
 
 export class Scope {
 	constructor(parent: Scope, namespace?: Namespace) {
