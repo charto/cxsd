@@ -7,8 +7,17 @@ import * as types from '../types';
 
 export class ElementBase extends types.Base {
 	id: string = null;
-	minOccurs: number = 1;
-	maxOccurs: number = 1;
+	minOccurs: string = "1";
+	maxOccurs: string = "1";
+
+	min: number;
+	max: number;
+
+	init(state: State) {
+		this.min = +this.minOccurs;
+		if(this.maxOccurs == 'unbounded') this.max = Infinity;
+		else this.max = +this.maxOccurs;
+	}
 }
 
 /** <xsd:element> */
@@ -20,7 +29,9 @@ export class Element extends ElementBase {
 	];
 
 	init(state: State) {
-		this.define(state, 'element');
+		super.init(state);
+
+		this.define(state, 'element', this.min, this.max);
 		this.surrogateKey = Element.nextKey++;
 	}
 
@@ -33,7 +44,7 @@ export class Element extends ElementBase {
 			var ref = new QName(this.ref, state.source);
 			element = this.scope.lookup(ref, 'element');
 
-			if(element) element.define(state, 'element', this.scope);
+			if(element) element.define(state, 'element', this.min, this.max, this.scope);
 			else throw new types.MissingReferenceError(this, state, 'element', ref);
 		}
 

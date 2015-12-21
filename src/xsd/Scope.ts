@@ -13,32 +13,60 @@ export class Scope {
 		this.namespace = namespace;
 	}
 
-	addString(name: string, type: string, target: any) {
-		var tbl = this.data[type];
+	addString(name: string, type: string, target: any, min: number, max: number) {
+		var visibleTbl = this.visible[type];
 
-		if(!tbl) {
-			tbl = {} as {[name: string]: any};
-			this.data[type] = tbl;
+		if(!visibleTbl) {
+			visibleTbl = {} as {[name: string]: any};
+			this.visible[type] = visibleTbl;
 		}
 
-		tbl[name] = target;
+		visibleTbl[name] = target;
+
+		var exposeTbl = this.expose[type];
+
+		if(!exposeTbl) {
+			exposeTbl = {} as {[name: string]: {
+				min: number;
+				max: number;
+				item: any;
+			}};
+			this.expose[type] = exposeTbl;
+		}
+
+		if(exposeTbl[name]) {
+			// For sequences, sum occurrence counts among matching element types.
+
+			min += exposeTbl[name].min;
+			max += exposeTbl[name].max;
+		}
+
+		exposeTbl[name] = {
+			min: min,
+			max: max,
+			item: target
+		};
 	}
 
-	add(name: QName, type: string, target: any) {
-		this.addString(name.nameFull, type, target);
+	add(name: QName, type: string, target: any, min: number, max: number) {
+		this.addString(name.nameFull, type, target, min, max);
 	}
 
-	addToParent(name: QName, type: string, target: any) {
-		this.parent.add(name, type, target);
+	addToParent(name: QName, type: string, target: any, min: number, max: number) {
+		this.parent.add(name, type, target, min, max);
 	}
 
-	addAllToParent(type: string, target?: Scope) {
-		if(!this.data[type]) return;
+	addAllToParent(type: string, min = 1, max = 1, target?: Scope) {
+		if(!this.visible[type]) return;
 		if(!target) target = this;
 		target = target.parent;
 
-		for(var name of Object.keys(this.data[type])) {
-			target.addString(name, type, this.data[type][name]);
+		var exposeTbl = this.expose[type];
+
+		for(var name of Object.keys(exposeTbl)) {
+			var spec = exposeTbl[name];
+			// TODO: If target is a choice, it must take the overall min and max.
+			target.addString(name, type, spec.item, spec.min * min, spec.max * max);
 		}
 	}
 
@@ -50,8 +78,8 @@ export class Scope {
 		}
 
 		while(scope) {
-			if(scope.data[type]) {
-				var result = scope.data[type][name.nameFull];
+			if(scope.visible[type]) {
+				var result = scope.visible[type][name.nameFull];
 
 				if(result) return(result);
 			}
@@ -72,18 +100,26 @@ export class Scope {
 	getType() { return(this.type); }
 
 	dumpTypes() {
-		return(this.data['type'] as {[name: string]: types.TypeBase});
+		return(this.visible['type'] as {[name: string]: types.TypeBase});
 	}
 
 	dumpElements() {
-		return(this.data['element'] as {[name: string]: types.Element});
+		return(this.visible['element'] as {[name: string]: types.Element});
 	}
 
 	private parent: Scope;
 	private namespace: Namespace;
 
-	private data = {} as {
+	private visible = {} as {
 		[type: string]: {[name: string]: any}
+	};
+
+	private expose = {} as {
+		[type: string]: {[name: string]: {
+			min: number;
+			max: number;
+			item: any;
+		}}
 	};
 
 	private type: types.TypeBase;

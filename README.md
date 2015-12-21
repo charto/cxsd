@@ -9,6 +9,12 @@ Downloads schema files and keeps a local cache in the file system.
 
 Handles arbitrarily large files using streaming.
 
+Related projects
+----------------
+
+- [CodeSynthesis XSD](http://codesynthesis.com/projects/xsd/) generates `C++`-based parsers out of XSD schema definitions.
+- [node-xml4js](https://github.com/peerlibrary/node-xml4js) uses schema information to read XML into nicely structured objects.
+
 Parsing XSD schema files
 ------------------------
 
@@ -23,7 +29,7 @@ Syntax elements may also have attributes. They should be initialized to `null` i
 The XSD parser proceeds in stages (the parser and all syntax element classes have correspondingly named methods):
 
 - `init` which calls `define` to bind named elements, attributes, types etc. to their scope and handles `import` and `include` declarations. The imports form a directed, possibly cyclic graph and can modify root scopes of arbitrary namespaces, so it's impossible to generally resolve references to other named things visible in scope before all imports have been processed.
-- `resolve` which resolves references by name. Because possible attributes and child elements can be defined through deeply nested references that can point to other namespaces, it's generally impossible to know them all before all references in all namespaces have been resolved.
+- `resolve` which resolves references by name and finds out how many times they may appear. Because possible attributes and child elements can be defined through deeply nested references that can point to other namespaces, it's generally impossible to know them all before all references in all namespaces have been resolved.
 - TODO: `transform` which renames things to avoid naming conflicts between child elements and attributes (which will be merged into members of a single JSON object) and possibly deals with scope issues for TypeScript definition output.
 
 TODO: after parsing, the resulting data structure should be exportable as JSON or a TypeScript definition file with ambient declarations of the XML namespaces.

@@ -29,8 +29,8 @@ export class Base {
 	init(state: State) {}
 	resolve(state: State) {}
 
-	define(state: State, type: string, scope?: Scope) {
-		if(this.name) (scope || this.scope).addToParent(new QName(this.name, state.source), type, this);
+	define(state: State, type: string, min = 1, max = 1, scope?: Scope) {
+		if(this.name) (scope || this.scope).addToParent(new QName(this.name, state.source), type, this, min, max);
 	}
 
 	scope: Scope;

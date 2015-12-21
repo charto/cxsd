@@ -11,7 +11,8 @@ export type XmlAttribute = string | number;
 
 export class Attribute extends types.Base {
 	init(state: State) {
-		this.define(state, 'attribute');
+		this.optional = (this.use == 'optional');
+		this.define(state, 'attribute', this.optional ? 0 : 1, 1);
 		this.surrogateKey = Attribute.nextKey++;
 	}
 
@@ -24,7 +25,7 @@ export class Attribute extends types.Base {
 			var ref = new QName(this.ref, state.source);
 			attribute = this.scope.lookup(ref, 'attribute');
 
-			if(attribute) attribute.define(state, 'attribute', this.scope);
+			if(attribute) attribute.define(state, 'attribute', this.optional ? 0 : 1, 1, this.scope);
 			else throw new types.MissingReferenceError(this, state, 'attribute', ref);
 		}
 	}
@@ -38,6 +39,8 @@ export class Attribute extends types.Base {
 
 	surrogateKey: number;
 	private static nextKey = 0;
+
+	optional: boolean;
 }
 
 /** <xsd:attributegroup> */
@@ -62,7 +65,7 @@ export class AttributeGroup extends types.Base {
 		// Named attribute groups are only models for referencing elsewhere.
 
 		if(!this.name) {
-			if(attributeGroup) attributeGroup.scope.addAllToParent('attribute', this.scope);
+			if(attributeGroup) attributeGroup.scope.addAllToParent('attribute', 1, 1, this.scope);
 			else throw new types.MissingReferenceError(this, state, 'attributeGroup', ref);
 		}
 	}

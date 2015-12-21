@@ -17,7 +17,7 @@ class GenericChildList extends GroupBase {
 	];
 
 	resolve(state: State) {
-		this.scope.addAllToParent('element');
+		this.scope.addAllToParent('element', this.min, this.max);
 	}
 }
 
@@ -40,6 +40,8 @@ export class Group extends GroupBase {
 	];
 
 	init(state: State) {
+		super.init(state);
+
 		this.define(state, 'group');
 	}
 
@@ -54,7 +56,7 @@ export class Group extends GroupBase {
 		// Named groups are only models for referencing elsewhere.
 
 		if(!this.name) {
-			if(group) group.scope.addAllToParent('element', this.scope);
+			if(group) group.scope.addAllToParent('element', this.min, this.max, this.scope);
 			else throw new types.MissingReferenceError(this, state, 'group', ref);
 		}
 	}
