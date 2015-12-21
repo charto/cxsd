@@ -33,7 +33,9 @@ export class Base {
 		if(this.name) (scope || this.scope).addToParent(new QName(this.name, state.source), type, this, min, max);
 	}
 
-	scope: Scope;
+	getScope() { return(this.scope); }
+
+	protected scope: Scope;
 	lineNumber: number;
 	name: string;
 

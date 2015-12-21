@@ -60,6 +60,16 @@ export class Element extends ElementBase {
 		}
 	}
 
+	getTypeName() {
+		var typeType = typeof(this.type);
+		if(typeType == 'object') {
+			if(this.type instanceof QName) return((this.type as QName).name);
+			else return((this.type as types.TypeBase).name);
+		} else if(typeType == 'string') {
+			return(this.type as string);
+		} else return(null);
+	}
+
 	name: string = null;
 	ref: string = null;
 	type: string | QName | types.TypeBase = null;

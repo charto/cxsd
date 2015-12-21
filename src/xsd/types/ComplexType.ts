@@ -51,6 +51,9 @@ export class ContentBase extends types.Base {
 
 	resolve(state: State) {
 		(state.parent.xsdElement as TypeBase).parent = this.parent;
+
+		this.scope.addAllToParent('element');
+		this.scope.addAllToParent('attribute');
 	}
 
 	// Internally used members
@@ -70,9 +73,17 @@ export class ComplexContent extends ContentBase {
 // Derived type support
 
 export class XsdDerivationBase extends types.Base {
+	static mayContain = () => [
+		Attribute,
+		Sequence
+	]
+
 	resolve(state: State) {
 		var base = new QName(this.base, state.source);
 		(state.parent.xsdElement as ContentBase).parent = this.scope.lookup(base, 'type') as TypeBase || base;
+
+		this.scope.addAllToParent('element');
+		this.scope.addAllToParent('attribute');
 	}
 
 	id: string = null;

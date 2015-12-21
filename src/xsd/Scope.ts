@@ -7,6 +7,12 @@ import {QName} from './QName'
 import {Element} from './types/Element';
 import {TypeBase} from './types/ComplexType';
 
+export interface TypeMember {
+	min: number;
+	max: number;
+	item: any;
+}
+
 export class Scope {
 	constructor(parent: Scope, namespace?: Namespace) {
 		if(!namespace && parent) namespace = parent.namespace;
@@ -28,11 +34,7 @@ export class Scope {
 		var exposeTbl = this.expose[type];
 
 		if(!exposeTbl) {
-			exposeTbl = {} as {[name: string]: {
-				min: number;
-				max: number;
-				item: any;
-			}};
+			exposeTbl = {} as {[name: string]: TypeMember};
 			this.expose[type] = exposeTbl;
 		}
 
@@ -102,11 +104,11 @@ export class Scope {
 	getType() { return(this.type); }
 
 	dumpTypes() {
-		return(this.visible['type'] as {[name: string]: types.TypeBase});
+		return((this.expose['type'] || {}) as {[name: string]: TypeMember});
 	}
 
 	dumpElements() {
-		return(this.visible['element'] as {[name: string]: types.Element});
+		return((this.expose['element'] || {}) as {[name: string]: TypeMember});
 	}
 
 	private parent: Scope;
@@ -117,11 +119,7 @@ export class Scope {
 	};
 
 	private expose = {} as {
-		[type: string]: {[name: string]: {
-			min: number;
-			max: number;
-			item: any;
-		}}
+		[type: string]: {[name: string]: TypeMember}
 	};
 
 	private type: types.TypeBase;

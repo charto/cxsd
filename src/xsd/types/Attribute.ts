@@ -11,7 +11,7 @@ export type XmlAttribute = string | number;
 
 export class Attribute extends types.Base {
 	init(state: State) {
-		this.optional = (this.use == 'optional');
+		this.optional = (this.use == 'optional'); // Otherwise assume 'required'
 		this.define(state, 'attribute', this.optional ? 0 : 1, 1);
 		this.surrogateKey = Attribute.nextKey++;
 	}
