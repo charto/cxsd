@@ -25,6 +25,7 @@ export class TypeBase extends types.Base {
 
 export class SimpleType extends TypeBase {
 	static mayContain: () => types.BaseClass[] = () => [
+		types.Annotation,
 		types.Restriction,
 		List,
 		Union
@@ -35,6 +36,7 @@ export class SimpleType extends TypeBase {
 
 export class ComplexType extends TypeBase {
 	static mayContain: () => types.BaseClass[] = () => [
+		types.Annotation,
 		SimpleContent,
 		ComplexContent,
 		types.Attribute,
@@ -74,7 +76,7 @@ export class ComplexContent extends ContentBase {
 }
 
 export class ListBase extends types.Base {
-	static mayContain = () => [
+	static mayContain: () => types.BaseClass[] = () => [
 		SimpleType
 	]
 }

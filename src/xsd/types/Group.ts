@@ -10,6 +10,7 @@ export class GroupBase extends types.ElementBase {
 
 export class GenericChildList extends GroupBase {
 	static mayContain: () => types.BaseClass[] = () => [
+		types.Annotation,
 		types.Element,
 		Group,
 		Sequence,
@@ -41,6 +42,7 @@ export class All extends GenericChildList {
 
 export class Group extends GroupBase {
 	static mayContain: () => types.BaseClass[] = () => [
+		types.Annotation,
 		Sequence,
 		Choice
 	];

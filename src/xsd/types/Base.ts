@@ -43,3 +43,16 @@ export class Base {
 	static name: string;
 	static rule: Rule;
 }
+
+/** <xsd:annotation> */
+
+export class Annotation extends Base {
+	static mayContain: () => BaseClass[] = () => [
+		Documentation
+	];
+}
+
+/** <xsd:documentation> */
+
+export class Documentation extends Base {
+}

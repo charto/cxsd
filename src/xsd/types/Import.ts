@@ -5,9 +5,27 @@ import {State} from '../State';
 import {Namespace} from '../Namespace';
 import * as types from '../types';
 
+/** <xsd:include> */
+
+export class Include extends types.Base {
+	static mayContain: () => types.BaseClass[] = () => [
+		types.Annotation
+	];
+
+	init(state: State) {
+		if(this.schemaLocation) {
+			var urlRemote = state.source.urlResolve(this.schemaLocation);
+			state.stateStatic.addImport(state.source.targetNamespace, urlRemote);
+		}
+	}
+
+	id: string = null;
+	schemaLocation: string = null;
+}
+
 /** <xsd:import> */
 
-export class Import extends types.Base {
+export class Import extends Include {
 	init(state: State) {
 		if(this.schemaLocation) {
 			// TODO: handle importing namespaces like http://www.w3.org/XML/1998/namespace
@@ -18,21 +36,5 @@ export class Import extends types.Base {
 		}
 	}
 
-	id: string = null;
 	namespace: string = null;
-	schemaLocation: string = null;
-}
-
-// <xsd:include>
-
-export class Include extends types.Base {
-	init(state: State) {
-		if(this.schemaLocation) {
-			var urlRemote = state.source.urlResolve(this.schemaLocation);
-			state.stateStatic.addImport(state.source.targetNamespace, urlRemote);
-		}
-	}
-
-	id: string = null;
-	schemaLocation: string = null;
 }

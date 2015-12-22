@@ -11,6 +11,7 @@ export type XmlAttribute = string | number;
 
 export class Attribute extends types.Base {
 	static mayContain: () => types.BaseClass[] = () => [
+		types.Annotation,
 		types.SimpleType
 	];
 
@@ -56,6 +57,7 @@ export class AnyAttribute extends types.Base {
 
 export class AttributeGroup extends types.Base {
 	static mayContain: () => types.BaseClass[] = () => [
+		types.Annotation,
 		Attribute,
 		AttributeGroup
 	];

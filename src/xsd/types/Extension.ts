@@ -47,4 +47,7 @@ export class Restriction extends DerivationBase {
 /** <xsd:enumeration> */
 
 export class Enumeration extends types.Base {
+	static mayContain: () => types.BaseClass[] = () => [
+		types.Annotation
+	];
 }

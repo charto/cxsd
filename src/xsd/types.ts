@@ -4,8 +4,8 @@
 import {State} from './State';
 import {QName} from './QName';
 
-import {Base, BaseClass} from './types/Base';
-export {Base, BaseClass};
+import {Base, BaseClass, Annotation, Documentation} from './types/Base';
+export {Base, BaseClass, Annotation, Documentation};
 import {Schema, Root} from './types/Schema';
 export {Schema, Root};
 import {Element, ElementBase} from './types/Element';

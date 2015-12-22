@@ -24,6 +24,7 @@ export class ElementBase extends types.Base {
 
 export class Element extends ElementBase {
 	static mayContain: () => types.BaseClass[] = () => [
+		types.Annotation,
 		types.SimpleType,
 		types.ComplexType
 	];

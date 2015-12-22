@@ -8,7 +8,7 @@ import {Group} from './Group';
 /** Schema root element */
 
 export class Root extends types.Base {
-	static mayContain = () => [
+	static mayContain: () => types.BaseClass[] = () => [
 		Schema
 	];
 }
@@ -17,6 +17,7 @@ export class Root extends types.Base {
 
 export class Schema extends types.Base {
 	static mayContain: () => types.BaseClass[] = () => [
+		types.Annotation,
 		types.Import,
 		types.Include,
 		types.AttributeGroup,
