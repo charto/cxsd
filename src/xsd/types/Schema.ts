@@ -4,9 +4,6 @@
 import {State} from '../State';
 import * as types from '../types';
 import {Group} from './Group';
-import {Attribute, AttributeGroup} from './Attribute';
-import {SimpleType, ComplexType} from './ComplexType';
-import {Import, Include} from './Import';
 
 /** Schema root element */
 
@@ -19,7 +16,7 @@ export class Root extends types.Base {
 /** <xsd:schema> */
 
 export class Schema extends types.Base {
-	static mayContain = () => [
+	static mayContain: () => types.BaseClass[] = () => [
 		types.Import,
 		types.Include,
 		types.AttributeGroup,

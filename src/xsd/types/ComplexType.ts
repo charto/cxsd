@@ -4,8 +4,6 @@
 import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
-import {Group, Sequence, Choice} from './Group';
-import {Attribute, AttributeGroup} from './Attribute';
 
 export class TypeBase extends types.Base {
 	init(state: State) {
@@ -23,19 +21,24 @@ export class TypeBase extends types.Base {
 	private static nextKey = 0;
 }
 
-// <xsd:simpletype>
+/** <xsd:simpletype> */
 
 export class SimpleType extends TypeBase {
+	static mayContain: () => types.BaseClass[] = () => [
+		types.Restriction,
+		List,
+		Union
+	];
 }
 
-// <xsd:complextype>
+/** <xsd:complextype> */
 
 export class ComplexType extends TypeBase {
-	static mayContain = () => [
+	static mayContain: () => types.BaseClass[] = () => [
 		SimpleContent,
 		ComplexContent,
 		types.Attribute,
-//		anyattribute,
+		types.AnyAttribute,
 		types.Sequence,
 		types.Choice,
 		types.AttributeGroup,
@@ -44,9 +47,9 @@ export class ComplexType extends TypeBase {
 }
 
 export class ContentBase extends types.Base {
-	static mayContain = () => [
-		Extension,
-		Restriction
+	static mayContain: () => types.BaseClass[] = () => [
+		types.Extension,
+		types.Restriction
 	]
 
 	resolve(state: State) {
@@ -70,32 +73,18 @@ export class SimpleContent extends ContentBase {
 export class ComplexContent extends ContentBase {
 }
 
-// Derived type support
-
-export class XsdDerivationBase extends types.Base {
+export class ListBase extends types.Base {
 	static mayContain = () => [
-		Attribute,
-		Sequence
+		SimpleType
 	]
-
-	resolve(state: State) {
-		var base = new QName(this.base, state.source);
-		(state.parent.xsdElement as ContentBase).parent = this.scope.lookup(base, 'type') as TypeBase || base;
-
-		this.scope.addAllToParent('element');
-		this.scope.addAllToParent('attribute');
-	}
-
-	id: string = null;
-	base: string = null;
 }
 
-// <xsd:extension>
+/** <xsd:list> */
 
-export class Extension extends XsdDerivationBase {
+export class List extends ListBase {
 }
 
-// <xsd:restriction>
+/** <xsd:union> */
 
-export class Restriction extends XsdDerivationBase {
+export class Union extends ListBase {
 }

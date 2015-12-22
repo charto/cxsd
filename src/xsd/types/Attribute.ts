@@ -10,6 +10,10 @@ export type XmlAttribute = string | number;
 /** <xsd:attribute> */
 
 export class Attribute extends types.Base {
+	static mayContain: () => types.BaseClass[] = () => [
+		types.SimpleType
+	];
+
 	init(state: State) {
 		this.optional = (this.use == 'optional'); // Otherwise assume 'required'
 		this.define(state, 'attribute', this.optional ? 0 : 1, 1);
@@ -43,11 +47,17 @@ export class Attribute extends types.Base {
 	optional: boolean;
 }
 
+/** <xsd:anyAttribute> */
+
+export class AnyAttribute extends types.Base {
+}
+
 /** <xsd:attributegroup> */
 
 export class AttributeGroup extends types.Base {
-	static mayContain = () => [
-		Attribute
+	static mayContain: () => types.BaseClass[] = () => [
+		Attribute,
+		AttributeGroup
 	];
 
 	init(state: State) {

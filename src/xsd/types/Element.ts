@@ -4,7 +4,6 @@
 import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
-import {SimpleType, ComplexType} from './ComplexType';
 
 export class ElementBase extends types.Base {
 	id: string = null;
@@ -24,7 +23,7 @@ export class ElementBase extends types.Base {
 /** <xsd:element> */
 
 export class Element extends ElementBase {
-	static mayContain = () => [
+	static mayContain: () => types.BaseClass[] = () => [
 		types.SimpleType,
 		types.ComplexType
 	];

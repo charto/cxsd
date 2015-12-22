@@ -13,7 +13,8 @@ export class GenericChildList extends GroupBase {
 		types.Element,
 		Group,
 		Sequence,
-		Choice
+		Choice,
+		Any
 	];
 
 	resolve(state: State) {
@@ -29,6 +30,11 @@ export class Sequence extends GenericChildList {
 // <xsd:choice>
 
 export class Choice extends GenericChildList {
+}
+
+// <xsd:all>
+
+export class All extends GenericChildList {
 }
 
 // <xsd:group>
@@ -63,4 +69,9 @@ export class Group extends GroupBase {
 
 	name: string = null;
 	ref: string = null;
+}
+
+// <xsd:any>
+
+export class Any extends types.Base {
 }

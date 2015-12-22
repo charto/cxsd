@@ -8,7 +8,10 @@ import * as types from './types';
 export class ExporterTS {
 	exportElement(indent: string, spec: TypeMember) {
 		var element = spec.item as types.Element;
-		console.log(indent + element.name + ': ' + (element.getTypeName() || 'any') + ';');
+		var optional = (spec.min == 0 ? '?' : '');
+		var multiple = (spec.max > 1 ? '[]' : '');
+
+		console.log(indent + element.name + optional + ': ' + (element.getTypeName() || 'any') + multiple + ';');
 	}
 
 	exportType(indent: string, spec: TypeMember) {
