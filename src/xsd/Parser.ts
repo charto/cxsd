@@ -105,7 +105,10 @@ export class Parser {
 
 			getLineNumber: () => {
 				return(xml.getCurrentLineNumber());
-			}
+			},
+
+			textDepth: 0,
+			textHandlerList: []
 		};
 
 		var stateStatic = state.stateStatic;
@@ -132,21 +135,28 @@ export class Parser {
 		});
 
 		xml.on('endElement', function(name: string) {
-			if(state.xsdElement && state.xsdElement.resolve) {
-				// Schedule finish hook to run after parsing is done.
-				// It might depend on definitions in scope but appearing later,
-				// and selectively postponing only hooks that cannot run yet
-				// would be extremely complicated.
+			if(state.xsdElement) {
+				if(state.xsdElement.loaded) {
+					state.xsdElement.loaded(state);
+				}
 
-				pendingList.push(state);
+				if(state.xsdElement.resolve) {
+					// Schedule resolve hook to run after parsing is done.
+					// It might depend on definitions in scope but appearing later,
+					// and selectively postponing only hooks that cannot run yet
+					// would be extremely complicated.
+
+					pendingList.push(state);
+				}
 			}
 
 			state = state.parent;
 		});
 
 		xml.on('text', function(text: string) {
-//			text = text.replace(/\s+$/, '');
-//			if(text) console.log(text);
+			if(stateStatic.textDepth) {
+				stateStatic.textHandlerList[stateStatic.textDepth - 1].addText(state, text);
+			}
 		});
 
 		xml.on('error', function(err: any) {

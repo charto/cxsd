@@ -26,7 +26,16 @@ export class Base {
 		this.lineNumber = state.stateStatic.getLineNumber();
 	}
 
+	/** Hook running after opening tag. */
 	init(state: State) {}
+
+	/** Hook running for text content. */
+	addText(state: State, text: string) {}
+
+	/** Hook running after closing tag. */
+	loaded(state: State) {}
+
+	/** Hook running after all dependencies have been loaded. */
 	resolve(state: State) {}
 
 	define(state: State, type: string, min = 1, max = 1, scope?: Scope) {
@@ -55,4 +64,16 @@ export class Annotation extends Base {
 /** <xsd:documentation> */
 
 export class Documentation extends Base {
+	init(state: State) {
+		state.startText(this);
+	}
+
+	addText(state: State, text: string) {
+		// Strip trailing whitespace from lines and all trailing blank lines.
+		text = text.replace(/\s+$/, '').replace(/[ \t\r]*\n\r?/, '\n');
+	}
+
+	loaded(state: State) {
+		state.endText();
+	}
 }

@@ -29,6 +29,11 @@ export class State {
 	getScope() { return(this.scope); }
 	setScope(scope: Scope) { this.scope = scope; }
 
+	startText(xsdElement: types.Base) {
+		this.stateStatic.textHandlerList[this.stateStatic.textDepth++] = xsdElement;
+	}
+	endText() { --this.stateStatic.textDepth; }
+
 	parent: State;
 	rule: Rule;
 	source: Source;
@@ -42,6 +47,8 @@ export class State {
 	stateStatic: {
 		addImport: (namespaceTarget: Namespace, urlRemote: string) => void;
 		getLineNumber: () => number;
+		textHandlerList: types.Base[];
+		textDepth: number;
 	};
 }
 
