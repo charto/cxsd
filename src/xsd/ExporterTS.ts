@@ -5,6 +5,8 @@ import {Namespace} from './Namespace';
 import {Scope, TypeMember} from './Scope';
 import * as types from './types';
 
+/** Export parsed schema to a TypeScript d.ts definition file. */
+
 export class ExporterTS {
 	exportElement(indent: string, spec: TypeMember) {
 		var element = spec.item as types.Element;

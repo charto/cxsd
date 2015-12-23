@@ -13,6 +13,9 @@ export interface TypeMember {
 	item: any;
 }
 
+/** Scope handles looking up references by type and name, and binding member
+  * types and elements to types or namespaces. */
+
 export class Scope {
 	constructor(parent: Scope, namespace?: Namespace) {
 		if(!namespace && parent) namespace = parent.namespace;
@@ -21,7 +24,7 @@ export class Scope {
 		this.namespace = namespace;
 	}
 
-	addString(name: string, type: string, target: any, min: number, max: number) {
+	private addString(name: string, type: string, target: any, min: number, max: number) {
 		var visibleTbl = this.visible[type];
 
 		if(!visibleTbl) {

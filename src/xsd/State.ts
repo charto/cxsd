@@ -11,6 +11,8 @@ import {Source} from './Source'
 import {Scope} from './Scope'
 import {QName} from './QName'
 
+/** Parser state, passed around between functions. */
+
 export class State {
 	constructor(parent: State, rule: Rule, source?: Source) {
 		if(parent) {
@@ -52,14 +54,17 @@ export class State {
 	};
 }
 
+/** Parser rule, defines a handler class, valid attributes and children
+  * for an XSD tag. */
+
 export class Rule {
-	constructor(qName: QName, proto: any) {
+	constructor(qName: QName, proto: types.BaseClass) {
 		this.qName = qName;
 		this.proto = proto;
 	}
 
 	qName: QName;
-	proto: any;
+	proto: types.BaseClass;
 
 	attributeList: string[] = [];
 	followerTbl: {[id: string]: Rule} = {};

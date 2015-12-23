@@ -14,6 +14,8 @@ import {QName} from './QName'
 
 import * as util from 'util';
 
+/** Parse syntax rules encoded into handler classes. */
+
 function parseRule(ctor: types.BaseClass) {
 	if(ctor.rule) return(ctor.rule as Rule);
 
@@ -79,7 +81,7 @@ export class Parser {
 
 		for(var key of rule.attributeList) {
 			if(attrTbl.hasOwnProperty(key)) {
-				xsdElem[key] = attrTbl[key];
+				(xsdElem as any as {[key: string]: string})[key] = attrTbl[key];
 			}
 		}
 
@@ -181,6 +183,7 @@ export class Parser {
 		return(promise);
 	}
 
+	/** Bind references, call after all imports have been initialized. */
 	resolve() {
 		try {
 			this.pendingList.forEach((state: State) => state.xsdElement.resolve(state));
@@ -191,7 +194,13 @@ export class Parser {
 		}
 	}
 
+	/** Temporarily holds a qualified name, re-used to avoid allocating objects. */
 	private qName = new QName();
+
+	/** List of parser states still needing further processing
+	  * after previous stage is done. */
 	private pendingList: State[] = [];
+
+	/** Defines valid contents for the XML file root element. */
 	private rootRule: Rule;
 }

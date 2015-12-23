@@ -6,6 +6,8 @@ import {Namespace} from './Namespace'
 import {Source} from './Source'
 import {Parser} from './Parser'
 
+/** Loader handles caching schema definitions and calling parser stages. */
+
 export class Loader {
 	constructor(options?: FetchOptions) {
 		this.options = util.clone(options);
@@ -25,6 +27,8 @@ export class Loader {
 
 		return(promise);
 	}
+
+	/** Internal function called by Namespace.importSchema. */
 
 	importFile(namespace: Namespace, urlRemote: string) {
 		var options = this.options;
@@ -54,7 +58,7 @@ export class Loader {
 		return(source);
 	}
 
-	finish() {
+	private finish() {
 		this.parser.resolve();
 		this.resolve(this.targetNamespace);
 	}

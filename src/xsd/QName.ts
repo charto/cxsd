@@ -36,7 +36,7 @@ export class QName {
 
 	parseClass(name: string, namespace: Namespace) {
 		// TODO: remove following line.
-		name = name.replace(/^Xsd/, '').toLowerCase();
+		name = name.toLowerCase();
 
 		this.namespace = namespace;
 		this.name = name;
