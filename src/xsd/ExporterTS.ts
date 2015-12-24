@@ -8,6 +8,38 @@ import * as types from './types';
 /** Export parsed schema to a TypeScript d.ts definition file. */
 
 export class ExporterTS {
+	formatComment(indent: string, comment: string) {
+		var lineList = comment.split('\n');
+		var lineCount = lineList.length;
+		var blankCount = 0;
+		var contentCount = 0;
+		var output: string[] = [];
+		var prefix = '/\**';
+
+		for(var line of lineList) {
+			// Remove leading whitespace.
+			line = line.replace(/^\s+/, '');
+
+			// Remove trailing whitespace.
+			line = line.replace(/\s+$/, '');
+
+			if(!line) ++blankCount;
+			else {
+				if(blankCount && contentCount) output.push(indent + prefix);
+
+				output.push(indent + prefix + ' ' + line);
+				prefix = '  *';
+
+				++contentCount;
+				blankCount = 0;
+			}
+		}
+
+		if(output.length) output[output.length - 1] += ' *\/';
+
+		return(output.join('\n'));
+	}
+
 	exportElement(indent: string, spec: TypeMember) {
 		var element = spec.item as types.Element;
 		var optional = (spec.min == 0 ? '?' : '');
@@ -17,8 +49,12 @@ export class ExporterTS {
 	}
 
 	exportType(indent: string, spec: TypeMember) {
-		var elementTbl = spec.item.getScope().dumpElements();
+		var scope = spec.item.getScope();
+		var comment = scope.getComments();
+		var elementTbl = scope.dumpElements();
 		var parentDef = '';
+
+		if(comment) console.log(this.formatComment(indent, comment));
 
 		var parent = (spec.item as types.TypeBase).parent;
 

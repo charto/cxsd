@@ -69,11 +69,16 @@ export class Documentation extends Base {
 	}
 
 	addText(state: State, text: string) {
-		// Strip trailing whitespace from lines and all trailing blank lines.
-		text = text.replace(/\s+$/, '').replace(/[ \t\r]*\n\r?/, '\n');
+		this.commentList.push(text);
 	}
 
 	loaded(state: State) {
 		state.endText();
 	}
+
+	resolve(state: State) {
+		this.scope.addCommentsToGrandParent(this.commentList);
+	}
+
+	commentList: string[] = [];
 }

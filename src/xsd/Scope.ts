@@ -77,6 +77,21 @@ export class Scope {
 		}
 	}
 
+	addComments(commentList: string[]) {
+		this.commentList = (this.commentList || []).concat(commentList);
+	}
+
+	addCommentsToGrandParent(commentList: string[]) {
+		this.parent.parent.addComments(commentList);
+	}
+
+	getComments() {
+		if(!this.commentList) return(null);
+
+		// Convert line breaks.
+		return(this.commentList.join(' ').replace(/\r\n?|\n/g, '\n'));
+	}
+
 	lookup(name: QName, type: string): any {
 		var scope: Scope = this;
 
@@ -126,4 +141,6 @@ export class Scope {
 	};
 
 	private type: types.TypeBase;
+
+	private commentList: string[];
 }
