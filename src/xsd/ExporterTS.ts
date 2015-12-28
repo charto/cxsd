@@ -40,12 +40,17 @@ export class ExporterTS {
 		return(output.join('\n'));
 	}
 
-	exportElement(indent: string, spec: TypeMember) {
+	exportElement(indent: string, prefix: string, spec: TypeMember) {
 		var element = spec.item as types.Element;
+		var scope = element.getScope();
+		var comment = scope.getComments();
+
 		var optional = (spec.min == 0 ? '?' : '');
 		var multiple = (spec.max > 1 ? '[]' : '');
 
-		console.log(indent + element.name + optional + ': ' + (element.getTypeName() || 'any') + multiple + ';');
+		if(comment) console.log(this.formatComment(indent, comment));
+
+		console.log(indent + prefix + element.name + optional + ': ' + (element.getTypeName() || 'any') + multiple + ';');
 	}
 
 	exportType(indent: string, spec: TypeMember) {
@@ -63,7 +68,7 @@ export class ExporterTS {
 		console.log(indent + 'interface ' + spec.item.name + parentDef + ' {');
 
 		for(var key of Object.keys(elementTbl)) {
-			this.exportElement(indent + '\t', elementTbl[key]);
+			this.exportElement(indent + '\t', '', elementTbl[key]);
 		}
 
 		console.log(indent + '}');
@@ -83,7 +88,7 @@ export class ExporterTS {
 		var elementTbl = scope.dumpElements();
 
 		for(var key of Object.keys(elementTbl)) {
-			this.exportElement('\tvar ', elementTbl[key]);
+			this.exportElement('\t', 'var ', elementTbl[key]);
 		}
 
 		console.log('}');
