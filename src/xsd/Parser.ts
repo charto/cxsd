@@ -19,12 +19,12 @@ import * as util from 'util';
 function parseRule(ctor: types.BaseClass) {
 	if(ctor.rule) return(ctor.rule as Rule);
 
-	var rule = new Rule(new QName().parseClass(ctor.name, ctor.namespace), ctor);
+	var rule = new Rule(new QName().parseClass(ctor.name, ctor.getNamespace()), ctor);
 
 	ctor.rule = rule;
 
 	for(var follower of ctor.mayContain()) {
-		var followerName = new QName().parseClass(follower.name, follower.namespace);
+		var followerName = new QName().parseClass(follower.name, follower.getNamespace());
 
 		rule.followerTbl[followerName.nameFull] = parseRule(follower);
 		rule.followerTbl[followerName.name] = parseRule(follower);
@@ -57,6 +57,7 @@ export class Parser {
 				rule.followerTbl[qName.name] ||
 				rule.followerTbl['*']
 			);
+			// if(!rule) console.log('Unhandled child ' + state.rule.qName.nameFull + ' -> ' + qName.nameFull);
 		}
 
 		state = new State(state, rule);

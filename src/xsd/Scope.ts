@@ -5,7 +5,7 @@ import * as types from './types';
 import {Namespace} from './Namespace'
 import {QName} from './QName'
 import {Element} from './types/Element';
-import {TypeBase} from './types/ComplexType';
+import {TypeBase, Primitive} from './types/Primitive';
 
 export interface TypeMember {
 	min: number;
@@ -94,6 +94,8 @@ export class Scope {
 
 	lookup(name: QName, type: string): any {
 		var scope: Scope = this;
+		var nameFull = name.nameFull;
+		var nameWild = '*:' + name.name;
 
 		if(name.namespace && name.namespace != this.namespace) {
 			scope = name.namespace.getScope();
@@ -101,13 +103,15 @@ export class Scope {
 
 		while(scope) {
 			if(scope.visible[type]) {
-				var result = scope.visible[type][name.nameFull];
+				var result = scope.visible[type][nameFull] || scope.visible[type][nameWild];
 
 				if(result) return(result);
 			}
 
 			scope = scope.parent;
 		}
+
+console.log('Missing ' + type + ': ' + name.name);
 
 		return(null);
 	}
@@ -129,6 +133,28 @@ export class Scope {
 		return((this.expose['element'] || {}) as {[name: string]: TypeMember});
 	}
 
+	static getPrimitiveScope() {
+		var scope = this.primitiveScope;
+
+		if(!scope) {
+			var typeTbl: {[name: string]: Primitive} = {};
+			var spec = Primitive.getTypes();
+
+			for(var name in spec) {
+				if(spec.hasOwnProperty(name)) typeTbl['*:' + name] = spec[name];
+			}
+
+			scope = new Scope(null)
+			scope.visible = {
+				'type': typeTbl
+			};
+
+			this.primitiveScope = scope;
+		}
+
+		return(scope);
+	}
+
 	private parent: Scope;
 	private namespace: Namespace;
 
@@ -143,4 +169,6 @@ export class Scope {
 	private type: types.TypeBase;
 
 	private commentList: string[];
+
+	private static primitiveScope: Scope;
 }

@@ -83,5 +83,5 @@ export class Namespace {
 	private short: string;
 
 	/** Global scope where exported members will be published. */
-	private scope: Scope = new Scope(null, this);
+	private scope: Scope = new Scope(Scope.getPrimitiveScope(), this);
 }

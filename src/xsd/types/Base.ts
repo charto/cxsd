@@ -11,8 +11,8 @@ import {QName} from '../QName';
 export interface BaseClass {
 	new(...args: any[]): Base;
 	mayContain(): BaseClass[];
+	getNamespace(): Namespace;
 
-	namespace: Namespace;
 	name: string;
 	rule: Rule;
 }
@@ -44,11 +44,22 @@ export class Base {
 
 	getScope() { return(this.scope); }
 
+	static getNamespace() {
+		if(!Base.namespace) {
+			Base.namespace = Namespace.register(
+				'http://www.w3.org/2001/XMLSchema',
+				'http://www.w3.org/2009/XMLSchema/XMLSchema.xsd',
+				'xsd'
+			);
+		}
+		return(Base.namespace);
+	}
+
 	protected scope: Scope;
 	lineNumber: number;
 	name: string;
 
-	static namespace: Namespace = Namespace.register('http://www.w3.org/2001/XMLSchema', 'http://www.w3.org/2009/XMLSchema/XMLSchema.xsd', 'xsd');
+	private static namespace: Namespace;
 	static name: string;
 	static rule: Rule;
 }

@@ -5,25 +5,9 @@ import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
 
-export class TypeBase extends types.Base {
-	init(state: State) {
-		this.define(state, 'type');
-		this.scope.setType(this);
-		this.surrogateKey = TypeBase.nextKey++;
-	}
-
-	id: string = null;
-	name: string = null;
-
-	// Internally used members
-	parent: TypeBase | QName;
-	surrogateKey: number;
-	private static nextKey = 0;
-}
-
 /** <xsd:simpletype> */
 
-export class SimpleType extends TypeBase {
+export class SimpleType extends types.TypeBase {
 	static mayContain: () => types.BaseClass[] = () => [
 		types.Annotation,
 		types.Restriction,
@@ -34,7 +18,7 @@ export class SimpleType extends TypeBase {
 
 /** <xsd:complextype> */
 
-export class ComplexType extends TypeBase {
+export class ComplexType extends types.TypeBase {
 	static mayContain: () => types.BaseClass[] = () => [
 		types.Annotation,
 		SimpleContent,
@@ -55,14 +39,14 @@ export class ContentBase extends types.Base {
 	]
 
 	resolve(state: State) {
-		(state.parent.xsdElement as TypeBase).parent = this.parent;
+		(state.parent.xsdElement as types.TypeBase).parent = this.parent;
 
 		this.scope.addAllToParent('element');
 		this.scope.addAllToParent('attribute');
 	}
 
 	// Internally used members
-	parent: TypeBase | QName;
+	parent: types.TypeBase | QName;
 }
 
 /** <xsd:simplecontent> */

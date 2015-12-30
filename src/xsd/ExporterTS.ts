@@ -63,15 +63,19 @@ export class ExporterTS {
 
 		var parent = (spec.item as types.TypeBase).parent;
 
-		if(parent) parentDef = ' extends ' + parent.name;
+		if(parent && parent instanceof types.Primitive) {
+			console.log(indent + 'type ' + spec.item.name + ' = ' + parent.name + ';');
+		} else {
+			if(parent) parentDef = ' extends ' + parent.name;
 
-		console.log(indent + 'interface ' + spec.item.name + parentDef + ' {');
+			console.log(indent + 'interface ' + spec.item.name + parentDef + ' {');
 
-		for(var key of Object.keys(elementTbl)) {
-			this.exportElement(indent + '\t', '', elementTbl[key]);
+			for(var key of Object.keys(elementTbl)) {
+				this.exportElement(indent + '\t', '', elementTbl[key]);
+			}
+
+			console.log(indent + '}');
 		}
-
-		console.log(indent + '}');
 	}
 
 	export(namespace: Namespace) {
