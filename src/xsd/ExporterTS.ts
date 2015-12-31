@@ -41,60 +41,113 @@ export class ExporterTS {
 	}
 
 	exportElement(indent: string, prefix: string, spec: TypeMember) {
+		var output: string[] = [];
 		var element = spec.item as types.Element;
 		var scope = element.getScope();
 		var comment = scope.getComments();
 
-		var optional = (spec.min == 0 ? '?' : '');
-		var multiple = (spec.max > 1 ? '[]' : '');
+		if(comment) {
+			output.push(this.formatComment(indent, comment));
+			output.push('\n');
+		}
 
-		if(comment) console.log(this.formatComment(indent, comment));
+		output.push(indent + prefix + element.name);
+		if(spec.min == 0) output.push('?');
+		output.push(': ');
 
-		console.log(indent + prefix + element.name + optional + ': ' + (element.getTypeName() || 'any') + multiple + ';');
+		var typeDef = element.getTypeName();
+
+		if(typeDef) output.push(typeDef);
+		else {
+			var type = element.getType();
+
+			if(!type) output.push('any');
+			else if(type.parent || type.exported) {
+				// TODO: Generate names for all derived and circularly defined types so this never happens!
+				output.push('any');
+			} else {
+				type.exported = true;
+				var members = this.exportTypeMembers(indent + '\t', type.getScope());
+
+				output.push('{');
+				if(members) {
+					output.push('\n');
+					output.push(members);
+					output.push('\n' + indent);
+				}
+				output.push('}');
+			}
+		}
+
+		if(spec.max > 1) output.push('[]');
+		output.push(';');
+
+		return(output.join(''));
+	}
+
+	exportTypeMembers(indent: string, scope: Scope) {
+		var elementTbl = scope.dumpElements();
+
+		return(Object.keys(elementTbl).map((key: string) =>
+			this.exportElement(indent, '', elementTbl[key])
+		).join('\n'));
 	}
 
 	exportType(indent: string, spec: TypeMember) {
-		var scope = spec.item.getScope();
+		var output: string[] = [];
+		var type = spec.item as types.TypeBase;
+		var scope = type.getScope();
 		var comment = scope.getComments();
-		var elementTbl = scope.dumpElements();
 		var parentDef = '';
 
-		if(comment) console.log(this.formatComment(indent, comment));
+		type.exported = true;
 
-		var parent = (spec.item as types.TypeBase).parent;
+		if(comment) {
+			output.push(this.formatComment(indent, comment));
+			output.push('\n');
+		}
+
+		var parent = type.parent;
 
 		if(parent && parent instanceof types.Primitive) {
-			console.log(indent + 'type ' + spec.item.name + ' = ' + parent.name + ';');
+			output.push(indent + 'type ' + spec.item.name + ' = ' + parent.name + ';');
 		} else {
 			if(parent) parentDef = ' extends ' + parent.name;
+			var members = this.exportTypeMembers(indent + '\t', scope);
 
-			console.log(indent + 'interface ' + spec.item.name + parentDef + ' {');
-
-			for(var key of Object.keys(elementTbl)) {
-				this.exportElement(indent + '\t', '', elementTbl[key]);
+			output.push(indent + 'interface ' + spec.item.name + parentDef + ' {');
+			if(members) {
+				output.push('\n');
+				output.push(members);
+				output.push('\n' + indent);
 			}
-
-			console.log(indent + '}');
+			output.push('}');
 		}
+
+		return(output.join(''));
 	}
 
 	export(namespace: Namespace) {
+		var output: string[] = [];
 		var scope = namespace.getScope();
 
-		console.log('declare module "' + namespace.name + '" {');
+		output.push('declare module "' + namespace.name + '" {');
 
 		var typeTbl = scope.dumpTypes();
 
 		for(var key of Object.keys(typeTbl)) {
-			this.exportType('\t', typeTbl[key]);
+			output.push(this.exportType('\t', typeTbl[key]));
 		}
 
 		var elementTbl = scope.dumpElements();
 
 		for(var key of Object.keys(elementTbl)) {
-			this.exportElement('\t', 'var ', elementTbl[key]);
+			output.push(this.exportElement('\t', 'var ', elementTbl[key]));
 		}
 
-		console.log('}');
+		output.push('}');
+		output.push('');
+
+		return(output.join('\n'));
 	}
 }

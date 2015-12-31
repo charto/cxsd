@@ -4,6 +4,7 @@
 import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
+import {TypeBase} from './Primitive';
 
 export class ElementBase extends types.Base {
 	id: string = null;
@@ -67,6 +68,15 @@ export class Element extends ElementBase {
 			else return((this.type as types.TypeBase).name);
 		} else if(typeType == 'string') {
 			return(this.type as string);
+		} else return(null);
+	}
+
+	getType() {
+		if(
+			typeof(this.type) == 'object' &&
+			this.type instanceof types.TypeBase
+		) {
+			return(this.type as types.TypeBase);
 		} else return(null);
 	}
 

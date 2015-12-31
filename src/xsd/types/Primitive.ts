@@ -8,7 +8,7 @@ import {QName} from '../QName';
 export class TypeBase extends Base {
 	init(state: State) {
 		this.define(state, 'type');
-		this.scope.setType(this);
+		this.scope.setParentType(this);
 		this.surrogateKey = TypeBase.nextKey++;
 	}
 
@@ -19,6 +19,9 @@ export class TypeBase extends Base {
 	parent: TypeBase | QName;
 	surrogateKey: number;
 	private static nextKey = 0;
+
+	// TODO: remove this and detect circular types (anonymous types inside elements referencing the same element) before exporting.
+	exported: boolean;
 }
 
 export class Primitive extends TypeBase {

@@ -16,5 +16,10 @@ var loader = new Loader({
 });
 
 loader.import(process.argv[2]).then((namespace: Namespace) => {
-	new ExporterTS().export(namespace);
+	try {
+		console.log(new ExporterTS().export(namespace));
+	} catch(err) {
+		console.log(err);
+		console.log(err.stack);
+	}
 });

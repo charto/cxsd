@@ -123,6 +123,10 @@ console.log('Missing ' + type + ': ' + name.name);
 		if(!this.type) this.type = type;
 	}
 
+	setParentType(type: types.TypeBase) {
+		this.parent.setType(type);
+	}
+
 	getType() { return(this.type); }
 
 	dumpTypes() {
