@@ -6,7 +6,7 @@ import {QName} from '../QName';
 import * as types from '../types';
 import {ContentBase} from './ComplexType';
 
-// Derived type support
+/** Derived type support, allows types to inherit others. */
 
 export class DerivationBase extends types.Base {
 	static mayContain: () => types.BaseClass[] = () => [
@@ -36,7 +36,8 @@ export class DerivationBase extends types.Base {
 export class Extension extends DerivationBase {
 }
 
-/** <xsd:restriction> */
+/** <xsd:restriction>
+  * The schema allows a restriction to contain anything, but we parse only some useful restrictions. */
 
 export class Restriction extends DerivationBase {
 	static mayContain: () => types.BaseClass[] = () => DerivationBase.mayContain().concat([

@@ -15,6 +15,8 @@ export class Source {
 		this.urlOriginal = urlRemote;
 	}
 
+	/** Called by the parser, converts XSD attributes describing the schema into references to internal objects. */
+
 	parse(attrTbl: {[name: string]: string}) {
 		// Unqualified tags are assumed to be in the default namespace.
 		// For the schema file itself, it should be http://www.w3.org/2001/XMLSchema
@@ -40,17 +42,26 @@ export class Source {
 		}
 	}
 
+	/** Find a namespace according to its full name or the short name as used in this source file. */
+
 	lookupNamespace(ref: string) {
 		return(this.namespaceRefTbl[ref] || Namespace.lookup(ref));
 	}
+
+	/** Resolve a possible relative URL in the context of this source file. */
 
 	urlResolve(urlRemote: string) {
 		return(url.resolve(this.targetNamespace.url, urlRemote));
 	}
 
+	/** Update current remote address, in case the previous address got redirected. */
+
 	updateUrl(urlRemote: string) { this.url = urlRemote; }
 
+	/** Remote address of the file, after possible redirections. */
 	url: string;
+
+	/** Original remote address of the file, before any redirections. */
 	urlOriginal: string;
 
 	/** New definitions are exported into the target namespace. */
@@ -59,10 +70,12 @@ export class Source {
 	/** Unqualified names are assumed to belong to the default namespace. */
 	defaultNamespace: Namespace;
 
+	/** Loader used for retrieving this file. */
 	private loader: Loader;
 
 	/** Table of namespace shorthand references (xmlns:...) used in this file. */
 	private namespaceRefTbl: {[name: string]: Namespace} = {};
 
+	/** Promise, resolves when the file and its dependencies have been completely parsed. */
 	parsed: Promise<any>;
 }

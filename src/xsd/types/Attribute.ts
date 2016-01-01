@@ -17,7 +17,10 @@ export class Attribute extends types.Base {
 
 	init(state: State) {
 		this.optional = (this.use == 'optional'); // Otherwise assume 'required'
+
+		// Attributes appear exactly once unless they're optional.
 		this.define(state, 'attribute', this.optional ? 0 : 1, 1);
+
 		this.surrogateKey = Attribute.nextKey++;
 	}
 
@@ -53,7 +56,8 @@ export class Attribute extends types.Base {
 export class AnyAttribute extends types.Base {
 }
 
-/** <xsd:attributegroup> */
+/** <xsd:attributegroup>
+  * Defines several attributes that can be included together in type definitions. */
 
 export class AttributeGroup extends types.Base {
 	static mayContain: () => types.BaseClass[] = () => [

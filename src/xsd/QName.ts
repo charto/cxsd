@@ -45,6 +45,8 @@ export class QName {
 		return(this);
 	}
 
+	/** Format name for printing (for debugging), together with namespace name. */
+
 	format() {
 		if(this.namespace) return(this.namespace.name + ':' + this.name);
 		else return(this.name);

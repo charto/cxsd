@@ -31,9 +31,12 @@ export class State {
 	getScope() { return(this.scope); }
 	setScope(scope: Scope) { this.scope = scope; }
 
+	/** Begin capturing text content between tags, sent to the handler of the innermost tag. */
 	startText(xsdElement: types.Base) {
 		this.stateStatic.textHandlerList[this.stateStatic.textDepth++] = xsdElement;
 	}
+
+	/** Finish capturing text content. */
 	endText() { --this.stateStatic.textDepth; }
 
 	parent: State;
@@ -64,8 +67,13 @@ export class Rule {
 	}
 
 	qName: QName;
+
+	/** Constructor function for creating objects handling and representing the results of this parsing rule. */
 	proto: types.BaseClass;
 
+	/** List of allowed attributes. */
 	attributeList: string[] = [];
+
+	/** Table mapping the names of allowed child tags, to their parsing rules. */
 	followerTbl: {[id: string]: Rule} = {};
 }

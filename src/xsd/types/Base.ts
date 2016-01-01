@@ -6,19 +6,26 @@ import {Namespace} from '../Namespace';
 import {Scope} from '../Scope';
 import {QName} from '../QName';
 
-/** Common base for all schema tags */
+/** Common constructor type for schema tag handler classes. */
 
 export interface BaseClass {
 	new(...args: any[]): Base;
+
+	/** Returns other classes allowed as children. */
 	mayContain(): BaseClass[];
+
 	getNamespace(): Namespace;
 
 	name: string;
 	rule: Rule;
 }
 
+/** Common handler base class for all schema tags. */
+
 export class Base {
+	/** Returns other classes allowed as children. */
 	static mayContain = () => ([] as BaseClass[]);
+
 	constructor(state: State) {
 		if(!state) return;
 
@@ -26,18 +33,20 @@ export class Base {
 		this.lineNumber = state.stateStatic.getLineNumber();
 	}
 
-	/** Hook running after opening tag. */
+	/** Hook, runs after opening tag. */
 	init(state: State) {}
 
-	/** Hook running for text content. */
+	/** Hook, runs for text content. */
 	addText(state: State, text: string) {}
 
-	/** Hook running after closing tag. */
+	/** Hook, runs after closing tag. */
 	loaded(state: State) {}
 
-	/** Hook running after all dependencies have been loaded. */
+	/** Hook, runs after all dependencies have been loaded. */
 	resolve(state: State) {}
 
+	/** Add this named tag to scope, listed under given type.
+	  * Optionally set number of allowed occurrences, for optional elements, sequences etc. */
 	define(state: State, type: string, min = 1, max = 1, scope?: Scope) {
 		if(this.name) (scope || this.scope).addToParent(new QName(this.name, state.source), type, this, min, max);
 	}
@@ -72,7 +81,8 @@ export class Annotation extends Base {
 	];
 }
 
-/** <xsd:documentation> */
+/** <xsd:documentation>
+  * Works like a comment usable in almost any part of the schema. */
 
 export class Documentation extends Base {
 	init(state: State) {

@@ -24,12 +24,17 @@ export class TypeBase extends Base {
 	exported: boolean;
 }
 
+/** Primitive types map directly to JavaScript equivalents. */
+
 export class Primitive extends TypeBase {
 	constructor(name: string) {
 		super(null);
 
 		this.name = name;
 	}
+
+	/** Construct a table mapping XSD primitive type names to their handler classes
+	  * or return it from memory. */
 
 	static getTypes() {
 		var tbl = this.typeTbl;
@@ -58,5 +63,6 @@ export class Primitive extends TypeBase {
 		return(tbl);
 	}
 
+	/** Table mapping XSD primitive type names to their handler classes. */
 	static typeTbl: {[name: string]: Primitive};
 }
