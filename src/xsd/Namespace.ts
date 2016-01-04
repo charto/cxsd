@@ -8,8 +8,12 @@ import {Scope} from './Scope';
 /** XML namespace, binding it to syntax definitions. */
 
 export class Namespace {
-	constructor(id: number) {
+	constructor() {
+		var id = Namespace.list.length;
+
 		this.id = id;
+
+		Namespace.list[id] = this;
 	}
 
 	/** Initialize names and addresses. Can be called multiple times. */
@@ -37,10 +41,8 @@ export class Namespace {
 		var namespace = Namespace.tbl[name] || Namespace.tbl[url];
 
 		if(!namespace) {
-			var id = Namespace.list.length;
 
-			namespace = new Namespace(id);
-			Namespace.list[id] = namespace;
+			namespace = new Namespace();
 		}
 
 		return(namespace.init(name, url, short));
@@ -53,7 +55,11 @@ export class Namespace {
 
 	/** Load and parse the main schema file for this namespace. */
 	importSchema(loader: Loader, urlRemote?: string) {
-		return(loader.importFile(this, urlRemote || this.url));
+		var source = loader.importFile(this, urlRemote || this.url);
+
+		this.sourceTbl[source.id] = source;
+
+		return(source);
 	}
 
 	/** Update final address of schema file if HTTP request was redirected. */
@@ -63,6 +69,11 @@ export class Namespace {
 
 	/** Fetch the root scope with published attributes, groups, elements... */
 	getScope() { return(this.scope); }
+
+	/** @return List of all source files potentially contributing to this namespace. */
+	getSourceList() {
+		return(Object.keys(this.sourceTbl).map((key: string) => this.sourceTbl[key]));
+	}
 
 	/** Internal list of namespaces indexed by a surrogate key. */
 	private static list: Namespace[] = [];
@@ -81,6 +92,9 @@ export class Namespace {
 
 	/** Example short name for the namespace, currently unused. */
 	private short: string;
+
+	/** Source files potentially contributing to this namespace. */
+	private sourceTbl: {[id: number]: Source} = {};
 
 	/** Global scope where exported members will be published. */
 	private scope: Scope = new Scope(Scope.getPrimitiveScope(), this);

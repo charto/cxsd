@@ -10,9 +10,14 @@ import {Loader} from './Loader'
 
 export class Source {
 	constructor(targetNamespace: Namespace, urlRemote: string) {
+		var id = Source.list.length;
+
+		this.id = id;
 		this.targetNamespace = targetNamespace;
 		this.url = urlRemote;
 		this.urlOriginal = urlRemote;
+
+		Source.list[id] = this;
 	}
 
 	/** Called by the parser, converts XSD attributes describing the schema into references to internal objects. */
@@ -57,6 +62,12 @@ export class Source {
 	/** Update current remote address, in case the previous address got redirected. */
 
 	updateUrl(urlRemote: string) { this.url = urlRemote; }
+
+	/** Internal list of source files indexed by a surrogate key. */
+	private static list: Source[] = [];
+
+	/** Surrogate key, used internally as a unique source file ID. */
+	id: number;
 
 	/** Remote address of the file, after possible redirections. */
 	url: string;

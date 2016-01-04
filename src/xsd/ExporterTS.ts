@@ -134,6 +134,14 @@ export class ExporterTS {
 
 		var typeTbl = scope.dumpTypes();
 
+		output.push('// Source files:');
+
+		for(var source of namespace.getSourceList()) {
+			output.push('// ' + source.url);
+		}
+
+		output.push('');
+
 		for(var key of Object.keys(typeTbl)) {
 			output.push(this.exportType('', 'export ', typeTbl[key]));
 		}
