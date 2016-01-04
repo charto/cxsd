@@ -1,6 +1,7 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {Cache} from 'cget'
 import {Namespace} from './Namespace';
 import {Scope, TypeMember} from './Scope';
 import * as types from './types';
@@ -93,7 +94,7 @@ export class ExporterTS {
 		).join('\n'));
 	}
 
-	exportType(indent: string, spec: TypeMember) {
+	exportType(indent: string, prefix: string, spec: TypeMember) {
 		var output: string[] = [];
 		var type = spec.item as types.TypeBase;
 		var scope = type.getScope();
@@ -110,12 +111,12 @@ export class ExporterTS {
 		var parent = type.parent;
 
 		if(parent && parent instanceof types.Primitive) {
-			output.push(indent + 'type ' + spec.item.name + ' = ' + parent.name + ';');
+			output.push(indent + prefix + 'type ' + spec.item.name + ' = ' + parent.name + ';');
 		} else {
 			if(parent) parentDef = ' extends ' + parent.name;
 			var members = this.exportTypeMembers(indent + '\t', scope);
 
-			output.push(indent + 'interface ' + spec.item.name + parentDef + ' {');
+			output.push(indent + prefix + 'interface ' + spec.item.name + parentDef + ' {');
 			if(members) {
 				output.push('\n');
 				output.push(members);
@@ -131,23 +132,22 @@ export class ExporterTS {
 		var output: string[] = [];
 		var scope = namespace.getScope();
 
-		output.push('declare module "' + namespace.name + '" {');
-
 		var typeTbl = scope.dumpTypes();
 
 		for(var key of Object.keys(typeTbl)) {
-			output.push(this.exportType('\t', typeTbl[key]));
+			output.push(this.exportType('', 'export ', typeTbl[key]));
 		}
 
 		var elementTbl = scope.dumpElements();
 
 		for(var key of Object.keys(elementTbl)) {
-			output.push(this.exportElement('\t', 'var ', elementTbl[key]));
+			output.push(this.exportElement('', 'export var ', elementTbl[key]));
 		}
 
-		output.push('}');
 		output.push('');
 
-		return(output.join('\n'));
+		return(ExporterTS.cache.store(namespace.name + '.d.ts', output.join('\n')));
 	}
+
+	private static cache = new Cache('cache/js', '_index.js');
 }
