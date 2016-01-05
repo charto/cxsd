@@ -2,6 +2,7 @@
 // Released under the MIT license, see LICENSE.
 
 import * as path from 'path';
+import * as Promise from 'bluebird';
 
 import {Cache} from 'cget'
 import {Namespace} from './Namespace';
@@ -12,10 +13,12 @@ import * as types from './types';
 
 export class ExporterTS {
 	constructor(namespace: Namespace) {
-		this.namespace = namespace;
-		this.cacheDir = path.dirname(
-			ExporterTS.cache.getCachePathSync(namespace.name)
-		);
+		if(namespace.name) {
+			this.namespace = namespace;
+			this.cacheDir = path.dirname(
+				ExporterTS.cache.getCachePathSync(namespace.name)
+			);
+		}
 	}
 
 	formatComment(indent: string, comment: string) {
@@ -55,6 +58,7 @@ export class ExporterTS {
 		var element = spec.item as types.Element;
 		var scope = element.getScope();
 		var comment = scope.getComments();
+		var short: string;
 
 		if(comment) {
 			output.push(this.formatComment(indent, comment));
@@ -77,7 +81,13 @@ export class ExporterTS {
 				output.push(type.name);
 			} else {
 				// Type from another, imported namespace.
-				output.push(this.shortNameTbl[namespace.id][0] + '.' + type.name);
+				if(this.shortNameTbl[namespace.id] && this.shortNameTbl[namespace.id].length) {
+					short = this.shortNameTbl[namespace.id][0];
+				} else {
+					console.error('MISSING IMPORT ' + namespace.name + ' <- ' + namespace.url);
+					short = 'ERROR';
+				}
+				output.push(short + '.' + type.name);
 				this.namespaceUsedTbl[namespace.id] = namespace;
 			}
 		} else if(type.name) {
@@ -147,7 +157,17 @@ export class ExporterTS {
 		return(output.join(''));
 	}
 
-	export() {
+	export(): Promise<Namespace> {
+		if(!this.namespace) return(null);
+
+		var outName = this.namespace.name + '.d.ts';
+
+		return(ExporterTS.cache.ifCached(outName).then((isCached: boolean) =>
+			isCached ? this.namespace : this.forceExport(outName)
+		));
+	}
+
+	forceExport(outName: string): Promise<Namespace> {
 		var outSources: string[] = [];
 		var outImports: string[] = [];
 		var outTypes: string[] = [];
@@ -188,10 +208,15 @@ export class ExporterTS {
 		outTypes.push('');
 
 		var importKeyList = Object.keys(this.namespaceUsedTbl);
+		var importList: Namespace[] = [];
 
 		if(importKeyList.length) {
 			for(var key of importKeyList) {
 				var namespace = this.namespaceUsedTbl[key];
+
+				if(!this.shortNameTbl[key] || !this.shortNameTbl[key].length) continue;
+
+				importList.push(namespace);
 				outImports.push(
 					'import * as ' +
 					this.shortNameTbl[key][0] +
@@ -204,13 +229,16 @@ export class ExporterTS {
 		}
 
 		return(ExporterTS.cache.store(
-			this.namespace.name + '.d.ts',
+			outName,
 			[].concat(
 				outImports,
 				outSources,
 				outTypes
-			).join('\n'))
-		);
+			).join('\n')
+		).then(() => Promise.map(
+			importList,
+			(namespace: Namespace) => new ExporterTS(namespace).export()
+		).then(() => namespace)))
 	}
 
 	getPathTo(namespace: Namespace) {
