@@ -46,9 +46,16 @@ export class Base {
 	resolve(state: State) {}
 
 	/** Add this named tag to scope, listed under given type.
-	  * Optionally set number of allowed occurrences, for optional elements, sequences etc. */
+	  * Optionally set number of allowed occurrences, for optional elements, sequences etc.
+		* @return fully qualified name. */
 	define(state: State, type: string, min = 1, max = 1, scope?: Scope) {
-		if(this.name) (scope || this.scope).addToParent(new QName(this.name, state.source), type, this, min, max);
+		if(!this.name) return(null);
+
+		var qName = new QName(this.name, state.source);
+
+		(scope || this.scope).addToParent(qName, type, this, min, max);
+
+		return(qName);
 	}
 
 	getScope() { return(this.scope); }

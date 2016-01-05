@@ -1,6 +1,8 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import * as path from 'path';
+
 import {Cache} from 'cget'
 import {Namespace} from './Namespace';
 import {Scope, TypeMember} from './Scope';
@@ -9,6 +11,13 @@ import * as types from './types';
 /** Export parsed schema to a TypeScript d.ts definition file. */
 
 export class ExporterTS {
+	constructor(namespace: Namespace) {
+		this.namespace = namespace;
+		this.cacheDir = path.dirname(
+			ExporterTS.cache.getCachePathSync(namespace.name)
+		);
+	}
+
 	formatComment(indent: string, comment: string) {
 		var lineList = comment.split('\n');
 		var lineCount = lineList.length;
@@ -41,7 +50,7 @@ export class ExporterTS {
 		return(output.join('\n'));
 	}
 
-	exportElement(indent: string, prefix: string, spec: TypeMember) {
+	exportElement(indent: string, syntaxPrefix: string, spec: TypeMember) {
 		var output: string[] = [];
 		var element = spec.item as types.Element;
 		var scope = element.getScope();
@@ -52,32 +61,43 @@ export class ExporterTS {
 			output.push('\n');
 		}
 
-		output.push(indent + prefix + element.name);
+		output.push(indent + syntaxPrefix + element.name);
 		if(spec.min == 0) output.push('?');
 		output.push(': ');
 
-		var typeDef = element.getTypeName();
+		var type = element.getType();
 
-		if(typeDef) output.push(typeDef);
-		else {
-			var type = element.getType();
-
-			if(!type) output.push('any');
-			else if(type.parent || type.exported) {
-				// TODO: Generate names for all derived and circularly defined types so this never happens!
-				output.push('any');
+		if(!type) {
+			// Unresolved type.
+			output.push('any');
+		} else if(type.qName) {
+			var namespace = type.qName.namespace;
+			if(namespace == this.namespace) {
+				// Type from the current namespace.
+				output.push(type.name);
 			} else {
-				type.exported = true;
-				var members = this.exportTypeMembers(indent + '\t', type.getScope());
-
-				output.push('{');
-				if(members) {
-					output.push('\n');
-					output.push(members);
-					output.push('\n' + indent);
-				}
-				output.push('}');
+				// Type from another, imported namespace.
+				output.push(this.shortNameTbl[namespace.id][0] + '.' + type.name);
+				this.namespaceUsedTbl[namespace.id] = namespace;
 			}
+		} else if(type.name) {
+			// Primitive type.
+			output.push(type.name);
+		} else if(type.parent || type.exported) {
+			// TODO: Generate names for all derived and circularly defined types so this never happens!
+			output.push('any');
+		} else {
+			// Anonymous type defined only within this element.
+			type.exported = true;
+			var members = this.exportTypeMembers(indent + '\t', type.getScope());
+
+			output.push('{');
+			if(members) {
+				output.push('\n');
+				output.push(members);
+				output.push('\n' + indent);
+			}
+			output.push('}');
 		}
 
 		if(spec.max > 1) output.push('[]');
@@ -94,9 +114,8 @@ export class ExporterTS {
 		).join('\n'));
 	}
 
-	exportType(indent: string, prefix: string, spec: TypeMember) {
+	exportType(indent: string, syntaxPrefix: string, namespacePrefix: string, type: types.TypeBase) {
 		var output: string[] = [];
-		var type = spec.item as types.TypeBase;
 		var scope = type.getScope();
 		var comment = scope.getComments();
 		var parentDef = '';
@@ -111,12 +130,12 @@ export class ExporterTS {
 		var parent = type.parent;
 
 		if(parent && parent instanceof types.Primitive) {
-			output.push(indent + prefix + 'type ' + spec.item.name + ' = ' + parent.name + ';');
+			output.push(indent + syntaxPrefix + 'type ' + type.name + ' = ' + parent.name + ';');
 		} else {
 			if(parent) parentDef = ' extends ' + parent.name;
 			var members = this.exportTypeMembers(indent + '\t', scope);
 
-			output.push(indent + prefix + 'interface ' + spec.item.name + parentDef + ' {');
+			output.push(indent + syntaxPrefix + 'interface ' + type.name + parentDef + ' {');
 			if(members) {
 				output.push('\n');
 				output.push(members);
@@ -128,34 +147,85 @@ export class ExporterTS {
 		return(output.join(''));
 	}
 
-	export(namespace: Namespace) {
-		var output: string[] = [];
-		var scope = namespace.getScope();
+	export() {
+		var outSources: string[] = [];
+		var outImports: string[] = [];
+		var outTypes: string[] = [];
+		var scope = this.namespace.getScope();
 
 		var typeTbl = scope.dumpTypes();
 
-		output.push('// Source files:');
+		outSources.push('// Source files:');
 
-		for(var source of namespace.getSourceList()) {
-			output.push('// ' + source.url);
+		var sourceList = this.namespace.getSourceList();
+		var namespaceRefTbl: {[name: string]: Namespace};
+
+		for(var source of sourceList) {
+			outSources.push('// ' + source.url);
+
+			namespaceRefTbl = source.getNamespaceRefs();
+
+			for(var name in namespaceRefTbl) {
+				var id = namespaceRefTbl[name].id;
+
+				if(!this.shortNameTbl[id]) this.shortNameTbl[id] = [];
+				this.shortNameTbl[id].push(name);
+			}
 		}
 
-		output.push('');
+		outSources.push('');
 
 		for(var key of Object.keys(typeTbl)) {
-			output.push(this.exportType('', 'export ', typeTbl[key]));
+			outTypes.push(this.exportType('', 'export ', '', typeTbl[key].item));
 		}
 
 		var elementTbl = scope.dumpElements();
 
 		for(var key of Object.keys(elementTbl)) {
-			output.push(this.exportElement('', 'export var ', elementTbl[key]));
+			outTypes.push(this.exportElement('', 'export var ', elementTbl[key]));
 		}
 
-		output.push('');
+		outTypes.push('');
 
-		return(ExporterTS.cache.store(namespace.name + '.d.ts', output.join('\n')));
+		var importKeyList = Object.keys(this.namespaceUsedTbl);
+
+		if(importKeyList.length) {
+			for(var key of importKeyList) {
+				var namespace = this.namespaceUsedTbl[key];
+				outImports.push(
+					'import * as ' +
+					this.shortNameTbl[key][0] +
+					' from ' +
+					"'" + this.getPathTo(namespace) + "';"
+				);
+			}
+
+			outImports.push('');
+		}
+
+		return(ExporterTS.cache.store(
+			this.namespace.name + '.d.ts',
+			[].concat(
+				outImports,
+				outSources,
+				outTypes
+			).join('\n'))
+		);
+	}
+
+	getPathTo(namespace: Namespace) {
+		return(path.relative(
+			this.cacheDir,
+			ExporterTS.cache.getCachePathSync(namespace.name)
+		));
 	}
 
 	private static cache = new Cache('cache/js', '_index.js');
+
+	private namespace: Namespace;
+
+	private cacheDir: string;
+
+	private shortNameTbl: {[namespaceId: number]: string[]} = {};
+	private namespaceUsedTbl: {[namespaceId: number]: Namespace} = {};
 }

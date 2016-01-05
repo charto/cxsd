@@ -63,6 +63,10 @@ export class Source {
 
 	updateUrl(urlRemote: string) { this.url = urlRemote; }
 
+	getNamespaceRefs() {
+		return(this.namespaceRefTbl);
+	}
+
 	/** Internal list of source files indexed by a surrogate key. */
 	private static list: Source[] = [];
 

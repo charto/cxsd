@@ -17,7 +17,7 @@ var loader = new Loader({
 
 loader.import(process.argv[2]).then((namespace: Namespace) => {
 	try {
-		console.log(new ExporterTS().export(namespace));
+		console.log(new ExporterTS(namespace).export());
 	} catch(err) {
 		console.log(err);
 		console.log(err.stack);

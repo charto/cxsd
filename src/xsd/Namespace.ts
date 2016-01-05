@@ -57,7 +57,10 @@ export class Namespace {
 	importSchema(loader: Loader, urlRemote?: string) {
 		var source = loader.importFile(this, urlRemote || this.url);
 
-		this.sourceTbl[source.id] = source;
+		if(!this.sourceTbl[source.id]) {
+			this.sourceTbl[source.id] = source;
+			this.sourceList.push(source);
+		}
 
 		return(source);
 	}
@@ -72,7 +75,7 @@ export class Namespace {
 
 	/** @return List of all source files potentially contributing to this namespace. */
 	getSourceList() {
-		return(Object.keys(this.sourceTbl).map((key: string) => this.sourceTbl[key]));
+		return(this.sourceList);
 	}
 
 	/** Internal list of namespaces indexed by a surrogate key. */
@@ -92,6 +95,9 @@ export class Namespace {
 
 	/** Example short name for the namespace, currently unused. */
 	private short: string;
+
+	/** List of all source files potentially contributing to this namespace. */
+	private sourceList: Source[] = [];
 
 	/** Source files potentially contributing to this namespace. */
 	private sourceTbl: {[id: number]: Source} = {};

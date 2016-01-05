@@ -4,10 +4,11 @@
 import {Base} from './Base';
 import {State} from '../State';
 import {QName} from '../QName';
+import {Namespace} from '../Namespace';
 
 export class TypeBase extends Base {
 	init(state: State) {
-		this.define(state, 'type');
+		this.qName = this.define(state, 'type');
 		this.scope.setParentType(this);
 		this.surrogateKey = TypeBase.nextKey++;
 	}
@@ -17,6 +18,7 @@ export class TypeBase extends Base {
 
 	// Internally used members
 	parent: TypeBase | QName;
+	qName: QName;
 	surrogateKey: number;
 	private static nextKey = 0;
 
