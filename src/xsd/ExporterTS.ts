@@ -53,34 +53,19 @@ export class ExporterTS {
 		return(output.join('\n'));
 	}
 
-	exportElement(indent: string, syntaxPrefix: string, spec: TypeMember) {
+	exportTypeRef(indent: string, type: types.TypeBase) {
 		var output: string[] = [];
-		var element = spec.item as types.Element;
-		var scope = element.getScope();
-		var comment = scope.getComments();
-		var short: string;
 
-		if(comment) {
-			output.push(this.formatComment(indent, comment));
-			output.push('\n');
-		}
-
-		output.push(indent + syntaxPrefix + element.name);
-		if(spec.min == 0) output.push('?');
-		output.push(': ');
-
-		var type = element.getType();
-
-		if(!type) {
-			// Unresolved type.
-			output.push('any');
-		} else if(type.qName) {
+		if(type.qName) {
 			var namespace = type.qName.namespace;
 			if(namespace == this.namespace) {
 				// Type from the current namespace.
 				output.push(type.name);
 			} else {
 				// Type from another, imported namespace.
+
+				var short: string;
+
 				if(this.shortNameTbl[namespace.id] && this.shortNameTbl[namespace.id].length) {
 					short = this.shortNameTbl[namespace.id][0];
 				} else {
@@ -99,7 +84,7 @@ export class ExporterTS {
 		} else {
 			// Anonymous type defined only within this element.
 			type.exported = true;
-			var members = this.exportTypeMembers(indent + '\t', type.getScope());
+			var members = this.exportTypeMembers(indent + '\t', '', type.getScope());
 
 			output.push('{');
 			if(members) {
@@ -110,18 +95,78 @@ export class ExporterTS {
 			output.push('}');
 		}
 
-		if(spec.max > 1) output.push('[]');
-		output.push(';');
+		return(output.join(''));
+	}
+
+	exportElement(indent: string, syntaxPrefix: string, element: types.Element, min: number, max: number) {
+		var output: string[] = [];
+		var scope = element.getScope();
+		var comment = scope.getComments();
+
+		if(comment) {
+			output.push(this.formatComment(indent, comment));
+			output.push('\n');
+		}
+
+		output.push(indent + syntaxPrefix + element.name);
+		if(min == 0) output.push('?');
+		output.push(': ');
+
+		var typeList = element.getTypes().map((type: types.TypeBase) =>
+			this.exportTypeRef(indent, type)
+		);
+
+		if(typeList.length == 0) return('');
+
+		var outTypes = typeList.join(' | ');
+		var suffix = '';
+
+		if(max > 1) suffix = '[]';
+
+		// NOTE: this never happens!
+		if(suffix && typeList.length > 1) outTypes = '(' + outTypes + ')';
+
+		output.push(outTypes);
+		output.push(suffix + ';');
 
 		return(output.join(''));
 	}
 
-	exportTypeMembers(indent: string, scope: Scope) {
+	/** Handle substitution groups. */
+
+	private static expandSubstitutes(element: types.Element) {
+		var elementList = element.isAbstract() ? [] : [element];
+
+		if(element.substituteList) {
+			elementList = elementList.concat.apply(
+				elementList,
+				element.substituteList.map(ExporterTS.expandSubstitutes)
+			);
+		}
+
+		return(elementList);
+	}
+
+	exportTypeMembers(indent: string, syntaxPrefix: string, scope: Scope) {
+		var output: string[] = [];
 		var elementTbl = scope.dumpElements();
 
-		return(Object.keys(elementTbl).map((key: string) =>
-			this.exportElement(indent, '', elementTbl[key])
-		).join('\n'));
+		for(var key of Object.keys(elementTbl)) {
+			var spec = elementTbl[key];
+			var elementList = ExporterTS.expandSubstitutes(spec.item as types.Element);
+			var min = spec.min;
+			var max = spec.max;
+
+			// If there are several alternatives, no specific one is mandatory.
+			if(elementList.length > 1) min = 0;
+
+			for(var element of elementList) {
+				var outElement = this.exportElement(indent, syntaxPrefix, element, min, max);
+				if(outElement) output.push(outElement);
+			}
+		}
+
+		return(output.join('\n'));
 	}
 
 	exportType(indent: string, syntaxPrefix: string, namespacePrefix: string, type: types.TypeBase) {
@@ -143,7 +188,7 @@ export class ExporterTS {
 			output.push(indent + syntaxPrefix + 'type ' + type.name + ' = ' + parent.name + ';');
 		} else {
 			if(parent) parentDef = ' extends ' + parent.name;
-			var members = this.exportTypeMembers(indent + '\t', scope);
+			var members = this.exportTypeMembers(indent + '\t', '', scope);
 
 			output.push(indent + syntaxPrefix + 'interface ' + type.name + parentDef + ' {');
 			if(members) {
@@ -199,12 +244,7 @@ export class ExporterTS {
 			outTypes.push(this.exportType('', 'export ', '', typeTbl[key].item));
 		}
 
-		var elementTbl = scope.dumpElements();
-
-		for(var key of Object.keys(elementTbl)) {
-			outTypes.push(this.exportElement('', 'export var ', elementTbl[key]));
-		}
-
+		outTypes.push(this.exportTypeMembers('', 'export var ', scope));
 		outTypes.push('');
 
 		var importKeyList = Object.keys(this.namespaceUsedTbl);

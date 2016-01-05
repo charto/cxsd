@@ -38,13 +38,13 @@ export class Element extends ElementBase {
 	}
 
 	resolve(state: State) {
-		var element = this;
+		var element = this as Element;
 
 		if(this.ref) {
 			// Replace this with another, referenced element.
 
 			var ref = new QName(this.ref, state.source);
-			element = this.scope.lookup(ref, 'element');
+			element = this.scope.lookup(ref, 'element') as Element;
 
 			if(element) element.define(state, 'element', this.min, this.max, this.scope);
 			else throw new types.MissingReferenceError(this, state, 'element', ref);
@@ -59,15 +59,40 @@ export class Element extends ElementBase {
 			// If there's a single type as a child, use it as the element's type.
 			this.type = this.scope.getType();
 		}
+
+		if(this.substitutionGroup) {
+			// Add this as an alternative to the substitution group base element.
+			var ref = new QName(this.substitutionGroup, state.source);
+			var groupBase = this.scope.lookup(ref, 'element') as Element;
+
+			if(groupBase) groupBase.addSubstitute(element);
+			else throw new types.MissingReferenceError(this, state, 'element', ref);
+		}
 	}
 
-	getType() {
+	addSubstitute(element: Element) {
+		// TODO: check out the "block" attribute. It might disallow adding alternatives.
+
+		if(!this.substituteList) this.substituteList = [];
+		this.substituteList.push(element);
+	}
+
+	getTypes() {
+		var typeList: types.TypeBase[] = [];
+
+		// Filter out types of abstract and unresolved elements.
 		if(
 			typeof(this.type) == 'object' &&
 			this.type instanceof types.TypeBase
 		) {
-			return(this.type as types.TypeBase);
-		} else return(null);
+			typeList = [this.type as types.TypeBase];
+		}
+
+		return(typeList);
+	}
+
+	isAbstract() {
+		return(this.abstract == 'true');
 	}
 
 	name: string = null;
@@ -75,6 +100,12 @@ export class Element extends ElementBase {
 	type: string | QName | types.TypeBase = null;
 	default: string = null;
 
+	/** Abstract elements are disallowed in the XML document,
+	  * and another member of the same substitution group should be used. */
+	abstract: string = null; // boolean
+	substitutionGroup: string = null;
+
+	substituteList: Element[];
 	surrogateKey: number;
 	private static nextKey = 0;
 }
