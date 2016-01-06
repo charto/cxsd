@@ -21,6 +21,8 @@ export class ExporterTS {
 		}
 	}
 
+	/** Format an XSD annotation as JSDoc. */
+
 	formatComment(indent: string, comment: string) {
 		var lineList = comment.split('\n');
 		var lineCount = lineList.length;
@@ -52,6 +54,9 @@ export class ExporterTS {
 
 		return(output.join('\n'));
 	}
+
+	/** Output a reference to a type, for example the type of a member inside
+	  * an interface declaration. */
 
 	exportTypeRef(indent: string, type: types.TypeBase) {
 		var output: string[] = [];
@@ -97,6 +102,9 @@ export class ExporterTS {
 
 		return(output.join(''));
 	}
+
+	/** Output an element, which can be an exported variable
+	  * or a member of an interface. */
 
 	exportElement(indent: string, syntaxPrefix: string, element: types.Element, min: number, max: number) {
 		var output: string[] = [];
@@ -147,6 +155,8 @@ export class ExporterTS {
 		return(elementList);
 	}
 
+	/** Output all member elements of a type. */
+
 	exportTypeMembers(indent: string, syntaxPrefix: string, scope: Scope) {
 		var output: string[] = [];
 		var elementTbl = scope.dumpElements();
@@ -168,6 +178,8 @@ export class ExporterTS {
 
 		return(output.join('\n'));
 	}
+
+	/** Output a type definition. */
 
 	exportType(indent: string, syntaxPrefix: string, namespacePrefix: string, type: types.TypeBase) {
 		var output: string[] = [];
@@ -202,6 +214,8 @@ export class ExporterTS {
 		return(output.join(''));
 	}
 
+	/** Output namespace contents, if not already exported. */
+
 	export(): Promise<Namespace> {
 		if(!this.namespace) return(null);
 
@@ -211,6 +225,8 @@ export class ExporterTS {
 			isCached ? this.namespace : this.forceExport(outName)
 		));
 	}
+
+	/** Output namespace contents to the given cache key. */
 
 	forceExport(outName: string): Promise<Namespace> {
 		var outSources: string[] = [];
@@ -281,6 +297,8 @@ export class ExporterTS {
 		).then(() => namespace)))
 	}
 
+	/** Get relative path to another namespace within the cache. */
+
 	getPathTo(namespace: Namespace) {
 		return(path.relative(
 			this.cacheDir,
@@ -288,12 +306,18 @@ export class ExporterTS {
 		));
 	}
 
+	/** Cache where all output is written. */
 	private static cache = new Cache('cache/js', '_index.js');
 
+	/** Namespace to export. */
 	private namespace: Namespace;
 
+	/** Full path of directory containing exported output for the current namespace. */
 	private cacheDir: string;
 
+	/** Short names used to reference other namespaces in schemas defining this namespace. */
 	private shortNameTbl: {[namespaceId: number]: string[]} = {};
+
+	/** Other namespaces actually referenced in schema definitions for this namespace. */
 	private namespaceUsedTbl: {[namespaceId: number]: Namespace} = {};
 }
