@@ -7,7 +7,13 @@ import * as Promise from 'bluebird';
 import {Cache} from 'cget'
 import {Namespace} from './Namespace';
 import {Scope, TypeMember} from './Scope';
+import {Source} from './Source';
 import * as types from './types';
+
+interface ElementGroup extends TypeMember {
+	item: types.Element;
+	typeList: types.TypeBase[];
+}
 
 /** Export parsed schema to a TypeScript d.ts definition file. */
 
@@ -103,13 +109,23 @@ export class ExporterTS {
 		return(output.join(''));
 	}
 
+	private static mergeDuplicateTypes(typeList: types.TypeBase[]) {
+		if(typeList.length < 2) return(typeList);
+
+		var tbl: {[key: number]: types.TypeBase} = {};
+
+		for(var type of typeList) tbl[type.surrogateKey] = type;
+
+		return(Object.keys(tbl).map((key: string) => tbl[key]));
+	}
+
 	/** Output an element, which can be an exported variable
 	  * or a member of an interface. */
 
-	exportElement(indent: string, syntaxPrefix: string, element: types.Element, min: number, max: number) {
+	exportElement(indent: string, syntaxPrefix: string, group: ElementGroup) {
 		var output: string[] = [];
-		var scope = element.getScope();
-		var comment = scope.getComments();
+		var element = group.item;
+		var comment = element.getScope().getComments();
 
 		if(comment) {
 			output.push(this.formatComment(indent, comment));
@@ -117,22 +133,22 @@ export class ExporterTS {
 		}
 
 		output.push(indent + syntaxPrefix + element.name);
-		if(min == 0) output.push('?');
+		if(group.min == 0) output.push('?');
 		output.push(': ');
 
-		var typeList = element.getTypes().map((type: types.TypeBase) =>
-			this.exportTypeRef(indent, type)
+		// TODO: remove duplicate types before exporting!
+		var outTypeList = ExporterTS.mergeDuplicateTypes(group.typeList).map(
+			(type: types.TypeBase) => this.exportTypeRef(indent, type)
 		);
 
-		if(typeList.length == 0) return('');
+		if(outTypeList.length == 0) return('');
 
-		var outTypes = typeList.join(' | ');
+		var outTypes = outTypeList.join(' | ');
 		var suffix = '';
 
-		if(max > 1) suffix = '[]';
+		if(group.max > 1) suffix = '[]';
 
-		// NOTE: this never happens!
-		if(suffix && typeList.length > 1) outTypes = '(' + outTypes + ')';
+		if(suffix && outTypeList.length > 1) outTypes = '(' + outTypes + ')';
 
 		output.push(outTypes);
 		output.push(suffix + ';');
@@ -155,25 +171,63 @@ export class ExporterTS {
 		return(elementList);
 	}
 
+	/** Group elements by name and list all their different types. */
+
+	private static mergeDuplicateElements(specList: TypeMember[]) {
+		var groupTbl: {[name: string]: ElementGroup} = {};
+
+		for(var spec of specList) {
+			var element = spec.item as types.Element;
+			var group = groupTbl[element.name];
+
+			if(!group) {
+				group = {
+					min: spec.min,
+					max: spec.max,
+					item: element,
+					typeList: element.getTypes()
+				};
+
+				groupTbl[element.name] = group;
+			} else {
+				if(group.min > spec.min) group.min = spec.min;
+				if(group.max < spec.max) group.max = spec.max;
+				group.typeList = group.typeList.concat(element.getTypes());
+			}
+		}
+
+		return(Object.keys(groupTbl).sort().map((name: string) => groupTbl[name]));
+	}
+
 	/** Output all member elements of a type. */
 
 	exportTypeMembers(indent: string, syntaxPrefix: string, scope: Scope) {
 		var output: string[] = [];
 		var elementTbl = scope.dumpElements();
+		var specList: TypeMember[] = [];
 
 		for(var key of Object.keys(elementTbl)) {
 			var spec = elementTbl[key];
-			var elementList = ExporterTS.expandSubstitutes(spec.item as types.Element);
 			var min = spec.min;
 			var max = spec.max;
 
-			// If there are several alternatives, no specific one is mandatory.
-			if(elementList.length > 1) min = 0;
+			var substituteList = ExporterTS.expandSubstitutes(spec.item as types.Element);
 
-			for(var element of elementList) {
-				var outElement = this.exportElement(indent, syntaxPrefix, element, min, max);
-				if(outElement) output.push(outElement);
+			// If there are several alternatives, no specific one is mandatory.
+			if(substituteList.length > 1) min = 0;
+
+			for(var element of substituteList) {
+				specList.push({
+					min: min,
+					max: max,
+					item: element
+				});
 			}
+		}
+
+		for(var group of ExporterTS.mergeDuplicateElements(specList)) {
+			var outElement = this.exportElement(indent, syntaxPrefix, group);
+			if(outElement) output.push(outElement);
 		}
 
 		return(output.join('\n'));
@@ -214,6 +268,20 @@ export class ExporterTS {
 		return(output.join(''));
 	}
 
+	/** Output list of original schema file locations. */
+
+	exportSourceList(sourceList: Source[]) {
+		var output: string[] = [];
+
+		output.push('// Source files:');
+
+		for(var source of sourceList) {
+			output.push('// ' + source.url);
+		}
+
+		return(output.join('\n'));
+	}
+
 	/** Output namespace contents, if not already exported. */
 
 	export(): Promise<Namespace> {
@@ -229,21 +297,19 @@ export class ExporterTS {
 	/** Output namespace contents to the given cache key. */
 
 	forceExport(outName: string): Promise<Namespace> {
-		var outSources: string[] = [];
 		var outImports: string[] = [];
 		var outTypes: string[] = [];
 		var scope = this.namespace.getScope();
 
 		var typeTbl = scope.dumpTypes();
 
-		outSources.push('// Source files:');
-
 		var sourceList = this.namespace.getSourceList();
+
+		var outSources = [this.exportSourceList(sourceList), ''];
+
 		var namespaceRefTbl: {[name: string]: Namespace};
 
 		for(var source of sourceList) {
-			outSources.push('// ' + source.url);
-
 			namespaceRefTbl = source.getNamespaceRefs();
 
 			for(var name in namespaceRefTbl) {
@@ -253,8 +319,6 @@ export class ExporterTS {
 				this.shortNameTbl[id].push(name);
 			}
 		}
-
-		outSources.push('');
 
 		for(var key of Object.keys(typeTbl)) {
 			outTypes.push(this.exportType('', 'export ', '', typeTbl[key].item));
