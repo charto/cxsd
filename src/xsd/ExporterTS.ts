@@ -95,7 +95,7 @@ export class ExporterTS {
 		} else {
 			// Anonymous type defined only within this element.
 			type.exported = true;
-			var members = this.exportTypeMembers(indent + '\t', '', type.getScope());
+			var members = this.exportTypeMembers(indent + '\t', '', type.getScope(), true);
 
 			output.push('{');
 			if(members) {
@@ -122,7 +122,7 @@ export class ExporterTS {
 	/** Output an element, which can be an exported variable
 	  * or a member of an interface. */
 
-	exportElement(indent: string, syntaxPrefix: string, group: ElementGroup) {
+	exportElement(indent: string, syntaxPrefix: string, group: ElementGroup, outputOptionalFlags: boolean) {
 		var output: string[] = [];
 		var element = group.item;
 		var comment = element.getScope().getComments();
@@ -133,7 +133,7 @@ export class ExporterTS {
 		}
 
 		output.push(indent + syntaxPrefix + element.name);
-		if(group.min == 0) output.push('?');
+		if(outputOptionalFlags && group.min == 0) output.push('?');
 		output.push(': ');
 
 		// TODO: remove duplicate types before exporting!
@@ -201,7 +201,7 @@ export class ExporterTS {
 
 	/** Output all member elements of a type. */
 
-	exportTypeMembers(indent: string, syntaxPrefix: string, scope: Scope) {
+	exportTypeMembers(indent: string, syntaxPrefix: string, scope: Scope, outputOptionalFlags: boolean) {
 		var output: string[] = [];
 		var elementTbl = scope.dumpElements();
 		var specList: TypeMember[] = [];
@@ -226,7 +226,7 @@ export class ExporterTS {
 		}
 
 		for(var group of ExporterTS.mergeDuplicateElements(specList)) {
-			var outElement = this.exportElement(indent, syntaxPrefix, group);
+			var outElement = this.exportElement(indent, syntaxPrefix, group, outputOptionalFlags);
 			if(outElement) output.push(outElement);
 		}
 
@@ -254,7 +254,7 @@ export class ExporterTS {
 			output.push(indent + syntaxPrefix + 'type ' + type.name + ' = ' + parent.name + ';');
 		} else {
 			if(parent) parentDef = ' extends ' + parent.name;
-			var members = this.exportTypeMembers(indent + '\t', '', scope);
+			var members = this.exportTypeMembers(indent + '\t', '', scope, true);
 
 			output.push(indent + syntaxPrefix + 'interface ' + type.name + parentDef + ' {');
 			if(members) {
@@ -324,7 +324,7 @@ export class ExporterTS {
 			outTypes.push(this.exportType('', 'export ', '', typeTbl[key].item));
 		}
 
-		outTypes.push(this.exportTypeMembers('', 'export var ', scope));
+		outTypes.push(this.exportTypeMembers('', 'export var ', scope, false));
 		outTypes.push('');
 
 		var importKeyList = Object.keys(this.namespaceUsedTbl);
