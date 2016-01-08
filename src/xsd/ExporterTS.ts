@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as Promise from 'bluebird';
 
-import {Cache} from 'cget'
+import {Address, Cache} from 'cget'
 import {Namespace} from './Namespace';
 import {Scope, TypeMember} from './Scope';
 import {Source} from './Source';
@@ -22,7 +22,7 @@ export class ExporterTS {
 		if(namespace.name) {
 			this.namespace = namespace;
 			this.cacheDir = path.dirname(
-				ExporterTS.cache.getCachePathSync(namespace.name)
+				ExporterTS.cache.getCachePathSync(new Address(namespace.name))
 			);
 		}
 	}
@@ -366,7 +366,7 @@ export class ExporterTS {
 	getPathTo(namespace: Namespace) {
 		return(path.relative(
 			this.cacheDir,
-			ExporterTS.cache.getCachePathSync(namespace.name)
+			ExporterTS.cache.getCachePathSync(new Address(namespace.name))
 		));
 	}
 

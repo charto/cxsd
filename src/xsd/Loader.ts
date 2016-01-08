@@ -1,7 +1,7 @@
 // This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {FetchOptions, Cache, CacheResult, util} from 'cget'
+import {Address, FetchOptions, Cache, CacheResult, util} from 'cget'
 import {Namespace} from './Namespace'
 import {Source} from './Source'
 import {Parser} from './Parser'
@@ -32,16 +32,16 @@ export class Loader {
 
 	importFile(namespace: Namespace, urlRemote: string) {
 		var options = this.options;
-		options.url = urlRemote;
+		options.address = new Address(urlRemote);
 
-		var source = Loader.sourceTbl[options.url];
+		var source = Loader.sourceTbl[urlRemote];
 
 		if(!source) {
 			source = new Source(namespace, urlRemote);
 
 			Loader.cache.fetch(options).then((cached: CacheResult) => {
-				source.updateUrl(cached.url);
-				namespace.updateUrl(urlRemote, cached.url);
+				source.updateUrl(cached.address.url);
+				namespace.updateUrl(urlRemote, cached.address.url);
 
 				return(this.parser.init(cached, source, this));
 			}).then((dependencyList: Source[]) => {
@@ -51,7 +51,7 @@ export class Loader {
 				if(--this.pendingCount == 0) this.finish();
 			});
 
-			Loader.sourceTbl[options.url] = source;
+			Loader.sourceTbl[urlRemote] = source;
 			++this.pendingCount;
 		}
 
