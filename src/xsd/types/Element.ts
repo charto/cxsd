@@ -92,7 +92,7 @@ export class Element extends ElementBase {
 	}
 
 	isAbstract() {
-		return(this.abstract == 'true');
+		return(this.abstract == 'true' || this.abstract == '1');
 	}
 
 	name: string = null;
