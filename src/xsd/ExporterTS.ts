@@ -114,7 +114,7 @@ export class ExporterTS {
 	private static mergeDuplicateTypes(typeList: types.TypeBase[]) {
 		if(typeList.length < 2) return(typeList);
 
-		var tbl: {[key: number]: types.TypeBase} = {};
+		var tbl: {[key: string]: types.TypeBase} = {};
 
 		for(var type of typeList) tbl[type.surrogateKey] = type;
 
@@ -400,8 +400,8 @@ export class ExporterTS {
 	private cacheDir: string;
 
 	/** Short names used to reference other namespaces in schemas defining this namespace. */
-	private shortNameTbl: {[namespaceId: number]: string[]} = {};
+	private shortNameTbl: {[namespaceId: string]: string[]} = {};
 
 	/** Other namespaces actually referenced in schema definitions for this namespace. */
-	private namespaceUsedTbl: {[namespaceId: number]: Namespace} = {};
+	private namespaceUsedTbl: {[namespaceId: string]: Namespace} = {};
 }
