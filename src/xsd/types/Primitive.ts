@@ -47,7 +47,7 @@ export class Primitive extends TypeBase {
 			var spec = [
 				['boolean', 'boolean'],
 				['date dateTime duration time', 'number'],
-				['anyURI language NCName NMTOKEN NMTOKENS normalizedString QName string token', 'string'],
+				['anyURI ID IDREF IDREFS language NCName NMTOKEN NMTOKENS normalizedString QName string token', 'string'],
 				['byte decimal double float int integer long negativeInteger nonNegativeInteger nonPositiveInteger positiveInteger short unsignedLong unsignedInt unsignedShort unsignedByte', 'number']
 			];
 
