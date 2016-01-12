@@ -8,6 +8,7 @@ import {Address, Cache} from 'cget'
 import {Namespace} from './Namespace';
 import {Scope, TypeMember} from './Scope';
 import {Source} from './Source';
+import {QName} from './QName';
 import * as types from './types';
 
 interface ElementGroup extends TypeMember {
@@ -64,11 +65,12 @@ export class ExporterTS {
 	/** Output a reference to a type, for example the type of a member inside
 	  * an interface declaration. */
 
-	exportTypeRef(indent: string, type: types.TypeBase) {
+	exportTypeRef(indent: string, type: types.TypeBase | QName) {
 		var output: string[] = [];
+		var qName = type as QName;
 
-		if(type.qName) {
-			var namespace = type.qName.namespace;
+		if(type instanceof QName || (qName = type.qName)) {
+			var namespace = qName.namespace;
 			if(namespace == this.namespace) {
 				// Type from the current namespace.
 				output.push(type.name);
@@ -253,7 +255,7 @@ export class ExporterTS {
 		if(parent && parent instanceof types.Primitive) {
 			output.push(indent + syntaxPrefix + 'type ' + type.name + ' = ' + parent.name + ';');
 		} else {
-			if(parent) parentDef = ' extends ' + parent.name;
+			if(parent) parentDef = ' extends ' + this.exportTypeRef(indent + '\t', parent);
 			var members = this.exportTypeMembers(indent + '\t', '', scope, true);
 
 			output.push(indent + syntaxPrefix + 'interface ' + type.name + parentDef + ' {');
