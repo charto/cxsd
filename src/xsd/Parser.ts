@@ -99,7 +99,7 @@ export class Parser {
 		var state = new State(null, this.rootRule, source);
 		var importList: {namespace: Namespace, url: string}[] = [];
 
-		var xml = new expat.Parser('utf-8');
+		var xml = new expat.Parser(null);
 
 		state.stateStatic = {
 			addImport: (namespaceTarget: Namespace, urlRemote: string) => {
@@ -166,7 +166,7 @@ export class Parser {
 			console.error(err);
 		});
 
-		stream.on('data', (data: string) => {
+		stream.on('data', (data: Buffer) => {
 			xml.parse(data, false);
 		});
 
