@@ -1,11 +1,24 @@
-// This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
+// This file is part of fast-xml, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
 import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
+import {ElementLike} from './Element';
 
-export class GroupBase extends types.ElementBase {
+export class GroupBase extends types.Base implements ElementLike {
+	init(state: State) {
+		this.min = +this.minOccurs;
+		if(this.maxOccurs == 'unbounded') this.max = Infinity;
+		else this.max = +this.maxOccurs;
+	}
+
+	id: string = null;
+	minOccurs: string = "1";
+	maxOccurs: string = "1";
+
+	min: number;
+	max: number;
 }
 
 export class GenericChildList extends GroupBase {

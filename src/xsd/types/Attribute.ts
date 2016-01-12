@@ -4,51 +4,36 @@
 import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
+import {MemberBase} from './MemberBase';
 
 export type XmlAttribute = string | number;
 
 /** <xsd:attribute> */
 
-export class Attribute extends types.Base {
+export class Attribute extends MemberBase {
 	static mayContain: () => types.BaseClass[] = () => [
 		types.Annotation,
 		types.SimpleType
 	];
 
 	init(state: State) {
-		this.optional = (this.use == 'optional'); // Otherwise assume 'required'
-
 		// Attributes appear exactly once unless they're optional.
-		this.define(state, 'attribute', this.optional ? 0 : 1, 1);
+		if(this.use == 'optional') this.min = 0;
+		else this.min = 1; // assume 'required'
+		this.max = 1;
 
+		this.define(state, 'attribute', this.min, this.max);
 		this.surrogateKey = Attribute.nextKey++;
 	}
 
 	resolve(state: State) {
-		var attribute = this;
-
-		if(this.ref) {
-			// Replace this with another, referenced attribute.
-
-			var ref = new QName(this.ref, state.source);
-			attribute = this.scope.lookup(ref, 'attribute');
-
-			if(attribute) attribute.define(state, 'attribute', this.optional ? 0 : 1, 1, this.scope);
-			else throw new types.MissingReferenceError(this, state, 'attribute', ref);
-		}
+		var attribute = this.resolveMember(state, 'attribute') as Attribute;
 	}
 
-	id: string = null;
-	name: string = null;
-	ref: string = null;
-	type: string = null;
 	use: string = null;
 	default: XmlAttribute = null;
 
-	surrogateKey: number;
 	private static nextKey = 0;
-
-	optional: boolean;
 }
 
 /** <xsd:anyAttribute> */

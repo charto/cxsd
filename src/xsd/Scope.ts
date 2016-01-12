@@ -1,10 +1,9 @@
-// This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
+// This file is part of fast-xml, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
 import * as types from './types';
 import {Namespace} from './Namespace'
 import {QName} from './QName'
-import {Element} from './types/Element';
 import {TypeBase, Primitive} from './types/Primitive';
 
 export interface TypeMember {
@@ -135,6 +134,10 @@ console.log('Missing ' + type + ': ' + name.name);
 
 	dumpElements() {
 		return((this.expose['element'] || {}) as {[name: string]: TypeMember});
+	}
+
+	dumpAttributes() {
+		return((this.expose['attribute'] || {}) as {[name: string]: TypeMember});
 	}
 
 	static getPrimitiveScope() {

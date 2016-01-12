@@ -1,4 +1,4 @@
-// This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
+// This file is part of fast-xml, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
 import {State} from './State';
@@ -8,8 +8,10 @@ import {Base, BaseClass, Annotation, Documentation} from './types/Base';
 export {Base, BaseClass, Annotation, Documentation};
 import {Schema, Root} from './types/Schema';
 export {Schema, Root};
-import {Element, ElementBase} from './types/Element';
-export {Element, ElementBase};
+import {MemberBase} from './types/MemberBase';
+export {MemberBase};
+import {Element} from './types/Element';
+export {Element};
 import {Group, Sequence, Choice, All} from './types/Group';
 export {Group, Sequence, Choice, All};
 import {Attribute, AnyAttribute, AttributeGroup} from './types/Attribute';

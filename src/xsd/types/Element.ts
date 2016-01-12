@@ -4,26 +4,21 @@
 import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
+import {MemberBase} from './MemberBase';
 import {TypeBase} from './Primitive';
 
-export class ElementBase extends types.Base {
-	id: string = null;
-	minOccurs: string = "1";
-	maxOccurs: string = "1";
+export interface ElementLike {
+	id: string;
+	minOccurs: string;
+	maxOccurs: string;
 
 	min: number;
 	max: number;
-
-	init(state: State) {
-		this.min = +this.minOccurs;
-		if(this.maxOccurs == 'unbounded') this.max = Infinity;
-		else this.max = +this.maxOccurs;
-	}
 }
 
 /** <xsd:element> */
 
-export class Element extends ElementBase {
+export class Element extends MemberBase implements ElementLike {
 	static mayContain: () => types.BaseClass[] = () => [
 		types.Annotation,
 		types.SimpleType,
@@ -31,34 +26,16 @@ export class Element extends ElementBase {
 	];
 
 	init(state: State) {
-		super.init(state);
+		this.min = +this.minOccurs;
+		if(this.maxOccurs == 'unbounded') this.max = Infinity;
+		else this.max = +this.maxOccurs;
 
 		this.define(state, 'element', this.min, this.max);
 		this.surrogateKey = Element.nextKey++;
 	}
 
 	resolve(state: State) {
-		var element = this as Element;
-
-		if(this.ref) {
-			// Replace this with another, referenced element.
-
-			var ref = new QName(this.ref, state.source);
-			element = this.scope.lookup(ref, 'element') as Element;
-
-			if(element) element.define(state, 'element', this.min, this.max, this.scope);
-			else throw new types.MissingReferenceError(this, state, 'element', ref);
-		}
-
-		// If the element has a type set through an attribute, look it up in scope.
-
-		if(this.type) {
-			var type = new QName(this.type as string, state.source);
-			this.type = this.scope.lookup(type, 'type') as types.TypeBase || type;
-		} else {
-			// If there's a single type as a child, use it as the element's type.
-			this.type = this.scope.getType();
-		}
+		var element = this.resolveMember(state, 'element') as Element;
 
 		if(this.substitutionGroup) {
 			// Add this as an alternative to the substitution group base element.
@@ -77,27 +54,13 @@ export class Element extends ElementBase {
 		this.substituteList.push(element);
 	}
 
-	getTypes() {
-		var typeList: types.TypeBase[] = [];
-
-		// Filter out types of abstract and unresolved elements.
-		if(
-			typeof(this.type) == 'object' &&
-			this.type instanceof types.TypeBase
-		) {
-			typeList = [this.type as types.TypeBase];
-		}
-
-		return(typeList);
-	}
-
 	isAbstract() {
 		return(this.abstract == 'true' || this.abstract == '1');
 	}
 
-	name: string = null;
-	ref: string = null;
-	type: string | QName | types.TypeBase = null;
+	minOccurs: string = "1";
+	maxOccurs: string = "1";
+
 	default: string = null;
 
 	/** Abstract elements are disallowed in the XML document,
@@ -106,6 +69,5 @@ export class Element extends ElementBase {
 	substitutionGroup: string = null;
 
 	substituteList: Element[];
-	surrogateKey: number;
 	private static nextKey = 0;
 }

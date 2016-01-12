@@ -11,8 +11,8 @@ import {Source} from './Source';
 import {QName} from './QName';
 import * as types from './types';
 
-interface ElementGroup extends TypeMember {
-	item: types.Element;
+interface MemberGroup extends TypeMember {
+	item: types.MemberBase;
 	typeList: types.TypeBase[];
 }
 
@@ -124,17 +124,17 @@ export class ExporterTS {
 	/** Output an element, which can be an exported variable
 	  * or a member of an interface. */
 
-	exportElement(indent: string, syntaxPrefix: string, group: ElementGroup, outputOptionalFlags: boolean) {
+	exportMember(indent: string, syntaxPrefix: string, group: MemberGroup, outputOptionalFlags: boolean) {
 		var output: string[] = [];
-		var element = group.item;
-		var comment = element.getScope().getComments();
+		var member = group.item;
+		var comment = member.getScope().getComments();
 
 		if(comment) {
 			output.push(this.formatComment(indent, comment));
 			output.push('\n');
 		}
 
-		output.push(indent + syntaxPrefix + element.name);
+		output.push(indent + syntaxPrefix + member.name);
 		if(outputOptionalFlags && group.min == 0) output.push('?');
 		output.push(': ');
 
@@ -161,6 +161,7 @@ export class ExporterTS {
 	/** Handle substitution groups. */
 
 	private static expandSubstitutes(element: types.Element) {
+		// Filter out types of abstract elements.
 		var elementList = element.isAbstract() ? [] : [element];
 
 		if(element.substituteList) {
@@ -176,7 +177,7 @@ export class ExporterTS {
 	/** Group elements by name and list all their different types. */
 
 	private static mergeDuplicateElements(specList: TypeMember[]) {
-		var groupTbl: {[name: string]: ElementGroup} = {};
+		var groupTbl: {[name: string]: MemberGroup} = {};
 
 		for(var spec of specList) {
 			var element = spec.item as types.Element;
@@ -201,9 +202,9 @@ export class ExporterTS {
 		return(Object.keys(groupTbl).sort().map((name: string) => groupTbl[name]));
 	}
 
-	/** Output all member elements of a type. */
+	/** Output all member elements and attributes of a type. */
 
-	exportTypeMembers(indent: string, syntaxPrefix: string, scope: Scope, outputOptionalFlags: boolean) {
+	exportTypeMembers(indent: string, syntaxPrefix: string, scope: Scope, outputAttributesAndOptionalFlags: boolean) {
 		var output: string[] = [];
 		var elementTbl = scope.dumpElements();
 		var specList: TypeMember[] = [];
@@ -228,8 +229,25 @@ export class ExporterTS {
 		}
 
 		for(var group of ExporterTS.mergeDuplicateElements(specList)) {
-			var outElement = this.exportElement(indent, syntaxPrefix, group, outputOptionalFlags);
+			var outElement = this.exportMember(indent, syntaxPrefix, group, outputAttributesAndOptionalFlags);
 			if(outElement) output.push(outElement);
+		}
+
+		if(outputAttributesAndOptionalFlags) {
+			var attributeTbl = scope.dumpAttributes();
+
+			for(var key of Object.keys(attributeTbl)) {
+				var spec = attributeTbl[key];
+				var attribute = spec.item as types.Attribute;
+				group = {
+					min: spec.min,
+					max: spec.max,
+					item: attribute,
+					typeList: attribute.getTypes()
+				};
+				var outAttribute = this.exportMember(indent, syntaxPrefix, group, outputAttributesAndOptionalFlags);
+				if(outAttribute) output.push(outAttribute);
+			}
 		}
 
 		return(output.join('\n'));
