@@ -91,21 +91,17 @@ export class ExporterTS {
 		} else if(type.name) {
 			// Primitive type.
 			output.push(type.name);
-		} else if(type.parent || type.exported) {
-			// TODO: Generate names for all derived and circularly defined types so this never happens!
+		} else if(type.exported) {
+			// TODO: Generate names for all circularly defined types so this never happens!
+			output.push('any');
+		} else if(type.parent && !(type.parent instanceof types.Primitive)) {
+			// TODO: Generate names for all derived types so this never happens!
 			output.push('any');
 		} else {
 			// Anonymous type defined only within this element.
 			type.exported = true;
-			var members = this.exportTypeMembers(indent + '\t', '', type.getScope(), true);
 
-			output.push('{');
-			if(members) {
-				output.push('\n');
-				output.push(members);
-				output.push('\n' + indent);
-			}
-			output.push('}');
+			output.push(this.exportTypeContent(indent, type));
 		}
 
 		return(output.join(''));
@@ -253,9 +249,33 @@ export class ExporterTS {
 		return(output.join('\n'));
 	}
 
+	exportTypeContent(indent: string, type: types.TypeBase) {
+		var output: string[] = [];
+		var scope = type.getScope();
+
+		var parent = type.parent;
+
+		if(parent && parent instanceof types.Primitive) {
+			//TODO: if parent is a string restricted to enumerated alternatives, output them joined with pipe characters.
+			output.push(parent.name);
+		} else {
+			var members = this.exportTypeMembers(indent + '\t', '', scope, true);
+
+			output.push('{');
+			if(members) {
+				output.push('\n');
+				output.push(members);
+				output.push('\n' + indent);
+			}
+			output.push('}');
+		}
+
+		return(output.join(''));
+	}
+
 	/** Output a type definition. */
 
-	exportType(indent: string, syntaxPrefix: string, namespacePrefix: string, type: types.TypeBase) {
+	exportType(indent: string, syntaxPrefix: string, type: types.TypeBase) {
 		var output: string[] = [];
 		var scope = type.getScope();
 		var comment = scope.getComments();
@@ -268,21 +288,14 @@ export class ExporterTS {
 			output.push('\n');
 		}
 
+		var content = this.exportTypeContent(indent, type);
 		var parent = type.parent;
 
 		if(parent && parent instanceof types.Primitive) {
-			output.push(indent + syntaxPrefix + 'type ' + type.name + ' = ' + parent.name + ';');
+			output.push(indent + syntaxPrefix + 'type ' + type.name + ' = ' + content + ';');
 		} else {
 			if(parent) parentDef = ' extends ' + this.exportTypeRef(indent + '\t', parent);
-			var members = this.exportTypeMembers(indent + '\t', '', scope, true);
-
-			output.push(indent + syntaxPrefix + 'interface ' + type.name + parentDef + ' {');
-			if(members) {
-				output.push('\n');
-				output.push(members);
-				output.push('\n' + indent);
-			}
-			output.push('}');
+			output.push(indent + syntaxPrefix + 'interface ' + type.name + parentDef + ' ' + content);
 		}
 
 		return(output.join(''));
@@ -341,7 +354,7 @@ export class ExporterTS {
 		}
 
 		for(var key of Object.keys(typeTbl)) {
-			outTypes.push(this.exportType('', 'export ', '', typeTbl[key].item));
+			outTypes.push(this.exportType('', 'export ', typeTbl[key].item));
 		}
 
 		outTypes.push(this.exportTypeMembers('', 'export var ', scope, false));

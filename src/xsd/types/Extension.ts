@@ -4,7 +4,7 @@
 import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
-import {ContentBase} from './ComplexType';
+import {ContentBase, SimpleType} from './ComplexType';
 
 /** Derived type support, allows types to inherit others. */
 
@@ -21,7 +21,7 @@ export class DerivationBase extends types.Base {
 
 	resolve(state: State) {
 		var base = new QName(this.base, state.source);
-		(state.parent.xsdElement as ContentBase).parent = this.scope.lookup(base, 'type') as types.TypeBase || base;
+		(state.parent.xsdElement as (ContentBase | SimpleType)).parent = this.scope.lookup(base, 'type') as types.TypeBase || base;
 
 		this.scope.addAllToParent('element');
 		this.scope.addAllToParent('attribute');
@@ -51,4 +51,6 @@ export class Enumeration extends types.Base {
 	static mayContain: () => types.BaseClass[] = () => [
 		types.Annotation
 	];
+
+	value: string = null;
 }
