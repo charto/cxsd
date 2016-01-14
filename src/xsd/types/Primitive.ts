@@ -47,7 +47,6 @@ export class TypeBase extends Base {
 
 	// TODO: remove this and detect circular types (anonymous types inside elements referencing the same element) before exporting.
 	exported: boolean;
-	exported2: boolean;
 }
 
 /** Primitive types map directly to JavaScript equivalents. */

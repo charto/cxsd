@@ -63,45 +63,6 @@ export class ExporterTS {
 		return(output.join('\n'));
 	}
 
-	/** Output a reference to a type, for example the type of a member inside
-	  * an interface declaration. */
-
-	exportTypeRef(indent: string, type: schema.Type) {
-		var output: string[] = [];
-
-		if(type.name) {
-			var namespace = type.namespace;
-
-			if(!namespace || namespace.id == this.namespace.id) {
-				output.push(type.name);
-			} else {
-				// Type from another, imported namespace.
-
-				var short = this.outNamespace.getShortRef(namespace.id);
-
-				if(!short) {
-					console.error('MISSING IMPORT ' + namespace.name);
-					short = 'ERROR';
-				}
-
-				output.push(short + '.' + type.name);
-			}
-		} else if(type.exported) {
-			// TODO: Generate names for all circularly defined types so this never happens!
-			output.push('any');
-		} else if(type.parent) {
-			// TODO: Generate names for all derived types so this never happens!
-			output.push('any');
-		} else {
-			// Anonymous type defined only within this element.
-			type.exported = true;
-
-			output.push(this.exportTypeContent(indent, type));
-		}
-
-		return(output.join(''));
-	}
-
 	private static mergeDuplicateTypes(typeList: types.TypeBase[]) {
 		if(typeList.length < 2) return(typeList);
 
@@ -110,41 +71,6 @@ export class ExporterTS {
 		for(var type of typeList) tbl[type.surrogateKey] = type;
 
 		return(Object.keys(tbl).map((key: string) => tbl[key]));
-	}
-
-	/** Output an element, which can be an exported variable
-	  * or a member of an interface. */
-
-	exportMember(indent: string, syntaxPrefix: string, member: schema.Member, outputOptionalFlags: boolean) {
-		var output: string[] = [];
-		var comment = member.comment;
-
-		if(comment) {
-			output.push(this.formatComment(indent, comment));
-			output.push('\n');
-		}
-
-		output.push(indent + syntaxPrefix + member.name);
-		if(outputOptionalFlags && member.min == 0) output.push('?');
-		output.push(': ');
-
-		var outTypeList = member.typeList.map(
-			(type: schema.Type) => this.exportTypeRef(indent, type)
-		);
-
-		if(outTypeList.length == 0) return('');
-
-		var outTypes = outTypeList.sort().join(' | ');
-		var suffix = '';
-
-		if(member.max > 1) suffix = '[]';
-
-		if(suffix && outTypeList.length > 1) outTypes = '(' + outTypes + ')';
-
-		output.push(outTypes);
-		output.push(suffix + ';');
-
-		return(output.join(''));
 	}
 
 	/** Handle substitution groups. */
@@ -191,73 +117,7 @@ export class ExporterTS {
 		return(Object.keys(groupTbl).sort().map((name: string) => groupTbl[name]));
 	}
 
-	/** Output all member elements and attributes of a type. */
-
-	exportTypeMembers(indent: string, syntaxPrefix: string, type: schema.Type) {
-		var output: string[] = [];
-
-		for(var attribute of type.attributeList) {
-			var outAttribute = this.exportMember(indent, syntaxPrefix, attribute, true);
-			if(outAttribute) output.push(outAttribute);
-		}
-
-		for(var child of type.childList) {
-			var outElement = this.exportMember(indent, syntaxPrefix, child, true);
-			if(outElement) output.push(outElement);
-		}
-
-		return(output.join('\n'));
-	}
-
-	exportTypeContent(indent: string, type: schema.Type) {
-		var output: string[] = [];
-
-		if(type.primitiveList && type.primitiveList.length) {
-			//TODO: if parent is a string restricted to enumerated alternatives, output them joined with pipe characters.
-			output.push(type.primitiveList[0]);
-		} else {
-			var members = this.exportTypeMembers(indent + '\t', '', type);
-
-			output.push('{');
-			if(members) {
-				output.push('\n');
-				output.push(members);
-				output.push('\n' + indent);
-			}
-			output.push('}');
-		}
-
-		return(output.join(''));
-	}
-
-	/** Output a type definition. */
-
-	exportType(indent: string, syntaxPrefix: string, type: schema.Type) {
-		var output: string[] = [];
-		var comment = type.comment;
-		var parentDef = '';
-
-		type.exported = true;
-
-		if(comment) {
-			output.push(this.formatComment(indent, comment));
-			output.push('\n');
-		}
-
-		var parent = type.parent;
-
-		if(type.primitiveList && type.primitiveList.length) {
-			output.push(indent + syntaxPrefix + 'type ' + type.name + ' = ' + type.primitiveList[0] + ';');
-		} else {
-			var content = this.exportTypeContent(indent, type);
-			if(parent) parentDef = ' extends ' + this.exportTypeRef(indent + '\t', parent);
-			output.push(indent + syntaxPrefix + 'interface ' + type.name + parentDef + ' ' + content);
-		}
-
-		return(output.join(''));
-	}
-
-	exportMember2(group: MemberGroup) {
+	exportMember(group: MemberGroup) {
 		var member = group.item;
 		var outMember = new schema.Member(member.name, group.min, group.max);
 
@@ -272,13 +132,13 @@ export class ExporterTS {
 					this.outNamespace.markUsed(type.qName.namespace.id);
 				} else if(type.name) {
 					// Primitive type.
-				} else if(type.exported2) {
+				} else if(type.exported) {
 					// TODO: Generate names for all circularly defined types so this never happens!
 				} else {
 					// Anonymous type defined only within this element.
-					type.exported2 = true;
+					type.exported = true;
 
-					this.exportType2(type);
+					this.exportType(type);
 				}
 
 				return(outType);
@@ -303,7 +163,7 @@ export class ExporterTS {
 				typeList: attribute.getTypes()
 			};
 
-			var outAttribute = this.exportMember2(group);
+			var outAttribute = this.exportMember(group);
 			if(outAttribute) attributeList.push(outAttribute);
 		}
 
@@ -337,18 +197,18 @@ export class ExporterTS {
 		var groupList = ExporterTS.mergeDuplicateElements(specList);
 
 		for(var group of groupList) {
-			var outChild = this.exportMember2(group);
+			var outChild = this.exportMember(group);
 			if(outChild) childList.push(outChild);
 		}
 
 		return(childList);
 	}
 
-	exportType2(type: types.TypeBase) {
+	exportType(type: types.TypeBase) {
 		var scope = type.getScope();
 		var comment = scope.getComments();
 
-		type.exported2 = true;
+		type.exported = true;
 
 		var outType = type.getOutType();
 		outType.comment = comment;
@@ -426,18 +286,18 @@ export class ExporterTS {
 		}
 
 		for(var key of Object.keys(typeTbl).sort()) {
-			outNamespace.addType(this.exportType2(typeTbl[key].item));
+			outNamespace.addType(this.exportType(typeTbl[key].item as types.TypeBase));
 		}
 
 		var doc = new schema.Type();
 		doc.childList = this.exportChildren(scope);
 
 		for(var type of outNamespace.typeList) {
-			outTypes.push(this.exportType('', 'export ', type));
+			outTypes.push(type.exportTS('', 'export ', this));
 		}
 
 		for(var child of doc.childList) {
-			var outElement = this.exportMember('', 'export var ', child, false);
+			var outElement = child.exportTS('', 'export var ', false, this);
 			if(outElement) outTypes.push(outElement);
 		}
 
@@ -475,7 +335,7 @@ export class ExporterTS {
 	/** Namespace to export. */
 	private namespace: Namespace;
 
-	private outNamespace: schema.Namespace;
+	outNamespace: schema.Namespace;
 
 	/** Full path of directory containing exported output for the current namespace. */
 	private cacheDir: string;
