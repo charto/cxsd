@@ -55,7 +55,7 @@ export class Namespace {
 		this.typeList.push(type);
 	}
 
-	exportTS(exporter: any) {
+	exportHeaderTS(exporter: any) {
 		var output: string[] = [];
 		var importNameTbl = this.getImports();
 
@@ -85,12 +85,22 @@ export class Namespace {
 		return(namespace);
 	}
 
+	static byId(id: number) {
+		return(Namespace.list[id]);
+	}
+
 	id: number;
 	name: string;
 	cachePath: string;
 
+	doc: Type;
+
 	typeList: Type[] = [];
-	childList: Member[] = [];
+//	childList: Member[] = [];
+
+	sourceList: string[];
+
+	exported: boolean;
 
 	private refList: NamespaceRef[];
 	private refTbl: {[namespaceId: number]: NamespaceRef};

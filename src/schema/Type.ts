@@ -3,17 +3,17 @@
 
 import {Namespace} from './Namespace';
 import {Member} from './Member';
-import {ExporterTS} from '../xsd/ExporterTS';
+import {ExporterTS} from './ExporterTS';
 
 export class Type {
-	exportContentTS(indent: string, exporter: ExporterTS) {
+	exportContentTS(namespace: Namespace, indent: string) {
 		var output: string[] = [];
 
 		if(this.primitiveList && this.primitiveList.length) {
 			//TODO: if parent is a string restricted to enumerated alternatives, output them joined with pipe characters.
 			output.push(this.primitiveList[0]);
 		} else {
-			var members = this.exportMembersTS(indent + '\t', '', exporter);
+			var members = this.exportMembersTS(namespace, indent + '\t', '');
 
 			output.push('{');
 			if(members) {
@@ -29,7 +29,7 @@ export class Type {
 
 	/** Output a type definition. */
 
-	exportTS(indent: string, syntaxPrefix: string, exporter: ExporterTS) {
+	exportTS(namespace: Namespace, indent: string, syntaxPrefix: string) {
 		var output: string[] = [];
 		var comment = this.comment;
 		var parentDef = '';
@@ -37,16 +37,16 @@ export class Type {
 		this.exported = true;
 
 		if(comment) {
-			output.push(exporter.formatComment(indent, comment));
+			output.push(ExporterTS.formatComment(indent, comment));
 			output.push('\n');
 		}
 
-		var content = this.exportContentTS(indent, exporter);
+		var content = this.exportContentTS(namespace, indent);
 
 		if(this.primitiveList && this.primitiveList.length) {
 			output.push(indent + syntaxPrefix + 'type ' + this.name + ' = ' + content + ';');
 		} else {
-			if(this.parent) parentDef = ' extends ' + this.parent.exportRefTS(indent + '\t', exporter);
+			if(this.parent) parentDef = ' extends ' + this.parent.exportRefTS(namespace, indent + '\t');
 			output.push(indent + syntaxPrefix + 'interface ' + this.name + parentDef + ' ' + content);
 		}
 
@@ -55,16 +55,16 @@ export class Type {
 
 	/** Output all member elements and attributes of a type. */
 
-	exportMembersTS(indent: string, syntaxPrefix: string, exporter: ExporterTS) {
+	exportMembersTS(namespace: Namespace, indent: string, syntaxPrefix: string) {
 		var output: string[] = [];
 
 		for(var attribute of this.attributeList) {
-			var outAttribute = attribute.exportTS(indent, syntaxPrefix, true, exporter);
+			var outAttribute = attribute.exportTS(namespace, indent, syntaxPrefix, true);
 			if(outAttribute) output.push(outAttribute);
 		}
 
 		for(var child of this.childList) {
-			var outElement = child.exportTS(indent, syntaxPrefix, true, exporter);
+			var outElement = child.exportTS(namespace, indent, syntaxPrefix, true);
 			if(outElement) output.push(outElement);
 		}
 
@@ -74,18 +74,18 @@ export class Type {
 	/** Output a reference to a type, for example the type of a member inside
 	  * an interface declaration. */
 
-	exportRefTS(indent: string, exporter: ExporterTS) {
+	exportRefTS(outNamespace: Namespace, indent: string) {
 		var output: string[] = [];
 
 		if(this.name) {
 			var namespace = this.namespace;
 
-			if(!namespace || namespace == exporter.outNamespace) {
+			if(!namespace || namespace == outNamespace) {
 				output.push(this.name);
 			} else {
 				// Type from another, imported namespace.
 
-				var short = exporter.outNamespace.getShortRef(namespace.id);
+				var short = outNamespace.getShortRef(namespace.id);
 
 				if(!short) {
 					console.error('MISSING IMPORT ' + namespace.name);
@@ -104,7 +104,7 @@ export class Type {
 			// Anonymous type defined only within this element.
 			this.exported = true;
 
-			output.push(this.exportContentTS(indent, exporter));
+			output.push(this.exportContentTS(outNamespace, indent));
 		}
 
 		return(output.join(''));

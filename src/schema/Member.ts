@@ -1,8 +1,9 @@
 // This file is part of fast-xml, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {Namespace} from './Namespace';
 import {Type} from './Type';
-import {ExporterTS} from '../xsd/ExporterTS';
+import {ExporterTS} from './ExporterTS';
 
 export class Member {
 	constructor(name: string, min: number, max: number) {
@@ -14,12 +15,12 @@ export class Member {
 	/** Output an element, which can be an exported variable
 	  * or a member of an interface. */
 
-	exportTS(indent: string, syntaxPrefix: string, outputOptionalFlags: boolean, exporter: ExporterTS) {
+	exportTS(namespace: Namespace, indent: string, syntaxPrefix: string, outputOptionalFlags: boolean) {
 		var output: string[] = [];
 		var comment = this.comment;
 
 		if(comment) {
-			output.push(exporter.formatComment(indent, comment));
+			output.push(ExporterTS.formatComment(indent, comment));
 			output.push('\n');
 		}
 
@@ -28,7 +29,7 @@ export class Member {
 		output.push(': ');
 
 		var outTypeList = this.typeList.map(
-			(type: Type) => type.exportRefTS(indent, exporter)
+			(type: Type) => type.exportRefTS(namespace, indent)
 		);
 
 		if(outTypeList.length == 0) return('');

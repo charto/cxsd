@@ -3,7 +3,7 @@
 
 import {Namespace} from './Namespace';
 
-export class NamespaceRef {
+export interface NamespaceRef {
 	shortName: string;
 	relativePath: string;
 	Namespace: Namespace;
