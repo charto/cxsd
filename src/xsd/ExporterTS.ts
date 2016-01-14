@@ -10,6 +10,7 @@ import {Scope, TypeMember} from './Scope';
 import {Source} from './Source';
 import {QName} from './QName';
 import * as types from './types';
+import * as schema from '../schema';
 
 interface MemberGroup extends TypeMember {
 	item: types.MemberBase;
@@ -77,16 +78,15 @@ export class ExporterTS {
 			} else {
 				// Type from another, imported namespace.
 
-				var short: string;
+				var short = this.outNamespace.getShortRef(namespace.id);
 
-				if(this.shortNameTbl[namespace.id] && this.shortNameTbl[namespace.id].length) {
-					short = this.shortNameTbl[namespace.id][0];
-				} else {
+				if(!short) {
 					console.error('MISSING IMPORT ' + namespace.name + ' <- ' + namespace.url);
 					short = 'ERROR';
 				}
+
 				output.push(short + '.' + type.name);
-				this.namespaceUsedTbl[namespace.id] = namespace;
+				this.outNamespace.markUsed(namespace.id);
 			}
 		} else if(type.name) {
 			// Primitive type.
@@ -338,6 +338,10 @@ export class ExporterTS {
 		var outTypes: string[] = [];
 		var scope = this.namespace.getScope();
 
+		var namespace: Namespace;
+		var outNamespace = schema.Namespace.register(this.namespace.id, this.namespace.name);
+		this.outNamespace = outNamespace;
+
 		var typeTbl = scope.dumpTypes();
 
 		var sourceList = this.namespace.getSourceList();
@@ -350,10 +354,8 @@ export class ExporterTS {
 			namespaceRefTbl = source.getNamespaceRefs();
 
 			for(var name in namespaceRefTbl) {
-				var id = namespaceRefTbl[name].id;
-
-				if(!this.shortNameTbl[id]) this.shortNameTbl[id] = [];
-				this.shortNameTbl[id].push(name);
+				namespace = namespaceRefTbl[name];
+				outNamespace.addRef(name, schema.Namespace.register(namespace.id, namespace.name));
 			}
 		}
 
@@ -364,35 +366,9 @@ export class ExporterTS {
 		outTypes.push(this.exportTypeMembers('', 'export var ', scope, false));
 		outTypes.push('');
 
-		var importIdList = Object.keys(this.namespaceUsedTbl);
-		var importList: Namespace[] = [];
-
-		if(importIdList.length) {
-			var outNameTbl: {[short: string]: Namespace} = {};
-
-			for(var key of importIdList) {
-				var namespace = this.namespaceUsedTbl[key];
-				var shortNameList = this.shortNameTbl[key];
-
-				if(!shortNameList || !shortNameList.length) continue;
-
-				outNameTbl[shortNameList[0]] = namespace;
-			}
-
-			for(var shortName of Object.keys(outNameTbl).sort()) {
-				var namespace = outNameTbl[shortName];
-
-				importList.push(namespace);
-				outImports.push(
-					'import * as ' +
-					shortName +
-					' from ' +
-					"'" + this.getPathTo(namespace) + "';"
-				);
-			}
-
-			outImports.push('');
-		}
+		outImports.push(outNamespace.exportTS(this));
+		var importNameTbl = outNamespace.getImports();
+		var importList = Object.keys(importNameTbl).map((short: string) => Namespace.byId(importNameTbl[short]));
 
 		return(ExporterTS.cache.store(
 			outName,
@@ -409,10 +385,10 @@ export class ExporterTS {
 
 	/** Get relative path to another namespace within the cache. */
 
-	getPathTo(namespace: Namespace) {
+	getPathTo(name: string) {
 		return(path.relative(
 			this.cacheDir,
-			ExporterTS.cache.getCachePathSync(new Address(namespace.name))
+			ExporterTS.cache.getCachePathSync(new Address(name))
 		));
 	}
 
@@ -422,12 +398,8 @@ export class ExporterTS {
 	/** Namespace to export. */
 	private namespace: Namespace;
 
+	private outNamespace: schema.Namespace;
+
 	/** Full path of directory containing exported output for the current namespace. */
 	private cacheDir: string;
-
-	/** Short names used to reference other namespaces in schemas defining this namespace. */
-	private shortNameTbl: {[namespaceId: string]: string[]} = {};
-
-	/** Other namespaces actually referenced in schema definitions for this namespace. */
-	private namespaceUsedTbl: {[namespaceId: string]: Namespace} = {};
 }

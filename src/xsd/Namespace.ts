@@ -53,6 +53,10 @@ export class Namespace {
 		return(Namespace.tbl[name]);
 	}
 
+	static byId(id: number) {
+		return(Namespace.list[id]);
+	}
+
 	/** Load and parse the main schema file for this namespace. */
 	importSchema(loader: Loader, urlRemote?: string) {
 		var source = loader.importFile(this, urlRemote || this.url);
