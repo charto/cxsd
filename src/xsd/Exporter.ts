@@ -19,12 +19,12 @@ interface MemberGroup extends TypeMember {
 
 /** Export parsed schema to a TypeScript d.ts definition file. */
 
-export class ExporterTS {
+export class Exporter {
 	constructor(namespace: Namespace) {
 		if(namespace.name) {
 			this.namespace = namespace;
 			this.cacheDir = path.dirname(
-				ExporterTS.cache.getCachePathSync(new Address(namespace.name))
+				Exporter.cache.getCachePathSync(new Address(namespace.name))
 			);
 		}
 	}
@@ -82,7 +82,7 @@ export class ExporterTS {
 		if(element.substituteList) {
 			elementList = elementList.concat.apply(
 				elementList,
-				element.substituteList.map(ExporterTS.expandSubstitutes)
+				element.substituteList.map(Exporter.expandSubstitutes)
 			);
 		}
 
@@ -123,7 +123,7 @@ export class ExporterTS {
 
 		outMember.comment = member.getScope().getComments();
 
-		outMember.typeList = ExporterTS.mergeDuplicateTypes(group.typeList).map(
+		outMember.typeList = Exporter.mergeDuplicateTypes(group.typeList).map(
 			(type: types.TypeBase) => {
 				var outType = type.getOutType();
 				var qName = type.qName;
@@ -180,7 +180,7 @@ export class ExporterTS {
 			var min = spec.min;
 			var max = spec.max;
 
-			var substituteList = ExporterTS.expandSubstitutes(spec.item as types.Element);
+			var substituteList = Exporter.expandSubstitutes(spec.item as types.Element);
 
 			// If there are several alternatives, no specific one is mandatory.
 			if(substituteList.length > 1) min = 0;
@@ -194,7 +194,7 @@ export class ExporterTS {
 			}
 		}
 
-		var groupList = ExporterTS.mergeDuplicateElements(specList);
+		var groupList = Exporter.mergeDuplicateElements(specList);
 
 		for(var group of groupList) {
 			var outChild = this.exportMember(group);
@@ -252,7 +252,7 @@ export class ExporterTS {
 
 		var outName = this.namespace.name + '.d.ts';
 
-		return(ExporterTS.cache.ifCached(outName).then((isCached: boolean) =>
+		return(Exporter.cache.ifCached(outName).then((isCached: boolean) =>
 			isCached ? this.namespace : this.forceExport(outName)
 		));
 	}
@@ -307,7 +307,7 @@ export class ExporterTS {
 		var importNameTbl = outNamespace.getImports();
 		var importList = Object.keys(importNameTbl).map((short: string) => Namespace.byId(importNameTbl[short]));
 
-		return(ExporterTS.cache.store(
+		return(Exporter.cache.store(
 			outName,
 			[].concat(
 				outImports,
@@ -316,7 +316,7 @@ export class ExporterTS {
 			).join('\n')
 		).then(() => Promise.map(
 			importList,
-			(namespace: Namespace) => new ExporterTS(namespace).export()
+			(namespace: Namespace) => new Exporter(namespace).export()
 		).then(() => namespace)))
 	}
 
@@ -325,7 +325,7 @@ export class ExporterTS {
 	getPathTo(name: string) {
 		return(path.relative(
 			this.cacheDir,
-			ExporterTS.cache.getCachePathSync(new Address(name))
+			Exporter.cache.getCachePathSync(new Address(name))
 		));
 	}
 

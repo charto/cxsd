@@ -1,10 +1,10 @@
-// This file is part of fast-xml, copyright (c) 2015 BusFaster Ltd.
+// This file is part of fast-xml, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
 import {Cache} from 'cget';
 import {Namespace} from './xsd/Namespace';
 import {Loader} from './xsd/Loader';
-import {ExporterTS} from './xsd/ExporterTS'
+import {Exporter} from './xsd/Exporter'
 
 Cache.patchRequest();
 
@@ -17,7 +17,7 @@ var loader = new Loader({
 
 loader.import(process.argv[2]).then((namespace: Namespace) => {
 	try {
-		console.log(new ExporterTS(namespace).export());
+		console.log(new Exporter(namespace).export());
 	} catch(err) {
 		console.log(err);
 		console.log(err.stack);
