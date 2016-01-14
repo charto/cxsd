@@ -88,7 +88,7 @@ export class Scope {
 		if(!this.commentList) return(null);
 
 		// Convert line breaks.
-		return(this.commentList.join(' ').replace(/\r\n?|\n/g, '\n'));
+		return(this.commentList.join('').replace(/\r\n?|\n/g, '\n'));
 	}
 
 	lookup(name: QName, type: string): any {
