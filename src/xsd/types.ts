@@ -6,24 +6,15 @@ import {QName} from './QName';
 
 import {Base, BaseClass, Annotation, Documentation} from './types/Base';
 export {Base, BaseClass, Annotation, Documentation};
-import {Schema, Root} from './types/Schema';
-export {Schema, Root};
-import {MemberBase} from './types/MemberBase';
-export {MemberBase};
-import {Element} from './types/Element';
-export {Element};
-import {Group, Sequence, Choice, All} from './types/Group';
-export {Group, Sequence, Choice, All};
-import {Attribute, AnyAttribute, AttributeGroup} from './types/Attribute';
-export {Attribute, AnyAttribute, AttributeGroup};
-import {TypeBase, Primitive} from './types/Primitive';
-export {TypeBase, Primitive};
-import {SimpleType, ComplexType, SimpleContent, ComplexContent} from './types/ComplexType';
-export {SimpleType, ComplexType, SimpleContent, ComplexContent};
-import {Extension, Restriction} from './types/Extension';
-export {Extension, Restriction};
-import {Import, Include} from './types/Import';
-export {Import, Include};
+export {Schema, Root} from './types/Schema';
+export {MemberBase} from './types/MemberBase';
+export {Element} from './types/Element';
+export {Group, Sequence, Choice, All} from './types/Group';
+export {Attribute, AnyAttribute, AttributeGroup} from './types/Attribute';
+export {TypeBase, Primitive} from './types/Primitive';
+export {SimpleType, ComplexType, SimpleContent, ComplexContent} from './types/ComplexType';
+export {Extension, Restriction} from './types/Extension';
+export {Import, Include} from './types/Import';
 
 export class MissingReferenceError extends Error {
 	constructor(tag: Base, state: State, type: string, ref: QName) {
