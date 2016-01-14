@@ -4,6 +4,12 @@
 import {Type} from './Type';
 
 export class Member {
+	constructor(name: string, min: number, max: number) {
+		this.name = name;
+		this.min = min;
+		this.max = max;
+	}
+
 	name: string;
 
 	min: number;

@@ -41,7 +41,7 @@ export class Namespace {
 			importNameTbl = {};
 
 			for(var id = 0; id < namespaceCount; ++id) {
-				if(this.namespaceUsedList[id]) {
+				if(this.namespaceUsedList[id] && id != this.id) {
 					var short = this.getShortRef(id);
 					if(short) importNameTbl[short] = id;
 				}
@@ -49,6 +49,10 @@ export class Namespace {
 		}
 
 		return(importNameTbl);
+	}
+
+	addType(type: Type) {
+		this.typeList.push(type);
 	}
 
 	exportTS(exporter: any) {
@@ -85,8 +89,8 @@ export class Namespace {
 	name: string;
 	cachePath: string;
 
-	typeList: Type[];
-	childList: Member[];
+	typeList: Type[] = [];
+	childList: Member[] = [];
 
 	private refList: NamespaceRef[];
 	private refTbl: {[namespaceId: number]: NamespaceRef};

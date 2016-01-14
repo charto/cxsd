@@ -17,4 +17,6 @@ export class Type {
 	parent: Type;
 
 	comment: string;
+
+	exported: boolean;
 }
