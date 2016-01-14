@@ -141,7 +141,7 @@ export class ExporterTS {
 
 		if(outTypeList.length == 0) return('');
 
-		var outTypes = outTypeList.join(' | ');
+		var outTypes = outTypeList.sort().join(' | ');
 		var suffix = '';
 
 		if(group.max > 1) suffix = '[]';
@@ -224,26 +224,30 @@ export class ExporterTS {
 			}
 		}
 
-		for(var group of ExporterTS.mergeDuplicateElements(specList)) {
-			var outElement = this.exportMember(indent, syntaxPrefix, group, outputAttributesAndOptionalFlags);
-			if(outElement) output.push(outElement);
-		}
-
 		if(outputAttributesAndOptionalFlags) {
 			var attributeTbl = scope.dumpAttributes();
 
-			for(var key of Object.keys(attributeTbl)) {
+			for(var key of Object.keys(attributeTbl).sort()) {
 				var spec = attributeTbl[key];
 				var attribute = spec.item as types.Attribute;
+
 				group = {
 					min: spec.min,
 					max: spec.max,
 					item: attribute,
 					typeList: attribute.getTypes()
 				};
+
 				var outAttribute = this.exportMember(indent, syntaxPrefix, group, outputAttributesAndOptionalFlags);
 				if(outAttribute) output.push(outAttribute);
 			}
+		}
+
+		var groupList = ExporterTS.mergeDuplicateElements(specList);
+
+		for(var group of groupList) {
+			var outElement = this.exportMember(indent, syntaxPrefix, group, outputAttributesAndOptionalFlags);
+			if(outElement) output.push(outElement);
 		}
 
 		return(output.join('\n'));
@@ -308,8 +312,8 @@ export class ExporterTS {
 
 		output.push('// Source files:');
 
-		for(var source of sourceList) {
-			output.push('// ' + source.url);
+		for(var urlRemote of sourceList.map((source: Source) => source.url).sort()) {
+			output.push('// ' + urlRemote);
 		}
 
 		return(output.join('\n'));
@@ -353,26 +357,35 @@ export class ExporterTS {
 			}
 		}
 
-		for(var key of Object.keys(typeTbl)) {
+		for(var key of Object.keys(typeTbl).sort()) {
 			outTypes.push(this.exportType('', 'export ', typeTbl[key].item));
 		}
 
 		outTypes.push(this.exportTypeMembers('', 'export var ', scope, false));
 		outTypes.push('');
 
-		var importKeyList = Object.keys(this.namespaceUsedTbl);
+		var importIdList = Object.keys(this.namespaceUsedTbl);
 		var importList: Namespace[] = [];
 
-		if(importKeyList.length) {
-			for(var key of importKeyList) {
-				var namespace = this.namespaceUsedTbl[key];
+		if(importIdList.length) {
+			var outNameTbl: {[short: string]: Namespace} = {};
 
-				if(!this.shortNameTbl[key] || !this.shortNameTbl[key].length) continue;
+			for(var key of importIdList) {
+				var namespace = this.namespaceUsedTbl[key];
+				var shortNameList = this.shortNameTbl[key];
+
+				if(!shortNameList || !shortNameList.length) continue;
+
+				outNameTbl[shortNameList[0]] = namespace;
+			}
+
+			for(var shortName of Object.keys(outNameTbl).sort()) {
+				var namespace = outNameTbl[shortName];
 
 				importList.push(namespace);
 				outImports.push(
 					'import * as ' +
-					this.shortNameTbl[key][0] +
+					shortName +
 					' from ' +
 					"'" + this.getPathTo(namespace) + "';"
 				);
