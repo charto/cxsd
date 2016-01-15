@@ -1,7 +1,7 @@
 // This file is part of fast-xml, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {Base} from './Base';
+import {Base, BaseClass} from './Base';
 import {State} from '../State';
 import {QName} from '../QName';
 import * as schema from '../../schema';
@@ -31,6 +31,26 @@ export class TypeBase extends Base {
 		}
 
 		return(outType);
+	}
+
+	/** Find parent type inheriting from a base type. */
+
+	getParent(base: BaseClass, breakAtContent: boolean) {
+		var next: TypeBase | QName = this;
+		var type: TypeBase | QName;
+		/** Maximum iterations in case type inheritance forms a loop. */
+		var iter = 100;
+
+		while(--iter) {
+			type = next;
+
+			if(!(type instanceof TypeBase)) break;
+			else if(type instanceof base) return(type);
+			else if(breakAtContent && type.scope && type.scope.hasAttributes()) break;
+			else next = type.parent;
+		}
+
+		return(null);
 	}
 
 	id: string = null;

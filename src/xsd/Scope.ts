@@ -140,6 +140,14 @@ console.log('Missing ' + type + ': ' + name.name);
 		return((this.expose['attribute'] || {}) as {[name: string]: TypeMember});
 	}
 
+	hasAttributes() {
+		var tbl = this.expose['attribute'];
+
+		for(var key in tbl) if(tbl.hasOwnProperty(key)) return(true);
+
+		return(false);
+	}
+
 	static getPrimitiveScope() {
 		var scope = this.primitiveScope;
 

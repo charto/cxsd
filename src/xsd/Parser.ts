@@ -187,7 +187,11 @@ export class Parser {
 	/** Bind references, call after all imports have been initialized. */
 	resolve() {
 		try {
-			this.pendingList.forEach((state: State) => state.xsdElement.resolve(state));
+			for(var pos = 0; pos < this.pendingList.length; ++pos) {
+				var state = this.pendingList[pos];
+				state.xsdElement.resolve(state);
+			}
+
 			this.pendingList = [];
 		} catch(err) {
 			console.error(err);

@@ -14,6 +14,16 @@ export class SimpleType extends types.TypeBase {
 		List,
 		Union
 	];
+
+	setEnumerationList(enumerationList: string[]) {
+		this.enumerationList = enumerationList;
+	}
+
+	getEnumerationList() {
+		return(this.enumerationList);
+	}
+
+	private enumerationList: string[];
 }
 
 /** <xsd:complextype> */

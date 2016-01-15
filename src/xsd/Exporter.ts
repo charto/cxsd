@@ -162,20 +162,32 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 	var outType = type.getOutType();
 	outType.comment = comment;
 
-	var parent = type.parent;
+	var parentPrimitive = type.getParent(types.Primitive, true);
 
-	if(parent && parent instanceof types.Primitive) {
-		// TODO: if parent is a string restricted to enumerated alternatives, output those instead.
-		outType.primitiveList = [parent.name];
-	} else {
-		if(parent instanceof types.TypeBase) {
-			outType.parent = parent.getOutType();
-			namespace.markUsed(parent.qName.namespace.id);
+	if(parentPrimitive) {
+		var primitiveList: string[];
+		var parentSimple = type.getParent(types.SimpleType, false) as types.SimpleType;
+
+		if(parentSimple) {
+			// If parent is restricted to enumerated alternatives, output those instead.
+			primitiveList = parentSimple.getEnumerationList();
+			if(primitiveList) primitiveList = primitiveList.map((content: string) => '"' + content + '"');
 		}
 
-		outType.attributeList = exportAttributes(scope, namespace);
-		outType.childList = exportChildren(scope, namespace);
+		if(!primitiveList) primitiveList = [parentPrimitive.name];
+
+		outType.primitiveList = primitiveList;
 	}
+
+	var parent = type.parent;
+
+	if(parent instanceof types.TypeBase && parent != parentPrimitive) {
+		outType.parent = parent.getOutType();
+		if(parent.qName) namespace.markUsed(parent.qName.namespace.id);
+	}
+
+	outType.attributeList = exportAttributes(scope, namespace);
+	outType.childList = exportChildren(scope, namespace);
 
 	return(outType);
 }

@@ -10,8 +10,9 @@ export class Type {
 		var output: string[] = [];
 
 		if(this.primitiveList && this.primitiveList.length) {
-			//TODO: if parent is a string restricted to enumerated alternatives, output them joined with pipe characters.
-			output.push(this.primitiveList[0]);
+			if(this.primitiveList.length > 1) {
+				output.push('(' + this.primitiveList.join(' | ') + ')');
+			} else output.push(this.primitiveList[0]);
 		} else {
 			var members = this.exportMembersTS(namespace, indent + '\t', '');
 
