@@ -13,7 +13,7 @@ export class TypeBase extends Base {
 		this.surrogateKey = TypeBase.nextKey++;
 	}
 
-	getOutType() {
+	getOutType(): schema.Type {
 		var outType = this.outType;
 
 		if(!outType) {

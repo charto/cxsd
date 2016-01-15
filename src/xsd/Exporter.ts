@@ -193,7 +193,7 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 
 /** Export parsed xsd into a simpler internal schema format. */
 
-export function exportNamespace(namespace: Namespace) {
+export function exportNamespace(namespace: Namespace): schema.Type {
 	var outNamespace = schema.Namespace.register(namespace.id, namespace.name);
 	var doc = outNamespace.doc;
 

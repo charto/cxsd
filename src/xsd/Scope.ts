@@ -126,7 +126,7 @@ console.log('Missing ' + type + ': ' + name.name);
 		this.parent.setType(type);
 	}
 
-	getType() { return(this.type); }
+	getType(): types.TypeBase { return(this.type); }
 
 	dumpTypes() {
 		return((this.expose['type'] || {}) as {[name: string]: TypeMember});

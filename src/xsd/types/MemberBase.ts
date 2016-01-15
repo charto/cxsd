@@ -32,7 +32,7 @@ export class MemberBase extends types.Base {
 		return(member);
 	}
 
-	getTypes() {
+	getTypes(): types.TypeBase[] {
 		var typeList: types.TypeBase[];
 
 		// Filter out types of unresolved elements.
