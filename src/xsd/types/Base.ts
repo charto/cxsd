@@ -79,34 +79,3 @@ export class Base {
 	static name: string;
 	static rule: Rule;
 }
-
-/** <xsd:annotation> */
-
-export class Annotation extends Base {
-	static mayContain: () => BaseClass[] = () => [
-		Documentation
-	];
-}
-
-/** <xsd:documentation>
-  * Works like a comment usable in almost any part of the schema. */
-
-export class Documentation extends Base {
-	init(state: State) {
-		state.startText(this);
-	}
-
-	addText(state: State, text: string) {
-		this.commentList.push(text);
-	}
-
-	loaded(state: State) {
-		state.endText();
-	}
-
-	resolve(state: State) {
-		this.scope.addCommentsToGrandParent(this.commentList);
-	}
-
-	commentList: string[] = [];
-}

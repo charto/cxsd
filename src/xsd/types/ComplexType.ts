@@ -41,6 +41,8 @@ export class ContentBase extends types.Base {
 	resolve(state: State) {
 		(state.parent.xsdElement as types.TypeBase).parent = this.parent;
 
+		// Pass elements and attributes defined in child extension or restriction
+		// onwards to the parent type definition.
 		this.scope.addAllToParent('element');
 		this.scope.addAllToParent('attribute');
 	}

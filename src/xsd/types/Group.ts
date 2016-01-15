@@ -3,8 +3,8 @@
 
 import {State} from '../State';
 import {QName} from '../QName';
-import * as types from '../types';
 import {ElementLike} from './Element';
+import * as types from '../types';
 
 export class GroupBase extends types.Base implements ElementLike {
 	init(state: State) {

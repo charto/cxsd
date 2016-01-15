@@ -4,7 +4,6 @@
 import * as types from './types';
 import {Namespace} from './Namespace'
 import {QName} from './QName'
-import {TypeBase, Primitive} from './types/Primitive';
 
 export interface TypeMember {
 	min: number;
@@ -63,6 +62,7 @@ export class Scope {
 	}
 
 	addAllToParent(type: string, min = 1, max = 1, target?: Scope) {
+		// Check if there's anything to add.
 		if(!this.visible[type]) return;
 		if(!target) target = this;
 		target = target.parent;
@@ -144,8 +144,8 @@ console.log('Missing ' + type + ': ' + name.name);
 		var scope = this.primitiveScope;
 
 		if(!scope) {
-			var typeTbl: {[name: string]: Primitive} = {};
-			var spec = Primitive.getTypes();
+			var typeTbl: {[name: string]: types.Primitive} = {};
+			var spec = types.Primitive.getTypes();
 
 			for(var name in spec) {
 				if(spec.hasOwnProperty(name)) typeTbl['*:' + name] = spec[name];

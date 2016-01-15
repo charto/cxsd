@@ -3,7 +3,6 @@
 
 import {State} from '../State';
 import * as types from '../types';
-import {Group} from './Group';
 
 /** Schema root element */
 

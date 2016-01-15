@@ -3,9 +3,9 @@
 
 import {State} from '../State';
 import {QName} from '../QName';
-import * as types from '../types';
 import {MemberBase} from './MemberBase';
-import {TypeBase} from './Primitive';
+import {TypeBase} from './TypeBase';
+import * as types from '../types';
 
 export interface ElementLike {
 	id: string;
