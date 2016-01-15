@@ -174,9 +174,8 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 			if(primitiveList) primitiveList = primitiveList.map((content: string) => '"' + content + '"');
 		}
 
-		if(!primitiveList) primitiveList = [parentPrimitive.name];
-
 		outType.primitiveList = primitiveList;
+		outType.literalType = parentPrimitive.name;
 	}
 
 	var parent = type.parent;

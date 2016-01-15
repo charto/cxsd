@@ -9,10 +9,12 @@ export class Type {
 	exportContentTS(namespace: Namespace, indent: string) {
 		var output: string[] = [];
 
-		if(this.primitiveList && this.primitiveList.length) {
-			if(this.primitiveList.length > 1) {
-				output.push('(' + this.primitiveList.join(' | ') + ')');
-			} else output.push(this.primitiveList[0]);
+		if(this.literalType) {
+			if(this.primitiveList && this.primitiveList.length > 0) {
+				if(this.primitiveList.length > 1) {
+					output.push('(' + this.primitiveList.join(' | ') + ')');
+				} else output.push(this.primitiveList[0]);
+			} else output.push(this.literalType);
 		} else {
 			var members = this.exportMembersTS(namespace, indent + '\t', '');
 
@@ -44,7 +46,7 @@ export class Type {
 
 		var content = this.exportContentTS(namespace, indent);
 
-		if(this.primitiveList && this.primitiveList.length) {
+		if(this.literalType) {
 			output.push(indent + syntaxPrefix + 'type ' + this.name + ' = ' + content + ';');
 		} else {
 			if(this.parent) parentDef = ' extends ' + this.parent.exportRefTS(namespace, indent + '\t');
@@ -114,12 +116,18 @@ export class Type {
 	name: string;
 	namespace: Namespace;
 
-//	aliasable: boolean;	// Type can be represented as a type alias in TypeScript if attributeList and childList are empty, and it has no name.
+	/** JavaScript type name, if the XML type only contains single value
+	  * that can be parsed into a JavaScript value. */
+	literalType: string;
+	/** List of allowed literal values, if such a restriction is defined. */
 	primitiveList: string[];
 
+	/** XML attributes in an element of this type. */
 	attributeList: Member[];
+	/** Allowed child elements for an element of this type. */
 	childList: Member[];
 
+	/** Parent type this is derived from. */
 	parent: Type;
 
 	comment: string;

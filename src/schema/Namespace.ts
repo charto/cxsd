@@ -93,11 +93,13 @@ export class Namespace {
 	name: string;
 	cachePath: string;
 
+	/** Invisible document element defining the types of XML file root elements. */
 	doc: Type;
 
+	/** Types of all elements in the document. */
 	typeList: Type[] = [];
-//	childList: Member[] = [];
 
+	/** List of URL addresses of files with definitions for this namespace. */
 	sourceList: string[];
 
 	exported: boolean;

@@ -7,11 +7,6 @@ import * as Promise from 'bluebird';
 import {Address, Cache} from 'cget'
 import {Namespace} from './Namespace';
 import {Type} from './Type';
-//import {Scope, TypeMember} from './Scope';
-//import {Source} from './Source';
-//import {QName} from './QName';
-//import * as types from './types';
-//import * as schema from '../schema';
 
 /** Export parsed schema to a TypeScript d.ts definition file. */
 
