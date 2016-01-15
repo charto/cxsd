@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"declaration": false,
+		"declaration": true,
 		"experimentalDecorators": true,
 		"module": "commonjs",
 		"moduleResolution": "node",
@@ -9,9 +9,7 @@
 		"target": "es5"
 	},
 	"files": [
-		"typings/node/node.d.ts",
-		"typings/request/request.d.ts",
-		"typings/bluebird/bluebird.d.ts",
+		"typings/tsd.d.ts",
 		"typings-custom/node-expat.d.ts",
 
 		"src/xsd.ts"
