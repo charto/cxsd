@@ -1,5 +1,5 @@
-fast-xml
-========
+cxml
+====
 
 (Currently incomplete and not operational) streaming XML parser using node-expat (requires node-gyp to compile).
 

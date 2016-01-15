@@ -1,11 +1,12 @@
 {
-  "name": "fast-xml",
+  "name": "cxml",
   "version": "0.0.2",
-  "description": "(incomplete) fast XML parser with XSD support",
+  "description": "(incomplete) fast schema-aware XML parser with XSD support",
   "main": "index.js",
   "scripts": {
+    "tsc": "tsc",
     "tsd": "tsd",
-    "prepublish": "tsc",
+    "prepublish": "tsd install && tsc",
     "test": "node index.js"
   },
   "author": "Juha Järvi",
@@ -21,10 +22,10 @@
   "dependencies": {
     "bluebird": "~3.1.1",
     "cget": "~0.0.3",
-    "node-expat": "~2.3.11"
+    "node-expat": "~2.3.12"
   },
   "devDependencies": {
     "tsd": "~0.6.5",
-    "typescript": "^1.8.0-dev.20151204"
+    "typescript": "~1.8.0-dev.20160114"
   }
 }

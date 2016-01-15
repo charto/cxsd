@@ -1,4 +1,4 @@
-// This file is part of fast-xml, copyright (c) 2015-2016 BusFaster Ltd.
+// This file is part of cxml, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
 import {Base, BaseClass} from './Base';
