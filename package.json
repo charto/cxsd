@@ -1,6 +1,6 @@
 {
   "name": "cxml",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "(incomplete) fast schema-aware XML parser with XSD support",
   "main": "index.js",
   "scripts": {
