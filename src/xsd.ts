@@ -5,7 +5,7 @@ import {Cache} from 'cget';
 import {Namespace} from './xsd/Namespace';
 import {Loader} from './xsd/Loader';
 import {exportNamespace} from './xsd/Exporter';
-import {ExporterTS} from './schema/ExporterTS';
+import * as schema from './schema';
 
 Cache.patchRequest();
 
@@ -18,7 +18,7 @@ var loader = new Loader({
 
 loader.import(process.argv[2]).then((namespace: Namespace) => {
 	try {
-		new ExporterTS(exportNamespace(namespace)).export();
+		new schema.exporter.TS(exportNamespace(namespace)).export();
 	} catch(err) {
 		console.log(err);
 		console.log(err.stack);

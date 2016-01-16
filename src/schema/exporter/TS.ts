@@ -1,23 +1,15 @@
 // This file is part of cxml, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as path from 'path';
 import * as Promise from 'bluebird';
 
-import {Address, Cache} from 'cget'
-import {Namespace} from './Namespace';
-import {Type} from './Type';
+import {Cache} from 'cget'
+import {Exporter} from './Exporter';
+import {Namespace} from '../Namespace';
 
 /** Export parsed schema to a TypeScript d.ts definition file. */
 
-export class ExporterTS {
-	constructor(doc: Type) {
-		this.doc = doc;
-
-		this.cacheDir = path.dirname(
-			ExporterTS.cache.getCachePathSync(new Address(doc.namespace.name))
-		);
-	}
+export class TS extends Exporter {
 
 	/** Format an XSD annotation as JSDoc. */
 
@@ -54,6 +46,7 @@ export class ExporterTS {
 	}
 
 	/** Output list of original schema file locations. */
+
 	exportSourceList(sourceList: string[]) {
 		var output: string[] = [];
 
@@ -64,18 +57,6 @@ export class ExporterTS {
 		}
 
 		return(output.join('\n'));
-	}
-
-	/** Output namespace contents, if not already exported. */
-
-	export(): Promise<Namespace> {
-		if(!this.doc) return(null);
-
-		var outName = this.doc.namespace.name + '.d.ts';
-
-		return(ExporterTS.cache.ifCached(outName).then((isCached: boolean) =>
-			isCached ? this.doc.namespace : this.forceExport(outName)
-		));
 	}
 
 	/** Output namespace contents to the given cache key. */
@@ -106,7 +87,7 @@ export class ExporterTS {
 			(shortName: string) => Namespace.byId(importNameTbl[shortName])
 		);
 
-		return(ExporterTS.cache.store(
+		return(this.getCache().store(
 			outName,
 			[].concat(
 				outImports,
@@ -115,24 +96,18 @@ export class ExporterTS {
 			).join('\n')
 		).then(() => Promise.map(
 			importList,
-			(namespace: Namespace) => new ExporterTS(namespace.doc).export()
+			(namespace: Namespace) => new TS(namespace.doc).export()
 		).then(() => namespace)))
 	}
 
-	/** Get relative path to another namespace within the cache. */
+	getCache() {
+		return(TS.cache);
+	}
 
-	getPathTo(name: string) {
-		return(path.relative(
-			this.cacheDir,
-			ExporterTS.cache.getCachePathSync(new Address(name))
-		));
+	getOutName(name: string) {
+		return(name + '.d.ts');
 	}
 
 	/** Cache where all output is written. */
 	private static cache = new Cache('cache/js', '_index.js');
-
-	private doc: Type;
-
-	/** Full path of directory containing exported output for the current namespace. */
-	private cacheDir: string;
 }

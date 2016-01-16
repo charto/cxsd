@@ -3,7 +3,7 @@
 
 import {Namespace} from './Namespace';
 import {Member} from './Member';
-import {ExporterTS} from './ExporterTS';
+import * as exporter from './exporter';
 
 export class Type {
 	exportContentTS(namespace: Namespace, indent: string) {
@@ -40,7 +40,7 @@ export class Type {
 		this.exported = true;
 
 		if(comment) {
-			output.push(ExporterTS.formatComment(indent, comment));
+			output.push(exporter.TS.formatComment(indent, comment));
 			output.push('\n');
 		}
 

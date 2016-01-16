@@ -3,7 +3,7 @@
 
 import {Namespace} from './Namespace';
 import {Type} from './Type';
-import {ExporterTS} from './ExporterTS';
+import * as exporter from './exporter';
 
 export class Member {
 	constructor(name: string, min: number, max: number) {
@@ -20,7 +20,7 @@ export class Member {
 		var comment = this.comment;
 
 		if(comment) {
-			output.push(ExporterTS.formatComment(indent, comment));
+			output.push(exporter.TS.formatComment(indent, comment));
 			output.push('\n');
 		}
 

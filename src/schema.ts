@@ -4,3 +4,5 @@
 export {Namespace} from './schema/Namespace';
 export {Type} from './schema/Type';
 export {Member} from './schema/Member';
+import * as exporter from './schema/exporter';
+export {exporter}
