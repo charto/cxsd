@@ -66,12 +66,33 @@ export class Namespace {
 				'import * as ' +
 				shortName +
 				' from ' +
-				"'" + exporter.getPathTo(namespace.name) + "';"
+				"'" + exporter.getPathTo(namespace.name) + "'" +
+				';'
 			);
 		}
 
 		output.push('');
-		return(output.join('\n'));
+		return(output);
+	}
+
+	exportHeaderCJS(exporter: any) {
+		var output: string[] = [];
+		var importNameTbl = this.getImports();
+
+		for(var shortName of Object.keys(importNameTbl).sort()) {
+			var namespace = Namespace.list[importNameTbl[shortName]];
+
+			output.push(
+				'var ' +
+				shortName +
+				' = require(' +
+				"'" + exporter.getPathTo(namespace.name) + "'" +
+				');'
+			);
+		}
+
+		output.push('');
+		return(output);
 	}
 
 	static register(id: number, name: string) {

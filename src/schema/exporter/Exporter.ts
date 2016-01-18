@@ -2,6 +2,7 @@
 // Released under the MIT license, see LICENSE.
 
 import * as path from 'path';
+import * as Promise from 'bluebird';
 
 import {Address, Cache} from 'cget'
 import {Namespace} from '../Namespace';
@@ -30,18 +31,42 @@ export abstract class Exporter {
 
 	/** Output namespace contents to the given cache key. */
 
-	abstract forceExport(outName: string): Promise<Namespace>;
+	forceExport(outName: string): Promise<Namespace> {
+		var doc = this.doc;
+		var namespace = doc.namespace;
+
+		var importNameTbl = namespace.getImports();
+		var importList = Object.keys(importNameTbl).map(
+			(shortName: string) => Namespace.byId(importNameTbl[shortName])
+		);
+
+		return(this.getCache().store(
+			outName,
+			this.handleExport()
+		).then(() => Promise.map(
+			importList,
+			(namespace: Namespace) => new this.construct(namespace.doc).export()
+		).then(() => namespace)))
+	}
+
+	abstract handleExport(): string;
 
 	/** Get relative path to another namespace within the cache. */
 
 	getPathTo(name: string) {
-		return(path.relative(
+		var relPath = path.relative(
 			this.cacheDir,
 			this.getCache().getCachePathSync(new Address(name))
-		));
+		).replace(new RegExp(path.sep, 'g'), '/');
+
+		if(relPath.indexOf('/') < 0) relPath = './' + relPath;
+
+		return(relPath);
 	}
 
 	abstract getCache(): Cache;
+
+	construct: { new(...args: any[]): Exporter; };
 
 	protected abstract getOutName(name: string): string;
 

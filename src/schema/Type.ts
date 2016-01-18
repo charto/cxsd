@@ -5,6 +5,10 @@ import {Namespace} from './Namespace';
 import {Member} from './Member';
 import * as exporter from './exporter';
 
+function sanitizeName(name: string) {
+	return(name.replace(/[^_0-9A-Za-z]/g, '').replace(/^[^A-Za-z]+/, ''));
+}
+
 export class Type {
 	exportContentTS(namespace: Namespace, indent: string) {
 		var output: string[] = [];
@@ -37,6 +41,8 @@ export class Type {
 		var comment = this.comment;
 		var parentDef = '';
 
+		var name = sanitizeName(this.name);
+
 		this.exported = true;
 
 		if(comment) {
@@ -47,10 +53,17 @@ export class Type {
 		var content = this.exportContentTS(namespace, indent);
 
 		if(this.literalType) {
-			output.push(indent + syntaxPrefix + 'type ' + this.name + ' = ' + content + ';');
+			output.push(indent + syntaxPrefix + 'type ' + name + ' = ' + content + ';');
 		} else {
-			if(this.parent) parentDef = ' extends ' + this.parent.exportRefTS(namespace, indent + '\t');
-			output.push(indent + syntaxPrefix + 'interface ' + this.name + parentDef + ' ' + content);
+			if(this.parent) {
+				if(this.parent.literalType) {
+					// TODO: extend a literal type class.
+				} else {
+					parentDef = ' extends ' + this.parent.exportRefTS(namespace, indent + '\t', '_');
+				}
+			}
+			output.push(indent + syntaxPrefix + 'interface _' + name + parentDef + ' ' + content + '\n');
+			output.push(indent + syntaxPrefix + 'interface ' + name + ' extends _' + name + ' { new(): ' + name + '; }');
 		}
 
 		return(output.join(''));
@@ -60,14 +73,15 @@ export class Type {
 
 	exportMembersTS(namespace: Namespace, indent: string, syntaxPrefix: string) {
 		var output: string[] = [];
+		var parentType = this.parent;
 
 		for(var attribute of this.attributeList) {
-			var outAttribute = attribute.exportTS(namespace, indent, syntaxPrefix, true);
+			var outAttribute = attribute.exportTS(namespace, indent, '$' + syntaxPrefix, parentType, true);
 			if(outAttribute) output.push(outAttribute);
 		}
 
 		for(var child of this.childList) {
-			var outElement = child.exportTS(namespace, indent, syntaxPrefix, true);
+			var outElement = child.exportTS(namespace, indent, syntaxPrefix, parentType, true);
 			if(outElement) output.push(outElement);
 		}
 
@@ -77,25 +91,26 @@ export class Type {
 	/** Output a reference to a type, for example the type of a member inside
 	  * an interface declaration. */
 
-	exportRefTS(outNamespace: Namespace, indent: string) {
+	exportRefTS(outNamespace: Namespace, indent: string, prefix = '') {
 		var output: string[] = [];
 
 		if(this.name) {
 			var namespace = this.namespace;
+			var name = prefix + sanitizeName(this.name);
 
 			if(!namespace || namespace == outNamespace) {
-				output.push(this.name);
+				output.push(name);
 			} else {
 				// Type from another, imported namespace.
 
 				var short = outNamespace.getShortRef(namespace.id);
 
-				if(!short) {
-					console.error('MISSING IMPORT ' + namespace.name);
-					short = 'ERROR';
+				if(short) {
+					output.push(short + '.' + name);
+				} else {
+					console.error('MISSING IMPORT ' + namespace.name + ' for type ' + this.name);
+					output.push('any');
 				}
-
-				output.push(short + '.' + this.name);
 			}
 		} else if(this.exported) {
 			// TODO: Generate names for all circularly defined types so this never happens!
@@ -113,6 +128,32 @@ export class Type {
 		return(output.join(''));
 	}
 
+	buildMemberTbl() {
+		var member: Member;
+
+		var tbl = this.memberTbl;
+		tbl = {};
+
+		for(member of this.attributeList) tbl[member.name] = member;
+		for(member of this.childList) tbl[member.name] = member;
+
+		this.memberTbl = tbl;
+	}
+
+/*
+	getMember(name: string) {
+		var type: Type = this;
+		var member: Member;
+
+		do {
+			if(type.memberTbl) member = type.memberTbl[name];
+			type = type.parent;
+		} while(!member && type);
+
+		return(member);
+	}
+*/
+
 	name: string;
 	namespace: Namespace;
 
@@ -122,6 +163,7 @@ export class Type {
 	/** List of allowed literal values, if such a restriction is defined. */
 	primitiveList: string[];
 
+	memberTbl: {[name: string]: Member};
 	/** XML attributes in an element of this type. */
 	attributeList: Member[];
 	/** Allowed child elements for an element of this type. */

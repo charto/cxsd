@@ -5,6 +5,10 @@ import {Namespace} from './Namespace';
 import {Type} from './Type';
 import * as exporter from './exporter';
 
+function sanitizeName(name: string) {
+	return(name.replace(/[^_0-9A-Za-z]/g, '').replace(/^[^A-Za-z]+/, ''));
+}
+
 export class Member {
 	constructor(name: string, min: number, max: number) {
 		this.name = name;
@@ -15,7 +19,7 @@ export class Member {
 	/** Output an element, which can be an exported variable
 	  * or a member of an interface. */
 
-	exportTS(namespace: Namespace, indent: string, syntaxPrefix: string, outputOptionalFlags: boolean) {
+	exportTS(namespace: Namespace, indent: string, syntaxPrefix: string, parentType: Type, outputOptionalFlags: boolean) {
 		var output: string[] = [];
 		var comment = this.comment;
 
@@ -24,7 +28,34 @@ export class Member {
 			output.push('\n');
 		}
 
-		output.push(indent + syntaxPrefix + this.name);
+		// TODO: propagate max and sanitize names in a separate transform step.
+		// Topologically sort dependencies to start processing from root types,
+		// to avoid continuing search after one parent with a matching member is found.
+
+		var name = sanitizeName(this.name);
+		var max = this.max;
+
+		// Ensure maximum allowed occurrence count is no less than in parent types,
+		// because overriding a parent class member with a different type
+		// (array vs non-array) doesn't compile.
+
+		if(max < 2 && parentType) {
+			var type = parentType;
+			var member: Member;
+
+			do {
+				if(type.memberTbl) {
+					member = type.memberTbl[this.name];
+					if(member && member.max > max) {
+						max = member.max;
+						if(max > 1) break;
+					}
+				}
+				type = type.parent;
+			} while(type);
+		}
+
+		output.push(indent + syntaxPrefix + name);
 		if(outputOptionalFlags && this.min == 0) output.push('?');
 		output.push(': ');
 
@@ -37,7 +68,7 @@ export class Member {
 		var outTypes = outTypeList.sort().join(' | ');
 		var suffix = '';
 
-		if(this.max > 1) suffix = '[]';
+		if(max > 1) suffix = '[]';
 
 		if(suffix && outTypeList.length > 1) outTypes = '(' + outTypes + ')';
 

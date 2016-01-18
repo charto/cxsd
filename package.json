@@ -2,7 +2,10 @@
   "name": "cxml",
   "version": "0.0.3",
   "description": "(incomplete) fast schema-aware XML parser with XSD support",
-  "main": "index.js",
+  "main": "dist/cxml.js",
+  "bin": {
+    "cxml": "dist/cli.js"
+  },
   "scripts": {
     "tsc": "tsc",
     "tsd": "tsd",

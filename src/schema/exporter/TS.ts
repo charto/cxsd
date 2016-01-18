@@ -1,8 +1,6 @@
 // This file is part of cxml, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as Promise from 'bluebird';
-
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
 import {Namespace} from '../Namespace';
@@ -56,48 +54,31 @@ export class TS extends Exporter {
 			output.push('// ' + urlRemote);
 		}
 
-		return(output.join('\n'));
+		output.push('');
+		return(output);
 	}
 
-	/** Output namespace contents to the given cache key. */
-
-	forceExport(outName: string): Promise<Namespace> {
-		var outImports: string[] = [];
+	handleExport(): string {
 		var outTypes: string[] = [];
 		var doc = this.doc;
 		var namespace = doc.namespace;
-
-		var outSources = [this.exportSourceList(namespace.sourceList), ''];
 
 		for(var type of namespace.typeList) {
 			outTypes.push(type.exportTS(namespace, '', 'export '));
 		}
 
 		for(var child of doc.childList) {
-			var outElement = child.exportTS(namespace, '', 'export var ', false);
+			var outElement = child.exportTS(namespace, '', 'export var ', null, false);
 			if(outElement) outTypes.push(outElement);
 		}
 
 		outTypes.push('');
 
-		outImports.push(namespace.exportHeaderTS(this));
-
-		var importNameTbl = namespace.getImports();
-		var importList = Object.keys(importNameTbl).map(
-			(shortName: string) => Namespace.byId(importNameTbl[shortName])
-		);
-
-		return(this.getCache().store(
-			outName,
-			[].concat(
-				outImports,
-				outSources,
-				outTypes
-			).join('\n')
-		).then(() => Promise.map(
-			importList,
-			(namespace: Namespace) => new TS(namespace.doc).export()
-		).then(() => namespace)))
+		return([].concat(
+			namespace.exportHeaderTS(this),
+			this.exportSourceList(namespace.sourceList),
+			outTypes
+		).join('\n'));
 	}
 
 	getCache() {
@@ -107,6 +88,8 @@ export class TS extends Exporter {
 	getOutName(name: string) {
 		return(name + '.d.ts');
 	}
+
+	construct = TS;
 
 	/** Cache where all output is written. */
 	private static cache = new Cache('cache/js', '_index.js');

@@ -10,8 +10,22 @@ import {Namespace} from '../Namespace';
 export class JS extends Exporter {
 	/** Output namespace contents to the given cache key. */
 
-	forceExport(outName: string): Promise<Namespace> {
-		return(null);
+	handleExport(): string {
+		var doc = this.doc;
+		var namespace = doc.namespace;
+
+		var importNameTbl = namespace.getImports();
+		var importList = Object.keys(importNameTbl);
+
+		console.log(namespace.name);
+
+		return([].concat(
+			[
+				'var cxml = require("cxml");',
+			],
+			namespace.exportHeaderCJS(this),
+			['cxml.register("' + namespace.name + '", exports, [' + importList.join(', ') + ']);']
+		).join('\n'));
 	}
 
 	getCache() {
@@ -21,6 +35,8 @@ export class JS extends Exporter {
 	getOutName(name: string) {
 		return(name + '.js');
 	}
+
+	construct = JS;
 
 	/** Cache where all output is written. */
 	private static cache = new Cache('cache/js', '_index.js');

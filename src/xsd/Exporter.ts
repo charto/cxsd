@@ -187,6 +187,7 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 
 	outType.attributeList = exportAttributes(scope, namespace);
 	outType.childList = exportChildren(scope, namespace);
+	outType.buildMemberTbl();
 
 	return(outType);
 }
@@ -196,6 +197,13 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 export function exportNamespace(namespace: Namespace): schema.Type {
 	var outNamespace = schema.Namespace.register(namespace.id, namespace.name);
 	var doc = outNamespace.doc;
+
+	var spec = types.Primitive.getTypes();
+
+	for(var name of Object.keys(spec)) {
+		var type = spec[name];
+		type.getOutType().literalType = type.name;
+	}
 
 	if(!doc) {
 		var scope = namespace.getScope();

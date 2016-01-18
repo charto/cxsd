@@ -18,7 +18,9 @@ var loader = new Loader({
 
 loader.import(process.argv[2]).then((namespace: Namespace) => {
 	try {
-		new schema.exporter.TS(exportNamespace(namespace)).export();
+		var spec = exportNamespace(namespace);
+		new schema.exporter.JS(spec).export();
+		new schema.exporter.TS(spec).export();
 	} catch(err) {
 		console.log(err);
 		console.log(err.stack);
