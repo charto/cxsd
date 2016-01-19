@@ -5,11 +5,11 @@ import {Namespace} from './Namespace';
 import {Member} from './Member';
 import * as exporter from './exporter';
 
-function sanitizeName(name: string) {
-	return(name.replace(/[^_0-9A-Za-z]/g, '').replace(/^[^A-Za-z]+/, ''));
-}
-
 export class Type {
+	constructor() {
+		this.surrogateKey = Type.nextKey++;
+	}
+
 	exportContentTS(namespace: Namespace, indent: string) {
 		var output: string[] = [];
 
@@ -41,7 +41,7 @@ export class Type {
 		var comment = this.comment;
 		var parentDef = '';
 
-		var name = sanitizeName(this.name);
+		var name = this.safeName;
 
 		this.exported = true;
 
@@ -96,7 +96,7 @@ export class Type {
 
 		if(this.name) {
 			var namespace = this.namespace;
-			var name = prefix + sanitizeName(this.name);
+			var name = prefix + this.safeName;
 
 			if(!namespace || namespace == outNamespace) {
 				output.push(name);
@@ -156,6 +156,7 @@ export class Type {
 
 	name: string;
 	namespace: Namespace;
+	safeName: string;
 
 	/** JavaScript type name, if the XML type only contains single value
 	  * that can be parsed into a JavaScript value. */
@@ -173,6 +174,9 @@ export class Type {
 	parent: Type;
 
 	comment: string;
+
+	surrogateKey: number;
+	private static nextKey = 0;
 
 	exported: boolean;
 }

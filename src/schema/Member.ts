@@ -5,10 +5,6 @@ import {Namespace} from './Namespace';
 import {Type} from './Type';
 import * as exporter from './exporter';
 
-function sanitizeName(name: string) {
-	return(name.replace(/[^_0-9A-Za-z]/g, '').replace(/^[^A-Za-z]+/, ''));
-}
-
 export class Member {
 	constructor(name: string, min: number, max: number) {
 		this.name = name;
@@ -32,7 +28,6 @@ export class Member {
 		// Topologically sort dependencies to start processing from root types,
 		// to avoid continuing search after one parent with a matching member is found.
 
-		var name = sanitizeName(this.name);
 		var max = this.max;
 
 		// Ensure maximum allowed occurrence count is no less than in parent types,
@@ -55,7 +50,7 @@ export class Member {
 			} while(type);
 		}
 
-		output.push(indent + syntaxPrefix + name);
+		output.push(indent + syntaxPrefix + this.safeName);
 		if(outputOptionalFlags && this.min == 0) output.push('?');
 		output.push(': ');
 
@@ -79,6 +74,7 @@ export class Member {
 	}
 
 	name: string;
+	safeName: string;
 
 	min: number;
 	max: number;

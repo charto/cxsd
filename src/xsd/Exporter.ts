@@ -198,11 +198,16 @@ export function exportNamespace(namespace: Namespace): schema.Type {
 	var outNamespace = schema.Namespace.register(namespace.id, namespace.name);
 	var doc = outNamespace.doc;
 
+	// NOTE: Hack to handle primitive types, which should probably be in their own "virtual" namespace instead.
+
 	var spec = types.Primitive.getTypes();
 
 	for(var name of Object.keys(spec)) {
 		var type = spec[name];
-		type.getOutType().literalType = type.name;
+		var outType = type.getOutType();
+
+		outType.literalType = type.name;
+		outType.safeName = type.name;
 	}
 
 	if(!doc) {
