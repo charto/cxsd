@@ -48,7 +48,7 @@ export class Namespace {
 	}
 
 	addType(type: Type) {
-		this.typeList.push(type);
+		this.exportedTypeList.push(type);
 	}
 
 	exportHeaderTS(exporter: any) {
@@ -113,8 +113,11 @@ export class Namespace {
 	/** Invisible document element defining the types of XML file root elements. */
 	doc: Type;
 
-	/** Types of all elements in the document. */
-	typeList: Type[] = [];
+	/** All exported types in the document. */
+	exportedTypeList: Type[] = [];
+
+	/** Types not exported but needed to represent elements in the document. */
+	hiddenTypeList: Type[] = [];
 
 	/** List of URL addresses of files with definitions for this namespace. */
 	sourceList: string[];

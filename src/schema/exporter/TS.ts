@@ -63,7 +63,7 @@ export class TS extends Exporter {
 		var doc = this.doc;
 		var namespace = doc.namespace;
 
-		for(var type of namespace.typeList) {
+		for(var type of namespace.exportedTypeList) {
 			outTypes.push(type.exportTS(namespace, '', 'export '));
 		}
 

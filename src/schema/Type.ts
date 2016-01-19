@@ -62,8 +62,8 @@ export class Type {
 					parentDef = ' extends ' + this.parent.exportRefTS(namespace, indent + '\t', '_');
 				}
 			}
-			output.push(indent + syntaxPrefix + 'interface _' + name + parentDef + ' ' + content + '\n');
-			output.push(indent + syntaxPrefix + 'interface ' + name + ' extends _' + name + ' { new(): ' + name + '; }');
+			output.push(indent + 'interface _' + name + parentDef + ' ' + content + '\n');
+			output.push(indent + syntaxPrefix + 'interface ' + name + ' extends _' + name + ' { new(): ' + name + '; }' + '\n');
 		}
 
 		return(output.join(''));

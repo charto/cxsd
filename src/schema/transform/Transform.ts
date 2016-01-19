@@ -46,7 +46,7 @@ export class Transform<Output> {
 
 		this.visitedNamespaceTbl[namespace.id] = namespace;
 
-		for(var type of namespace.typeList) {
+		for(var type of namespace.exportedTypeList) {
 			this.visitType(type, output);
 		}
 
