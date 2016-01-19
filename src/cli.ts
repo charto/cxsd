@@ -7,6 +7,7 @@ import {Loader} from './xsd/Loader';
 import {exportNamespace} from './xsd/Exporter';
 import * as schema from './schema';
 import {Sanitize} from './schema/transform/Sanitize';
+import {ListImports} from './schema/transform/ListImports';
 
 Cache.patchRequest();
 
@@ -21,6 +22,7 @@ loader.import(process.argv[2]).then((namespace: Namespace) => {
 	try {
 		var spec = exportNamespace(namespace);
 		new Sanitize(spec).exec();
+		new ListImports(spec).exec();
 		new schema.exporter.JS(spec).export();
 		new schema.exporter.TS(spec).export();
 	} catch(err) {

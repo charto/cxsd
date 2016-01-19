@@ -14,17 +14,29 @@ export class JS extends Exporter {
 		var doc = this.doc;
 		var namespace = doc.namespace;
 
-		var importNameTbl = namespace.getImports();
+		var importNameTbl = namespace.getUsedImports();
 		var importList = Object.keys(importNameTbl);
-
-		console.log(namespace.name);
 
 		return([].concat(
 			[
 				'var cxml = require("cxml");',
 			],
 			namespace.exportHeaderCJS(this),
-			['cxml.register("' + namespace.name + '", exports, [' + importList.join(', ') + ']);']
+			[
+				'cxml.register(' +
+				"'" + namespace.name+ "', " +
+				'exports, ' +
+				'[\n\t' + importList.map((name: string) => {
+					var typeList = Object.keys(namespace.importTypeNameTbl[importNameTbl[name]]).sort();
+					return(
+						'[' + name + ', [' +
+						typeList.map((name: string) => "'" + name + "'").join(', ') +
+						']]'
+					);
+				}).join(',\n\t') + '\n], [\n' +
+				']' +
+				');'
+			]
 		).join('\n'));
 	}
 

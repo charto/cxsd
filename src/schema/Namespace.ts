@@ -29,21 +29,17 @@ export class Namespace {
 		else return(null);
 	}
 
-	markUsed(id: number) {
-		this.namespaceUsedList[id] = true;
-	}
-
-	getImports() {
-		var namespaceCount = this.namespaceUsedList.length;
+	getUsedImports() {
 		var importNameTbl = this.importNameTbl;
 
 		if(!importNameTbl) {
 			importNameTbl = {};
 
-			for(var id = 0; id < namespaceCount; ++id) {
-				if(this.namespaceUsedList[id] && id != this.id) {
+			if(this.importTypeNameTbl) {
+				for(var key of Object.keys(this.importTypeNameTbl)) {
+					var id = +key;
 					var short = this.getShortRef(id);
-					if(short) importNameTbl[short] = id;
+					importNameTbl[this.getShortRef(id)] = id;
 				}
 			}
 		}
@@ -57,7 +53,7 @@ export class Namespace {
 
 	exportHeaderTS(exporter: any) {
 		var output: string[] = [];
-		var importNameTbl = this.getImports();
+		var importNameTbl = this.getUsedImports();
 
 		for(var shortName of Object.keys(importNameTbl).sort()) {
 			var namespace = Namespace.list[importNameTbl[shortName]];
@@ -77,7 +73,7 @@ export class Namespace {
 
 	exportHeaderCJS(exporter: any) {
 		var output: string[] = [];
-		var importNameTbl = this.getImports();
+		var importNameTbl = this.getUsedImports();
 
 		for(var shortName of Object.keys(importNameTbl).sort()) {
 			var namespace = Namespace.list[importNameTbl[shortName]];
@@ -131,12 +127,13 @@ export class Namespace {
 	private cacheDir: string;
 
 	/** Short names used to reference other namespaces in schemas defining this namespace. */
-	private shortNameTbl: {[namespaceId: string]: string[]} = {};
+	shortNameTbl: {[namespaceId: string]: string[]} = {};
 
 	/** Table of namespaces actually imported, mapping their short name to ID. */
 	private importNameTbl: {[short: string]: number};
 
-	private namespaceUsedList: boolean[] = [];
+	/** List of referenced type names from each imported namespace. */
+	importTypeNameTbl: { [namespaceId: string]: { [name: string]: boolean } };
 
 	/** Internal list of namespaces indexed by a surrogate key. */
 	private static list: Namespace[] = [];

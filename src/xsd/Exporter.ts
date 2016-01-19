@@ -78,7 +78,7 @@ function exportMember(group: MemberGroup, namespace: schema.Namespace) {
 			var qName = type.qName;
 
 			if(qName) {
-				namespace.markUsed(type.qName.namespace.id);
+				// Normal named type.
 			} else if(type.name) {
 				// Primitive type.
 			} else if(type.exported) {
@@ -182,7 +182,6 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 
 	if(parent instanceof types.TypeBase && parent != parentPrimitive) {
 		outType.parent = parent.getOutType();
-		if(parent.qName) namespace.markUsed(parent.qName.namespace.id);
 	}
 
 	outType.attributeList = exportAttributes(scope, namespace);
@@ -214,6 +213,7 @@ export function exportNamespace(namespace: Namespace): schema.Type {
 		var scope = namespace.getScope();
 
 		var sourceList = namespace.getSourceList();
+		var importTbl: { [id: string]: Namespace } = {}
 
 		for(var source of sourceList) {
 			var namespaceRefTbl = source.getNamespaceRefs();
@@ -221,6 +221,7 @@ export function exportNamespace(namespace: Namespace): schema.Type {
 			for(var name of Object.keys(namespaceRefTbl)) {
 				var otherNamespace = namespaceRefTbl[name];
 				outNamespace.addRef(name, schema.Namespace.register(otherNamespace.id, otherNamespace.name));
+				importTbl[otherNamespace.id] = otherNamespace;
 			}
 		}
 
@@ -239,10 +240,8 @@ export function exportNamespace(namespace: Namespace): schema.Type {
 
 		outNamespace.doc = doc;
 
-		var importNameTbl = outNamespace.getImports();
-
-		for(var shortName of Object.keys(importNameTbl)) {
-			exportNamespace(Namespace.byId(importNameTbl[shortName]));
+		for(var namespaceId of Object.keys(importTbl)) {
+			exportNamespace(importTbl[namespaceId]);
 		}
 	}
 

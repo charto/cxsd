@@ -44,6 +44,8 @@ export class Transform<Output> {
 		var doc = this.doc;
 		var namespace = this.namespace;
 
+		this.visitedNamespaceTbl[namespace.id] = namespace;
+
 		for(var type of namespace.typeList) {
 			this.visitType(type, output);
 		}
@@ -52,19 +54,16 @@ export class Transform<Output> {
 			this.visitRoot(child, output);
 		}
 
-		var importNameTbl = namespace.getImports();
-
-		for(var shortName of Object.keys(importNameTbl)) {
-			var id = importNameTbl[shortName];
-
+		for(var id of Object.keys(namespace.shortNameTbl)) {
 			if(!this.visitedNamespaceTbl[id]) {
-				namespace = Namespace.byId(id);
-				this.visitedNamespaceTbl[id] = namespace;
+				namespace = Namespace.byId(+id);
 
-				var transform = new this.construct(namespace.doc);
+				if(namespace.doc) {
+					var transform = new this.construct(namespace.doc);
 
-				transform.visitedNamespaceTbl = this.visitedNamespaceTbl;
-				transform.exec(output);
+					transform.visitedNamespaceTbl = this.visitedNamespaceTbl;
+					transform.exec(output);
+				}
 			}
 		}
 	}

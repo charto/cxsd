@@ -35,7 +35,7 @@ export abstract class Exporter {
 		var doc = this.doc;
 		var namespace = doc.namespace;
 
-		var importNameTbl = namespace.getImports();
+		var importNameTbl = namespace.getUsedImports();
 		var importList = Object.keys(importNameTbl).map(
 			(shortName: string) => Namespace.byId(importNameTbl[shortName])
 		);
@@ -45,7 +45,9 @@ export abstract class Exporter {
 			this.handleExport()
 		).then(() => Promise.map(
 			importList,
-			(namespace: Namespace) => new this.construct(namespace.doc).export()
+			(namespace: Namespace) => {
+				if(namespace.doc) new this.construct(namespace.doc).export()
+			}
 		).then(() => namespace)))
 	}
 
