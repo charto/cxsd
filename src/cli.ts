@@ -21,10 +21,13 @@ var loader = new Loader({
 loader.import(process.argv[2]).then((namespace: Namespace) => {
 	try {
 		var spec = exportNamespace(namespace);
-		new Sanitize(spec).exec();
-		new ListImports(spec).exec();
-		new schema.exporter.JS(spec).export();
-		new schema.exporter.TS(spec).export();
+		new Sanitize(spec).exec().then(() =>
+			new ListImports(spec).exec()
+		).then(() =>
+			new schema.exporter.JS(spec).exec()
+		).then(() =>
+			new schema.exporter.TS(spec).exec()
+		);
 	} catch(err) {
 		console.log(err);
 		console.log(err.stack);

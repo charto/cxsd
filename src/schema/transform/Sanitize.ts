@@ -13,15 +13,11 @@ export class Sanitize extends Transform<void> {
 	visitType(type: Type) {
 		if(type.name) type.safeName = sanitizeName(type.name);
 
-		super.visitType(type, null);
+		super.visitType(type);
 	}
 
 	visitMember(member: Member) {
 		if(member.name) member.safeName = sanitizeName(member.name);
-	}
-
-	exec() {
-		super.exec(null);
 	}
 
 	construct = Sanitize;

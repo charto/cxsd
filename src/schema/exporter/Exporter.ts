@@ -4,54 +4,64 @@
 import * as path from 'path';
 import * as Promise from 'bluebird';
 
+import {Transform} from '../transform/Transform';
 import {Address, Cache} from 'cget'
 import {Namespace} from '../Namespace';
 import {Type} from '../Type';
 
-export abstract class Exporter {
+export abstract class Exporter extends Transform<string> {
 	constructor(doc: Type) {
-		this.doc = doc;
+		super(doc);
 
 		this.cacheDir = path.dirname(
 			this.getCache().getCachePathSync(new Address(doc.namespace.name))
 		);
 	}
 
-	/** Output namespace contents, if not already exported. */
+	writeHeader() {
+		var output: string[] = [];
+		var importTbl = this.namespace.getUsedImportTbl();
 
-	export(): Promise<Namespace> {
-		if(!this.doc) return(null);
+		for(var shortName of Object.keys(importTbl).sort()) {
+			var namespace = importTbl[shortName];
+			var relativePath = this.getPathTo(namespace.name);
+			output.push(this.writeImport(shortName, relativePath));
+		}
 
-		var outName = this.getOutName(this.doc.namespace.name);
-
-		return(this.getCache().ifCached(outName).then((isCached: boolean) =>
-			isCached ? this.doc.namespace : this.forceExport(outName)
-		));
+		output.push('');
+		return(output);
 	}
 
-	/** Output namespace contents to the given cache key. */
+	abstract writeImport(shortName: string, relativePath: string): string;
 
-	forceExport(outName: string): Promise<Namespace> {
+	/** Output namespace contents to cache, if not already exported. */
+
+	prepare() {
 		var doc = this.doc;
-		var namespace = doc.namespace;
+		if(!doc) return(null);
 
-		var importNameTbl = namespace.getUsedImports();
-		var importList = Object.keys(importNameTbl).map(
-			(shortName: string) => Namespace.byId(importNameTbl[shortName])
-		);
+		var outName = this.getOutName(doc.namespace.name);
 
+		return(this.getCache().ifCached(outName).then((isCached: boolean) => {
+			if(isCached) return(null)
+
+			return(this.getCache().store(
+				outName,
+				this.writeContents()
+			)).then(() => false);
+		}));
+	}
+
+/*
+	done() {
 		return(this.getCache().store(
 			outName,
-			this.handleExport()
-		).then(() => Promise.map(
-			importList,
-			(namespace: Namespace) => {
-				if(namespace.doc) new this.construct(namespace.doc).export()
-			}
-		).then(() => namespace)))
+			this.output
+		));
 	}
+*/
 
-	abstract handleExport(): string;
+	abstract writeContents(): string;
 
 	/** Get relative path to another namespace within the cache. */
 
@@ -68,12 +78,10 @@ export abstract class Exporter {
 
 	abstract getCache(): Cache;
 
-	construct: { new(...args: any[]): Exporter; };
-
 	protected abstract getOutName(name: string): string;
-
-	protected doc: Type;
 
 	/** Full path of directory containing exported output for the current namespace. */
 	protected cacheDir: string;
+
+	protected output: string;
 }

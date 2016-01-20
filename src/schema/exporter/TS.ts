@@ -43,6 +43,16 @@ export class TS extends Exporter {
 		return(output.join('\n'));
 	}
 
+	writeImport(shortName: string, relativePath: string) {
+		return(
+			'import * as ' +
+			shortName +
+			' from ' +
+			"'" + relativePath + "'" +
+			';'
+		);
+	}
+
 	/** Output list of original schema file locations. */
 
 	exportSourceList(sourceList: string[]) {
@@ -58,7 +68,7 @@ export class TS extends Exporter {
 		return(output);
 	}
 
-	handleExport(): string {
+	writeContents(): string {
 		var outTypes: string[] = [];
 		var doc = this.doc;
 		var namespace = doc.namespace;
@@ -75,7 +85,7 @@ export class TS extends Exporter {
 		outTypes.push('');
 
 		return([].concat(
-			namespace.exportHeaderTS(this),
+			this.writeHeader(),
 			this.exportSourceList(namespace.sourceList),
 			outTypes
 		).join('\n'));

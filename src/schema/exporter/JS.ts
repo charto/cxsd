@@ -8,26 +8,42 @@ import {Exporter} from './Exporter';
 import {Namespace} from '../Namespace';
 
 export class JS extends Exporter {
+	writeImport(shortName: string, relativePath: string) {
+		return(
+			'var ' +
+			shortName +
+			' = require(' +
+			"'" + relativePath + "'" +
+			');'
+		);
+	}
+
 	/** Output namespace contents to the given cache key. */
 
-	handleExport(): string {
+	writeContents(): string {
 		var doc = this.doc;
 		var namespace = doc.namespace;
 
-		var importNameTbl = namespace.getUsedImports();
-		var importList = Object.keys(importNameTbl);
+		var importTbl = namespace.getUsedImportTbl();
+		var importNameList = Object.keys(importTbl);
 
 		return([].concat(
 			[
 				'var cxml = require("cxml");',
 			],
-			namespace.exportHeaderCJS(this),
+			this.writeHeader(),
 			[
 				'cxml.register(' +
 				"'" + namespace.name+ "', " +
 				'exports, ' +
-				'[\n\t' + importList.map((name: string) => {
-					var typeList = Object.keys(namespace.importTypeNameTbl[importNameTbl[name]]).sort();
+				'[\n\t' + importNameList.map((name: string) => {
+					var otherNamespaceId = importTbl[name].id;
+					var importTypeNameTbl = namespace.importTypeNameTbl[otherNamespaceId];
+					var typeList: string[];
+
+					if(importTypeNameTbl) typeList = Object.keys(importTypeNameTbl).sort();
+					else typeList = []; // NOTE: This should never happen!
+
 					return(
 						'[' + name + ', [' +
 						typeList.map((name: string) => "'" + name + "'").join(', ') +

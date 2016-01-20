@@ -29,66 +29,42 @@ export class Namespace {
 		else return(null);
 	}
 
-	getUsedImports() {
-		var importNameTbl = this.importNameTbl;
+	getUsedImportTbl() {
+		var importTbl = this.importTbl;
 
-		if(!importNameTbl) {
-			importNameTbl = {};
+		if(!importTbl) {
+			importTbl = {};
 
 			if(this.importTypeNameTbl) {
 				for(var key of Object.keys(this.importTypeNameTbl)) {
 					var id = +key;
 					var short = this.getShortRef(id);
-					importNameTbl[this.getShortRef(id)] = id;
+					importTbl[this.getShortRef(id)] = Namespace.list[id];
 				}
+
+				this.importTbl = importTbl;
 			}
 		}
 
-		return(importNameTbl);
+		return(importTbl);
+	}
+
+	getUsedImportList() {
+		if(this.importTypeNameTbl) {
+			var importTbl = this.getUsedImportTbl();
+
+			return(Object.keys(importTbl).map((shortName: string) =>
+				importTbl[shortName]
+			));
+		} else {
+			return(Object.keys(this.shortNameTbl).map((id: string) =>
+				Namespace.list[+id]
+			));
+		}
 	}
 
 	addType(type: Type) {
 		this.exportedTypeList.push(type);
-	}
-
-	exportHeaderTS(exporter: any) {
-		var output: string[] = [];
-		var importNameTbl = this.getUsedImports();
-
-		for(var shortName of Object.keys(importNameTbl).sort()) {
-			var namespace = Namespace.list[importNameTbl[shortName]];
-
-			output.push(
-				'import * as ' +
-				shortName +
-				' from ' +
-				"'" + exporter.getPathTo(namespace.name) + "'" +
-				';'
-			);
-		}
-
-		output.push('');
-		return(output);
-	}
-
-	exportHeaderCJS(exporter: any) {
-		var output: string[] = [];
-		var importNameTbl = this.getUsedImports();
-
-		for(var shortName of Object.keys(importNameTbl).sort()) {
-			var namespace = Namespace.list[importNameTbl[shortName]];
-
-			output.push(
-				'var ' +
-				shortName +
-				' = require(' +
-				"'" + exporter.getPathTo(namespace.name) + "'" +
-				');'
-			);
-		}
-
-		output.push('');
-		return(output);
 	}
 
 	static register(id: number, name: string) {
@@ -100,10 +76,6 @@ export class Namespace {
 		}
 
 		return(namespace);
-	}
-
-	static byId(id: number) {
-		return(Namespace.list[id]);
 	}
 
 	id: number;
@@ -132,8 +104,8 @@ export class Namespace {
 	/** Short names used to reference other namespaces in schemas defining this namespace. */
 	shortNameTbl: {[namespaceId: string]: string[]} = {};
 
-	/** Table of namespaces actually imported, mapping their short name to ID. */
-	private importNameTbl: {[short: string]: number};
+	/** Table of namespaces actually imported, by short name. */
+	private importTbl: {[short: string]: Namespace};
 
 	/** List of referenced type names from each imported namespace. */
 	importTypeNameTbl: { [namespaceId: string]: { [name: string]: boolean } };
