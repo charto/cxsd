@@ -19,13 +19,12 @@ export class TypeBase extends Base {
 		if(!outType) {
 			var qName = this.qName;
 			outType = new schema.Type();
+			outType.name = this.name;
 
 			if(qName) {
 				var namespace = qName.namespace;
-				outType.namespace = schema.Namespace.register(namespace.id, namespace.name);
+				schema.Namespace.register(namespace.id, namespace.name).addType(outType);
 			}
-
-			outType.name = this.name;
 
 			this.outType = outType;
 		}

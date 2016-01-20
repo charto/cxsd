@@ -52,6 +52,7 @@ export class State {
 	stateStatic: {
 		addImport: (namespaceTarget: Namespace, urlRemote: string) => void;
 		getLineNumber: () => number;
+		getBytePos: () => number;
 		textHandlerList: types.Base[];
 		textDepth: number;
 	};

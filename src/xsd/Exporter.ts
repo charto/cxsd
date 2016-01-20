@@ -161,6 +161,7 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 
 	var outType = type.getOutType();
 	outType.comment = comment;
+	outType.bytePos = type.bytePos;
 
 	var parentPrimitive = type.getParent(types.Primitive, true);
 
@@ -229,8 +230,8 @@ export function exportNamespace(namespace: Namespace): schema.Type {
 
 		var typeTbl = scope.dumpTypes();
 
-		for(var key of Object.keys(typeTbl).sort()) {
-			outNamespace.addType(exportType(typeTbl[key].item as types.TypeBase, outNamespace));
+		for(var key of Object.keys(typeTbl)) {
+			outNamespace.exportType(exportType(typeTbl[key].item as types.TypeBase, outNamespace));
 		}
 
 		doc = new schema.Type();

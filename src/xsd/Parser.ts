@@ -110,6 +110,10 @@ export class Parser {
 				return(xml.getCurrentLineNumber());
 			},
 
+			getBytePos: () => {
+				return(xml.getCurrentByteIndex());
+			},
+
 			textDepth: 0,
 			textHandlerList: []
 		};

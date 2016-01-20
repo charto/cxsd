@@ -3,7 +3,8 @@
 
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
-import {Namespace} from '../Namespace';
+import {Namespace, TypeState} from '../Namespace';
+import {Type} from '../Type';
 
 /** Export parsed schema to a TypeScript d.ts definition file. */
 
@@ -73,7 +74,7 @@ export class TS extends Exporter {
 		var doc = this.doc;
 		var namespace = doc.namespace;
 
-		for(var type of namespace.exportedTypeList) {
+		for(var type of namespace.typeList.filter((type: Type, id: number) => namespace.typeStateList[id] == TypeState.exported).sort((a: Type, b: Type) => (a.name || '').localeCompare(b.name || ''))) {
 			outTypes.push(type.exportTS(namespace, '', 'export '));
 		}
 

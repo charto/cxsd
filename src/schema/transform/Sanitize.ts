@@ -12,8 +12,14 @@ function sanitizeName(name: string) {
 export class Sanitize extends Transform<void> {
 	visitType(type: Type) {
 		if(type.name) type.safeName = sanitizeName(type.name);
+		else if(type.parent) this.doc.namespace.makeTypeNamed(type);
 
 		super.visitType(type);
+	}
+
+	visitRecursiveType(type: Type) {
+		type.isRecursive = true;
+		this.doc.namespace.makeTypeNamed(type);
 	}
 
 	visitMember(member: Member) {

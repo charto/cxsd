@@ -43,8 +43,6 @@ export class Type {
 
 		var name = this.safeName;
 
-		this.exported = true;
-
 		if(comment) {
 			output.push(exporter.TS.formatComment(indent, comment));
 			output.push('\n');
@@ -112,7 +110,7 @@ export class Type {
 					output.push('any');
 				}
 			}
-		} else if(this.exported) {
+		} else if(this.isRecursive) {
 			// TODO: Generate names for all circularly defined types so this never happens!
 			output.push('any');
 		} else if(this.parent) {
@@ -120,8 +118,6 @@ export class Type {
 			output.push('any');
 		} else {
 			// Anonymous type defined only within this element.
-			this.exported = true;
-
 			output.push(this.exportContentTS(outNamespace, indent));
 		}
 
@@ -157,6 +153,7 @@ export class Type {
 	name: string;
 	namespace: Namespace;
 	safeName: string;
+	bytePos: number;
 
 	/** JavaScript type name, if the XML type only contains single value
 	  * that can be parsed into a JavaScript value. */
@@ -173,10 +170,10 @@ export class Type {
 	/** Parent type this is derived from. */
 	parent: Type;
 
+	isRecursive: boolean;
+
 	comment: string;
 
 	surrogateKey: number;
 	private static nextKey = 0;
-
-	exported: boolean;
 }

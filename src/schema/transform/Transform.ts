@@ -3,7 +3,7 @@
 
 import * as Promise from 'bluebird';
 
-import {Namespace} from '../Namespace';
+import {Namespace, TypeState} from '../Namespace';
 import {Type} from '../Type';
 import {Member} from '../Member';
 
@@ -15,6 +15,7 @@ export abstract class Transform<Output> {
 
 	visitTypeRef(type: Type) {
 		if(!type.name && !this.visitedTypeTbl[type.surrogateKey]) this.visitType(type);
+		else this.visitRecursiveType(type);
 	}
 
 	visitType(type: Type) {
@@ -25,6 +26,8 @@ export abstract class Transform<Output> {
 
 		if(type.parent) this.visitTypeRef(type.parent);
 	}
+
+	visitRecursiveType(type: Type) {}
 
 	visitMember(member: Member) {}
 
@@ -54,7 +57,7 @@ export abstract class Transform<Output> {
 
 		return(Promise.resolve(this.prepare()).then((ready: any) => {
 			if(ready) {
-				for(var type of namespace.exportedTypeList) {
+				for(var type of namespace.typeList.filter((type: Type, id: number) => namespace.typeStateList[id] == TypeState.exported).sort((a: Type, b: Type) => (a.name || '').localeCompare(b.name || ''))) {
 					this.visitType(type);
 				}
 

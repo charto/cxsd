@@ -31,6 +31,7 @@ export class Base {
 
 		this.scope = state.getScope();
 		this.lineNumber = state.stateStatic.getLineNumber();
+		this.bytePos = state.stateStatic.getBytePos();
 	}
 
 	/** Hook, runs after opening tag. */
@@ -73,6 +74,7 @@ export class Base {
 
 	protected scope: Scope;
 	lineNumber: number;
+	bytePos: number;
 	name: string;
 
 	private static namespace: Namespace;

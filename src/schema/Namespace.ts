@@ -9,6 +9,13 @@ import {NamespaceRef} from './NamespaceRef';
 import {Type} from './Type';
 import {Member} from './Member';
 
+export enum TypeState {
+	anonymous,
+	/** Types not exported but needed to represent elements in the document. */
+	named,
+	exported
+}
+
 export class Namespace {
 	constructor(id: number, name: string) {
 		this.id = id;
@@ -64,7 +71,22 @@ export class Namespace {
 	}
 
 	addType(type: Type) {
-		this.exportedTypeList.push(type);
+		var id = type.surrogateKey;
+		this.typeList[id] = type;
+		this.typeStateList[id] = TypeState.anonymous;
+
+		type.namespace = this;
+	}
+
+	exportType(type: Type) {
+		this.typeStateList[type.surrogateKey] = TypeState.exported;
+	}
+
+	makeTypeNamed(type: Type) {
+		var id = type.surrogateKey;
+		if(this.typeStateList[id] == TypeState.anonymous) {
+			this.typeStateList[id] = TypeState.named
+		};
 	}
 
 	static register(id: number, name: string) {
@@ -85,11 +107,10 @@ export class Namespace {
 	/** Invisible document element defining the types of XML file root elements. */
 	doc: Type;
 
-	/** All exported types in the document. */
-	exportedTypeList: Type[] = [];
+	/** All types used in the document. */
+	typeList: Type[] = [];
 
-	/** Types not exported but needed to represent elements in the document. */
-	hiddenTypeList: Type[] = [];
+	typeStateList: TypeState[] = [];
 
 	/** List of URL addresses of files with definitions for this namespace. */
 	sourceList: string[];
