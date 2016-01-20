@@ -29,6 +29,12 @@ export class Namespace {
 		this.shortNameTbl[id].push(shortName);
 	}
 
+	addSrc(namespace: Namespace) {
+		var id = namespace.id;
+
+		this.srcNamespaceTbl[id] = namespace;
+	}
+
 	getShortRef(id: number) {
 		var nameList = this.shortNameTbl[id];
 
@@ -122,8 +128,14 @@ export class Namespace {
 
 	private cacheDir: string;
 
+	/** Example short name for this namespace, currently used only for elements
+	  * or attributes referenced from another namespace where they are defined. */
+	short: string;
+
 	/** Short names used to reference other namespaces in schemas defining this namespace. */
 	shortNameTbl: {[namespaceId: string]: string[]} = {};
+
+	srcNamespaceTbl: {[namespaceId: string]: Namespace} = {};
 
 	/** Table of namespaces actually imported, by short name. */
 	private importTbl: {[short: string]: Namespace};

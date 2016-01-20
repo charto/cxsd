@@ -97,8 +97,8 @@ export class Namespace {
 	/** URL address where main schema file was downloaded. */
 	url: string;
 
-	/** Example short name for the namespace, currently unused. */
-	private short: string;
+	/** Example short name for this namespace. */
+	short: string;
 
 	/** List of all source files potentially contributing to this namespace. */
 	private sourceList: Source[] = [];

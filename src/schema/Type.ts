@@ -124,6 +124,8 @@ export class Type {
 		return(output.join(''));
 	}
 
+	// TODO: handle naming collisions between attributes and children,
+	// and between namespaces.
 	buildMemberTbl() {
 		var member: Member;
 

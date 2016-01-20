@@ -13,61 +13,15 @@ export abstract class Transform<Output> {
 		this.namespace = doc.namespace;
 	}
 
-	visitTypeRef(type: Type) {
-		if(!type.name && !this.visitedTypeTbl[type.surrogateKey]) this.visitType(type);
-		else this.visitRecursiveType(type);
-	}
-
-	visitType(type: Type) {
-		this.visitedTypeTbl[type.surrogateKey] = type;
-
-		for(var attribute of type.attributeList) this.visitAttribute(attribute);
-		for(var child of type.childList) this.visitChild(child);
-
-		if(type.parent) this.visitTypeRef(type.parent);
-	}
-
-	visitRecursiveType(type: Type) {}
-
-	visitMember(member: Member) {}
-
-	visitAttribute(attribute: Member) {
-		this.visitMember(attribute);
-	}
-
-	visitChild(child: Member) {
-		this.visitMember(child);
-
-		for(var type of child.typeList) this.visitTypeRef(type);
-	}
-
-	visitRoot(child: Member) {
-		this.visitChild(child);
-	}
-
 	prepare(): boolean | Promise<any> { return(true); }
-
-	done(): boolean | Promise<any> { return(true); }
 
 	exec(): Promise<Namespace> {
 		var doc = this.doc;
-		var namespace = this.namespace;
+		var namespace = doc.namespace;
 
 		this.visitedNamespaceTbl[namespace.id] = namespace;
 
-		return(Promise.resolve(this.prepare()).then((ready: any) => {
-			if(ready) {
-				for(var type of namespace.typeList.filter((type: Type, id: number) => namespace.typeStateList[id] == TypeState.exported).sort((a: Type, b: Type) => (a.name || '').localeCompare(b.name || ''))) {
-					this.visitType(type);
-				}
-
-				for(var child of doc.childList) {
-					this.visitRoot(child);
-				}
-
-				return(this.done());
-			}
-		}).then(() => Promise.map(
+		return(Promise.resolve(this.prepare()).then(() => Promise.map(
 			namespace.getUsedImportList(),
 			(namespace: Namespace) => {
 				if(!this.visitedNamespaceTbl[namespace.id]) {
@@ -86,11 +40,8 @@ export abstract class Transform<Output> {
 
 	construct: { new(...args: any[]): Transform<Output>; };
 
-	private visitedTypeTbl: { [key: string]: Type } = {};
-
 	private visitedNamespaceTbl: { [key: string]: Namespace } = {};
 
 	protected doc: Type;
 	protected namespace: Namespace;
-	protected output: Output;
 }

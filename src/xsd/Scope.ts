@@ -171,7 +171,7 @@ console.log('Missing ' + type + ': ' + name.name);
 	}
 
 	private parent: Scope;
-	private namespace: Namespace;
+	namespace: Namespace;
 
 	private visible = {} as {
 		[type: string]: {[name: string]: any}

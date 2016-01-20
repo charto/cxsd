@@ -12,7 +12,35 @@ function sanitizeName(name: string) {
 export type Output = { [namespaceId: string]: { [name: string]: boolean } };
 
 export class ListImports extends Transform<Output> {
-	visitTypeRef(type: Type) {
+	prepare() {
+		this.visitType(this.doc);
+
+		for(var type of this.namespace.typeList) {
+			if(type) this.visitType(type);
+		}
+
+		this.namespace.importTypeNameTbl = this.output;
+
+		return(true);
+	}
+
+	visitType(type: Type) {
+		var member: Member;
+
+		if(type.attributeList) {
+			for(var member of type.attributeList) {
+				for(var memberType of member.typeList) this.visitTypeRef(memberType, member, type);
+			}
+		}
+
+		if(type.childList) {
+			for(var member of type.childList) {
+				for(var memberType of member.typeList) this.visitTypeRef(memberType, member, type);
+			}
+		}
+	}
+
+	visitTypeRef(type: Type, member: Member, parent: Type) {
 		if(type.namespace && type.namespace != this.namespace) {
 			// Type from another, imported namespace.
 
@@ -22,15 +50,8 @@ export class ListImports extends Transform<Output> {
 			if(short) {
 				if(!this.output[id]) this.output[id] = {};
 				this.output[id][type.safeName] = true;
-			} else {
-				console.error('MISSING IMPORT ' + type.namespace.name + ' for type ' + type.safeName);
 			}
 		}
-	}
-
-	done() {
-		this.namespace.importTypeNameTbl = this.output;
-		return(true);
 	}
 
 	construct = ListImports;

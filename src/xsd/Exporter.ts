@@ -45,7 +45,7 @@ function mergeDuplicateElements(specList: TypeMember[]) {
 
 	for(var spec of specList) {
 		var element = spec.item as types.Element;
-		var group = groupTbl[element.name];
+		var group = groupTbl[element.getScope().namespace.id + ':' + element.name];
 
 		if(!group) {
 			group = {
@@ -68,9 +68,16 @@ function mergeDuplicateElements(specList: TypeMember[]) {
 
 function exportMember(group: MemberGroup, namespace: schema.Namespace) {
 	var member = group.item;
+	var scope = member.getScope();
+	var otherNamespace = scope.namespace;
 	var outMember = new schema.Member(member.name, group.min, group.max);
 
-	outMember.comment = member.getScope().getComments();
+	outMember.comment = scope.getComments();
+
+	if(otherNamespace != scope.namespace) {
+		outMember.namespace = schema.Namespace.register(otherNamespace.id, otherNamespace.name);
+		namespace.addSrc(outMember.namespace);
+	} else outMember.namespace = namespace;
 
 	outMember.typeList = mergeDuplicateTypes(group.typeList).map(
 		(type: types.TypeBase) => {
@@ -226,6 +233,7 @@ export function exportNamespace(namespace: Namespace): schema.Type {
 			}
 		}
 
+		outNamespace.short = namespace.short;
 		outNamespace.sourceList = sourceList.map((source: Source) => source.url).sort();
 
 		var typeTbl = scope.dumpTypes();

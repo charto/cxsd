@@ -74,6 +74,7 @@ export class Member {
 	}
 
 	name: string;
+	namespace: Namespace;
 	safeName: string;
 
 	min: number;

@@ -42,7 +42,7 @@ export class Source {
 			if(attr.match(/^xmlns:/i)) {
 				var short = attr.substr(attr.indexOf(':') + 1);
 
-				this.namespaceRefTbl[short] = Namespace.register(attrTbl[attr]);
+				this.namespaceRefTbl[short] = Namespace.register(attrTbl[attr], null, short);
 			}
 		}
 	}
