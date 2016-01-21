@@ -34,6 +34,9 @@ export class ListImports extends Transform<Output> {
 		if(type.namespace && type.namespace != this.namespace) {
 			// Type from another, imported namespace.
 
+			// Make sure it gets exported.
+			type.namespace.exportType(type);
+
 			var id = type.namespace.id;
 			var short = this.namespace.getShortRef(id);
 

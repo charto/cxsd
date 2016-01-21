@@ -235,6 +235,7 @@ export function exportNamespace(namespace: Namespace): schema.Type {
 		doc = new schema.Type();
 
 		doc.namespace = outNamespace;
+		doc.attributeList = exportAttributes(scope, outNamespace);
 		doc.childList = exportChildren(scope, outNamespace);
 
 		outNamespace.doc = doc;

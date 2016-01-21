@@ -207,6 +207,7 @@ export class TS extends Exporter {
 		var doc = this.doc;
 		var namespace = this.namespace;
 		var prefix: string;
+		var exportCount = 0;
 
 		output = output.concat(this.exportSourceList(namespace.sourceList));
 
@@ -216,12 +217,18 @@ export class TS extends Exporter {
 			var isExported = (namespace.typeStateList[type.surrogateKey] == TypeState.exported);
 
 			output.push(this.writeType(type, isExported));
+			if(isExported) ++exportCount;
 		}
 
 		for(var child of doc.childList) {
 			var outElement = this.writeMember(child, true);
-			if(outElement) output.push(outElement);
+			if(outElement) {
+				output.push(outElement);
+				++exportCount;
+			}
 		}
+
+		if(!exportCount) output.push('export {};');
 
 		output.push('');
 
