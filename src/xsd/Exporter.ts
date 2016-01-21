@@ -66,7 +66,7 @@ function mergeDuplicateElements(specList: TypeMember[]) {
 	return(Object.keys(groupTbl).sort().map((name: string) => groupTbl[name]));
 }
 
-function exportMember(group: MemberGroup, namespace: schema.Namespace) {
+function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.Namespace) {
 	var member = group.item;
 	var scope = member.getScope();
 	var otherNamespace = scope.namespace;
@@ -74,9 +74,8 @@ function exportMember(group: MemberGroup, namespace: schema.Namespace) {
 
 	outMember.comment = scope.getComments();
 
-	if(otherNamespace != scope.namespace) {
+	if(otherNamespace != parentScope.namespace) {
 		outMember.namespace = schema.Namespace.register(otherNamespace.id, otherNamespace.name);
-		namespace.addSrc(outMember.namespace);
 	} else outMember.namespace = namespace;
 
 	outMember.typeList = mergeDuplicateTypes(group.typeList).map(
@@ -119,7 +118,7 @@ function exportAttributes(scope: Scope, namespace: schema.Namespace) {
 			typeList: attribute.getTypes()
 		};
 
-		var outAttribute = exportMember(group, namespace);
+		var outAttribute = exportMember(group, scope, namespace);
 		if(outAttribute) attributeList.push(outAttribute);
 	}
 
@@ -153,7 +152,7 @@ function exportChildren(scope: Scope, namespace: schema.Namespace) {
 	var groupList = mergeDuplicateElements(specList);
 
 	for(var group of groupList) {
-		var outChild = exportMember(group, namespace);
+		var outChild = exportMember(group, scope, namespace);
 		if(outChild) childList.push(outChild);
 	}
 

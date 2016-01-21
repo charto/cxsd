@@ -6,6 +6,7 @@ import {Namespace} from './xsd/Namespace';
 import {Loader} from './xsd/Loader';
 import {exportNamespace} from './xsd/Exporter';
 import * as schema from './schema';
+import {AddImports} from './schema/transform/AddImports';
 import {Sanitize} from './schema/transform/Sanitize';
 import {ListImports} from './schema/transform/ListImports';
 
@@ -21,7 +22,9 @@ var loader = new Loader({
 loader.import(process.argv[2]).then((namespace: Namespace) => {
 	try {
 		var spec = exportNamespace(namespace);
-		new Sanitize(spec).exec().then(() =>
+		new AddImports(spec).exec().then(() =>
+			new Sanitize(spec).exec()
+		).then(() =>
 			new ListImports(spec).exec()
 		).then(() =>
 			new schema.exporter.JS(spec).exec()

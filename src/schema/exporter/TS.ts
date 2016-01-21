@@ -73,27 +73,22 @@ export class TS extends Exporter {
 	writeTypeRef(type: Type, namePrefix: string) {
 		var output: string[] = [];
 
-		if(type.name) {
-			var namespace = type.namespace;
-			var name = namePrefix + type.safeName;
+		var namespace = type.namespace;
+		var name = namePrefix + type.safeName;
 
-			if(!namespace || namespace == this.namespace) {
-				output.push(name);
-			} else {
-				// Type from another, imported namespace.
-
-				var short = this.namespace.getShortRef(namespace.id);
-
-				if(short) {
-					output.push(short + '.' + name);
-				} else {
-					console.error('MISSING IMPORT ' + namespace.name + ' for type ' + type.name);
-					output.push('any');
-				}
-			}
+		if(!namespace || namespace == this.namespace) {
+			output.push(name);
 		} else {
-			// Anonymous type defined only within this element.
-			output.push(namePrefix + type.safeName);
+			// Type from another, imported namespace.
+
+			var short = this.namespace.getShortRef(namespace.id);
+
+			if(short) {
+				output.push(short + '.' + name);
+			} else {
+				console.error('MISSING IMPORT ' + namespace.name + ' for type ' + type.name);
+				output.push('any');
+			}
 		}
 
 		return(output.join(''));

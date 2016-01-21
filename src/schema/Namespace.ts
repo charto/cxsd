@@ -29,12 +29,6 @@ export class Namespace {
 		this.shortNameTbl[id].push(shortName);
 	}
 
-	addSrc(namespace: Namespace) {
-		var id = namespace.id;
-
-		this.srcNamespaceTbl[id] = namespace;
-	}
-
 	getShortRef(id: number) {
 		var nameList = this.shortNameTbl[id];
 
@@ -134,8 +128,6 @@ export class Namespace {
 
 	/** Short names used to reference other namespaces in schemas defining this namespace. */
 	shortNameTbl: {[namespaceId: string]: string[]} = {};
-
-	srcNamespaceTbl: {[namespaceId: string]: Namespace} = {};
 
 	/** Table of namespaces actually imported, by short name. */
 	private importTbl: {[short: string]: Namespace};
