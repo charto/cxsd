@@ -194,7 +194,6 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 
 	outType.attributeList = exportAttributes(scope, namespace);
 	outType.childList = exportChildren(scope, namespace);
-	outType.buildMemberTbl();
 
 	return(outType);
 }

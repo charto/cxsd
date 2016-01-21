@@ -5,35 +5,141 @@ import {Type} from '../Type';
 import {Member} from '../Member';
 import {Transform} from './Transform';
 
+function capitalize(match: string, initial: string) {
+	return(initial.toUpperCase());
+}
+
 function sanitizeName(name: string) {
-	return(name.replace(/[^_0-9A-Za-z]/g, '').replace(/^[^A-Za-z]+/, ''));
+	return(name
+		.replace(/-([a-z])/, capitalize)
+		.replace(/[^_0-9A-Za-z]/g, '')
+		.replace(/^[^A-Za-z]+/, '')
+	);
 }
 
 export class Sanitize extends Transform<void> {
 	prepare() {
+		var typeList = this.namespace.typeList.filter((type: Type) => !!type);
+
+		for(var type of typeList) {
+			type.buildMemberTbl();
+		}
+
 		this.visitType(this.doc);
 
-		for(var type of this.namespace.typeList) {
-			if(type) this.visitType(type);
+		for(var type of typeList) {
+			this.visitType(type);
+		}
+
+		for(var type of typeList) {
+			if(!type.safeName) type.safeName = 'Type';
+		}
+
+		// TODO: handle collisions between names of types and members of doc.
+
+		// Sort types by sanitized name and duplicates by original name
+		// (missing original names sorted after existing original names).
+
+		// TODO: merge types with identical contents.
+
+		typeList = typeList.sort((a: Type, b: Type) =>
+			a.safeName.localeCompare(b.safeName) ||
+			+!!b.name - +!!a.name ||
+			(a.name && a.name.localeCompare(b.name))
+		);
+
+		var name = '';
+		var suffix = 2;
+
+		for(var type of typeList) {
+			if(type.safeName == name) {
+				type.safeName += '_' + (suffix++);
+			} else {
+				name = type.safeName;
+				suffix = 2;
+			}
 		}
 
 		return(true);
 	}
 
 	visitType(type: Type) {
+		var memberList: Member[] = [];
 		var member: Member;
+		var other: Type;
+		var otherMember: Member;
 
 		if(type.name) type.safeName = sanitizeName(type.name);
 
 		if(type.attributeList) {
 			for(member of type.attributeList) {
-				if(member.name) member.safeName = sanitizeName(member.name);
+				// Add a $ prefix to attributes of this type
+				// conflicting with children of this or parent types.
+
+				other = type;
+
+				while(other) {
+					otherMember = other.childTbl[member.name];
+					if(otherMember) {
+						member.prefix = '$';
+						break;
+					}
+
+					other = other.parent;
+				}
+
+				memberList.push(member);
 			}
 		}
 
 		if(type.childList) {
 			for(member of type.childList) {
-				if(member.name) member.safeName = sanitizeName(member.name);
+				// Add a $ prefix to attributes of parent types
+				// conflicting with children of this type.
+
+				other = type;
+
+				while(other = other.parent) {
+					otherMember = other.attributeTbl[member.name];
+					if(otherMember && !otherMember.prefix) {
+						otherMember.prefix = '$';
+						if(otherMember.safeName) otherMember.safeName = otherMember.prefix + otherMember.safeName;
+					}
+				}
+
+				// Ensure maximum allowed occurrence count is no less than in parent types,
+				// because overriding a parent class member with a different type
+				// (array vs non-array) doesn't compile.
+
+				if(member.max < 2) {
+					other = type;
+
+					// TODO: Topologically sort dependencies to start processing from root types,
+					// to avoid continuing search after one parent with a matching member is found.
+
+					while(other = other.parent) {
+						otherMember = other.childTbl[member.name];
+						if(otherMember && otherMember.max > member.max) {
+							member.max = otherMember.max;
+							if(member.max > 1) break;
+						}
+					}
+				}
+
+				memberList.push(member);
+			}
+		}
+
+		// Add names to any unnamed types of members, based on the member name.
+
+		for(var member of memberList) {
+			// TODO: Detect duplicate names from other namespaces and prefix them.
+
+			member.safeName = (member.prefix || '') + sanitizeName(member.name);
+			for(var childType of member.typeList) {
+				if(!childType.safeName) {
+					childType.safeName = member.safeName.replace(/^([a-z])/, capitalize) + 'Type';
+				}
 			}
 		}
 	}

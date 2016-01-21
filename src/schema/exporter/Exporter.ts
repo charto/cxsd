@@ -10,16 +10,6 @@ import {Namespace} from '../Namespace';
 import {Type} from '../Type';
 
 export abstract class Exporter extends Transform<string> {
-/*
-	constructor(doc: Type) {
-		super(doc);
-
-		this.cacheDir = path.dirname(
-			this.getCache().getCachePathSync(new Address(doc.namespace.name))
-		);
-	}
-*/
-
 	writeHeader() {
 		var output: string[] = [];
 		var importTbl = this.namespace.getUsedImportTbl();
@@ -57,15 +47,6 @@ export abstract class Exporter extends Transform<string> {
 			)).then(() => false);
 		}));
 	}
-
-/*
-	done() {
-		return(this.getCache().store(
-			outName,
-			this.output
-		));
-	}
-*/
 
 	abstract writeContents(): string;
 
