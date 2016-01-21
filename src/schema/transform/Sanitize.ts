@@ -68,6 +68,7 @@ export class Sanitize extends Transform<void> {
 		var member: Member;
 		var other: Type;
 		var otherMember: Member;
+		var iter: number;
 
 		if(type.name) type.safeName = sanitizeName(type.name);
 
@@ -77,8 +78,9 @@ export class Sanitize extends Transform<void> {
 				// conflicting with children of this or parent types.
 
 				other = type;
+				iter = 100;
 
-				while(other) {
+				while(other && --iter) {
 					otherMember = other.childTbl[member.name];
 					if(otherMember) {
 						member.prefix = '$';
@@ -98,8 +100,9 @@ export class Sanitize extends Transform<void> {
 				// conflicting with children of this type.
 
 				other = type;
+				iter = 100;
 
-				while(other = other.parent) {
+				while((other = other.parent) && --iter) {
 					otherMember = other.attributeTbl[member.name];
 					if(otherMember && !otherMember.prefix) {
 						otherMember.prefix = '$';
@@ -113,11 +116,12 @@ export class Sanitize extends Transform<void> {
 
 				if(member.max < 2) {
 					other = type;
+					iter = 100;
 
 					// TODO: Topologically sort dependencies to start processing from root types,
 					// to avoid continuing search after one parent with a matching member is found.
 
-					while(other = other.parent) {
+					while((other = other.parent) && --iter) {
 						otherMember = other.childTbl[member.name];
 						if(otherMember && otherMember.max > member.max) {
 							member.max = otherMember.max;

@@ -100,7 +100,9 @@ export class Scope {
 			scope = name.namespace.getScope();
 		}
 
-		while(scope) {
+		var iter = 100;
+
+		while(scope && --iter) {
 			if(scope.visible[type]) {
 				var result = scope.visible[type][nameFull] || scope.visible[type][nameWild];
 
