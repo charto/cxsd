@@ -40,7 +40,7 @@ export class AddImports extends Transform<void> {
 			var short = this.namespace.getShortRef(id);
 
 			if(!short) {
-				short = member.namespace.getShortRef(id) || member.namespace.short;
+				short = member.namespace.getShortRef(id) || type.namespace.short;
 				if(short) this.namespace.addRef(short, type.namespace);
 			}
 		}

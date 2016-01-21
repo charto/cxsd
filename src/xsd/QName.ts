@@ -45,6 +45,17 @@ export class QName {
 		return(this);
 	}
 
+	parsePrimitive(name: string, namespace: Namespace) {
+		// TODO: remove following line.
+		name = name.toLowerCase();
+
+		this.namespace = namespace;
+		this.name = name;
+		this.nameFull = '*:' + name;
+
+		return(this);
+	}
+
 	/** Format name for printing (for debugging), together with namespace name. */
 
 	format() {

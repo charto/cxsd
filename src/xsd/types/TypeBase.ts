@@ -8,6 +8,8 @@ import * as schema from '../../schema';
 
 export class TypeBase extends Base {
 	init(state: State) {
+		if(!this.scope) this.scope = state.getScope();
+
 		this.qName = this.define(state, 'type');
 		this.scope.setParentType(this);
 		this.surrogateKey = TypeBase.nextKey++;
@@ -23,7 +25,7 @@ export class TypeBase extends Base {
 			if(this.scope) {
 				var namespace = this.scope.namespace;
 
-				schema.Namespace.register(namespace.id, namespace.name).addType(outType);
+				schema.Namespace.register(namespace.id, namespace.name, namespace.short).addType(outType);
 			}
 
 			this.outType = outType;

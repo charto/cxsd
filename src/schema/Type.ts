@@ -15,8 +15,8 @@ export class Type {
 	buildMemberTbl() {
 		var member: Member;
 
-		for(member of this.attributeList) this.attributeTbl[member.name] = member;
-		for(member of this.childList) this.childTbl[member.name] = member;
+		if(this.attributeList) for(member of this.attributeList) this.attributeTbl[member.name] = member;
+		if(this.childList) for(member of this.childList) this.childTbl[member.name] = member;
 	}
 
 	name: string;

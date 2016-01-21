@@ -2,7 +2,7 @@
 // Released under the MIT license, see LICENSE.
 
 import {Cache} from 'cget';
-import {Namespace} from './xsd/Namespace';
+import {Namespace, PrimitiveSpace} from './xsd/Namespace';
 import {Loader} from './xsd/Loader';
 import {exportNamespace} from './xsd/Exporter';
 import * as schema from './schema';
@@ -21,6 +21,7 @@ var loader = new Loader({
 
 loader.import(process.argv[2]).then((namespace: Namespace) => {
 	try {
+		exportNamespace(PrimitiveSpace.get());
 		var spec = exportNamespace(namespace);
 		new AddImports(spec).exec().then(() =>
 			new Sanitize(spec).exec()

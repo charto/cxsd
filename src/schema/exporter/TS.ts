@@ -110,7 +110,11 @@ export class TS extends Exporter {
 		output.push(': ');
 
 		var outTypeList = member.typeList.map(
-			(type: Type) => this.writeTypeRef(type, '')
+			(type: Type) => {
+				if(type.literalType && (!type.primitiveList || !type.primitiveList.length)) {
+					return(type.literalType);
+				} else return(this.writeTypeRef(type, ''));
+			}
 		);
 
 		if(outTypeList.length == 0) return('');
@@ -189,11 +193,7 @@ export class TS extends Exporter {
 			output.push(exportPrefix + 'type ' + name + ' = ' + content + ';');
 		} else {
 			if(type.parent) {
-				if(type.parent.literalType) {
-					// TODO: extend a literal type class.
-				} else {
-					parentDef = ' extends ' + this.writeTypeRef(type.parent, '_');
-				}
+				parentDef = ' extends ' + this.writeTypeRef(type.parent, '_');
 			}
 			output.push('interface _' + name + parentDef + ' ' + content + '\n');
 			output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { new(): ' + name + '; }' + '\n');

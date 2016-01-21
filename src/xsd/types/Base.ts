@@ -9,7 +9,7 @@ import {QName} from '../QName';
 /** Common constructor type for schema tag handler classes. */
 
 export interface BaseClass {
-	new(...args: any[]): Base;
+	new(state?: State): Base;
 
 	/** Returns other classes allowed as children. */
 	mayContain(): BaseClass[];
@@ -26,7 +26,7 @@ export class Base {
 	/** Returns other classes allowed as children. */
 	static mayContain = () => ([] as BaseClass[]);
 
-	constructor(state: State) {
+	constructor(state?: State) {
 		if(!state) return;
 
 		this.scope = state.getScope();

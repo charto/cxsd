@@ -4,16 +4,19 @@
 import {Loader} from './Loader';
 import {Source} from './Source';
 import {Scope} from './Scope';
+import {State} from './State';
+import {QName} from './QName';
+import {Primitive} from './types/Primitive';
 
 /** XML namespace, binding it to syntax definitions. */
 
 export class Namespace {
 	constructor() {
 		var id = Namespace.list.length;
+		Namespace.list[id] = this;
 
 		this.id = id;
-
-		Namespace.list[id] = this;
+		this.scope = new Scope(this instanceof PrimitiveSpace ? null : PrimitiveSpace.getScope(), this);
 	}
 
 	/** Initialize names and addresses. Can be called multiple times. */
@@ -49,7 +52,6 @@ export class Namespace {
 		var namespace = Namespace.tbl[name] || Namespace.tbl[url];
 
 		if(!namespace) {
-
 			namespace = new Namespace();
 		}
 
@@ -117,5 +119,70 @@ export class Namespace {
 	private sourceTbl: {[id: number]: Source} = {};
 
 	/** Global scope where exported members will be published. */
-	private scope: Scope = new Scope(Scope.getPrimitiveScope(), this);
+	private scope: Scope;
+}
+
+/** Special singleton namespace that contains primitive types. */
+
+export class PrimitiveSpace extends Namespace {
+	/** Construct a table mapping XSD primitive type names to their handler classes. */
+
+	constructor() {
+		super();
+
+		var spec = [
+			[
+				'boolean',
+				'boolean'
+			], [
+				'date dateTime duration time ' +
+				'byte decimal double float int integer long negativeInteger nonNegativeInteger nonPositiveInteger positiveInteger short unsignedLong unsignedInt unsignedShort unsignedByte',
+				'number'
+			], [
+				'anyURI ID IDREF IDREFS language NCName NMTOKEN NMTOKENS normalizedString QName string token',
+				'string'
+			]
+		];
+
+		var scope = this.getScope();
+		var source = new Source(this, '');
+		var state = new State(null, null, source);
+
+		state.setScope(scope);
+
+		for(var typeSpec of spec) {
+			var type = new Primitive(null);
+			type.name = typeSpec[1];
+			type.init(new State(state, null));
+
+			var outType = type.getOutType();
+
+			outType.literalType = type.name;
+			outType.safeName = type.name;
+
+			for(var name of typeSpec[0].split(' ')) {
+				scope.add(new QName().parsePrimitive(name, this), 'type', type, 1, 1);
+			}
+		}
+	}
+
+	static get() {
+		var instance = PrimitiveSpace.instance;
+
+		if(!instance) {
+			instance = new PrimitiveSpace();
+			PrimitiveSpace.instance = instance;
+		}
+
+		return(instance);
+	}
+
+	static getScope() {
+		return(PrimitiveSpace.get().getScope());
+	}
+
+	static instance: PrimitiveSpace;
+
+	name = 'xml-primitives';
+	short = 'Primitive';
 }

@@ -15,9 +15,10 @@ export enum TypeState {
 }
 
 export class Namespace {
-	constructor(id: number, name: string) {
+	constructor(id: number, name: string, short: string) {
 		this.id = id;
 		this.name = name;
+		this.short = short;
 	}
 
 	addRef(shortName: string, namespace: Namespace) {
@@ -80,13 +81,13 @@ export class Namespace {
 		this.typeStateList[type.surrogateKey] = TypeState.exported;
 	}
 
-	static register(id: number, name: string) {
+	static register(id: number, name: string, short: string) {
 		var namespace = Namespace.list[id];
 
 		if(!namespace) {
-			namespace = new Namespace(id, name);
+			namespace = new Namespace(id, name, short);
 			Namespace.list[id] = namespace;
-		}
+		} else if(!namespace.short) namespace.short = short;
 
 		return(namespace);
 	}

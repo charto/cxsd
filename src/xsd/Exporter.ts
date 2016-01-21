@@ -75,7 +75,7 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 	outMember.comment = scope.getComments();
 
 	if(otherNamespace != parentScope.namespace) {
-		outMember.namespace = schema.Namespace.register(otherNamespace.id, otherNamespace.name);
+		outMember.namespace = schema.Namespace.register(otherNamespace.id, otherNamespace.name, otherNamespace.short);
 	} else outMember.namespace = namespace;
 
 	outMember.typeList = mergeDuplicateTypes(group.typeList).map(
@@ -192,20 +192,8 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 /** Export parsed xsd into a simpler internal schema format. */
 
 export function exportNamespace(namespace: Namespace): schema.Type {
-	var outNamespace = schema.Namespace.register(namespace.id, namespace.name);
+	var outNamespace = schema.Namespace.register(namespace.id, namespace.name, namespace.short);
 	var doc = outNamespace.doc;
-
-	// NOTE: Hack to handle primitive types, which should probably be in their own "virtual" namespace instead.
-
-	var spec = types.Primitive.getTypes();
-
-	for(var name of Object.keys(spec)) {
-		var type = spec[name];
-		var outType = type.getOutType();
-
-		outType.literalType = type.name;
-		outType.safeName = type.name;
-	}
 
 	if(!doc) {
 		var scope = namespace.getScope();
@@ -218,12 +206,13 @@ export function exportNamespace(namespace: Namespace): schema.Type {
 
 			for(var name of Object.keys(namespaceRefTbl)) {
 				var otherNamespace = namespaceRefTbl[name];
-				outNamespace.addRef(name, schema.Namespace.register(otherNamespace.id, otherNamespace.name));
+
+				outNamespace.addRef(name, schema.Namespace.register(otherNamespace.id, otherNamespace.name, otherNamespace.short));
+
 				importTbl[otherNamespace.id] = otherNamespace;
 			}
 		}
 
-		outNamespace.short = namespace.short;
 		outNamespace.sourceList = sourceList.map((source: Source) => source.url).sort();
 
 		var typeTbl = scope.dumpTypes();

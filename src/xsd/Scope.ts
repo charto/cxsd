@@ -150,28 +150,6 @@ console.log('Missing ' + type + ': ' + name.name);
 		return(false);
 	}
 
-	static getPrimitiveScope() {
-		var scope = this.primitiveScope;
-
-		if(!scope) {
-			var typeTbl: {[name: string]: types.Primitive} = {};
-			var spec = types.Primitive.getTypes();
-
-			for(var name in spec) {
-				if(spec.hasOwnProperty(name)) typeTbl['*:' + name] = spec[name];
-			}
-
-			scope = new Scope(null)
-			scope.visible = {
-				'type': typeTbl
-			};
-
-			this.primitiveScope = scope;
-		}
-
-		return(scope);
-	}
-
 	private parent: Scope;
 	namespace: Namespace;
 
