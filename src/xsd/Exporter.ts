@@ -83,16 +83,8 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 			var outType = type.getOutType();
 			var qName = type.qName;
 
-			if(qName) {
-				// Normal named type.
-			} else if(type.name) {
-				// Primitive type.
-			} else if(type.exported) {
-				// TODO: Generate names for all circularly defined types so this never happens!
-			} else {
+			if(!qName && !type.name && !type.exported) {
 				// Anonymous type defined only within this element.
-				type.exported = true;
-
 				exportType(type, namespace);
 			}
 

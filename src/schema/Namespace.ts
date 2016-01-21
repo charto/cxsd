@@ -11,8 +11,6 @@ import {Member} from './Member';
 
 export enum TypeState {
 	anonymous,
-	/** Types not exported but needed to represent elements in the document. */
-	named,
 	exported
 }
 
@@ -80,13 +78,6 @@ export class Namespace {
 
 	exportType(type: Type) {
 		this.typeStateList[type.surrogateKey] = TypeState.exported;
-	}
-
-	makeTypeNamed(type: Type) {
-		var id = type.surrogateKey;
-		if(this.typeStateList[id] == TypeState.anonymous) {
-			this.typeStateList[id] = TypeState.named
-		};
 	}
 
 	static register(id: number, name: string) {

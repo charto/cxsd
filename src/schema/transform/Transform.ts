@@ -13,6 +13,21 @@ export abstract class Transform<Output> {
 		this.namespace = doc.namespace;
 	}
 
+	getTypeMembers(type: Type) {
+		var memberList: Member[] = [];
+		var member: Member;
+
+		if(type.attributeList) {
+			for(member of type.attributeList) memberList.push(member);
+		}
+
+		if(type.childList) {
+			for(member of type.childList) memberList.push(member);
+		}
+
+		return(memberList);
+	}
+
 	prepare(): boolean | Promise<any> { return(true); }
 
 	exec(): Promise<Namespace> {

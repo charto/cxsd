@@ -203,31 +203,29 @@ export class TS extends Exporter {
 	}
 
 	writeContents(): string {
-		var outTypes: string[] = [];
+		var output = this.writeHeader();
 		var doc = this.doc;
 		var namespace = this.namespace;
 		var prefix: string;
+
+		output = output.concat(this.exportSourceList(namespace.sourceList));
 
 		for(var type of namespace.typeList.slice(0).sort((a: Type, b: Type) => a.safeName.localeCompare(b.safeName))) {
 			if(!type) continue;
 
 			var isExported = (namespace.typeStateList[type.surrogateKey] == TypeState.exported);
 
-			outTypes.push(this.writeType(type, isExported));
+			output.push(this.writeType(type, isExported));
 		}
 
 		for(var child of doc.childList) {
 			var outElement = this.writeMember(child, true);
-			if(outElement) outTypes.push(outElement);
+			if(outElement) output.push(outElement);
 		}
 
-		outTypes.push('');
+		output.push('');
 
-		return([].concat(
-			this.writeHeader(),
-			this.exportSourceList(namespace.sourceList),
-			outTypes
-		).join('\n'));
+		return(output.join('\n'));
 	}
 
 	getCache() {

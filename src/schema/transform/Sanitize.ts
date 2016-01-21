@@ -20,18 +20,19 @@ function sanitizeName(name: string) {
 export class Sanitize extends Transform<void> {
 	prepare() {
 		var typeList = this.namespace.typeList.filter((type: Type) => !!type);
+		var type: Type;
 
-		for(var type of typeList) {
+		for(type of typeList) {
 			type.buildMemberTbl();
 		}
 
 		this.visitType(this.doc);
 
-		for(var type of typeList) {
+		for(type of typeList) {
 			this.visitType(type);
 		}
 
-		for(var type of typeList) {
+		for(type of typeList) {
 			if(!type.safeName) type.safeName = 'Type';
 		}
 
@@ -51,7 +52,7 @@ export class Sanitize extends Transform<void> {
 		var name = '';
 		var suffix = 2;
 
-		for(var type of typeList) {
+		for(type of typeList) {
 			if(type.safeName == name) {
 				type.safeName += '_' + (suffix++);
 			} else {

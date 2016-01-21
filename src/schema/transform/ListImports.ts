@@ -25,18 +25,8 @@ export class ListImports extends Transform<Output> {
 	}
 
 	visitType(type: Type) {
-		var member: Member;
-
-		if(type.attributeList) {
-			for(var member of type.attributeList) {
-				for(var memberType of member.typeList) this.visitTypeRef(memberType, member, type);
-			}
-		}
-
-		if(type.childList) {
-			for(var member of type.childList) {
-				for(var memberType of member.typeList) this.visitTypeRef(memberType, member, type);
-			}
+		for(var member of this.getTypeMembers(type)) {
+			for(var memberType of member.typeList) this.visitTypeRef(memberType, member, type);
 		}
 	}
 
