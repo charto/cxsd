@@ -18,6 +18,8 @@ export class Namespace {
 
 	/** Initialize names and addresses. Can be called multiple times. */
 	init(name: string, url?: string, short?: string) {
+		name = Namespace.sanitize(name);
+
 		if(name) {
 			if(!this.name) this.name = name;
 			Namespace.tbl[name] = this;
@@ -36,8 +38,14 @@ export class Namespace {
 		return(this);
 	}
 
+	static sanitize(name: string) {
+		return(name && name.replace(/\/+$/, ''));
+	}
+
 	/** Globally register a namespace, to attach handlers to it. */
 	static register(name: string, url?: string, short?: string) {
+		name = Namespace.sanitize(name);
+
 		var namespace = Namespace.tbl[name] || Namespace.tbl[url];
 
 		if(!namespace) {
@@ -50,6 +58,8 @@ export class Namespace {
 
 	/** Find a globally registered namespace. */
 	static lookup(name: string) {
+		name = Namespace.sanitize(name);
+
 		return(Namespace.tbl[name]);
 	}
 

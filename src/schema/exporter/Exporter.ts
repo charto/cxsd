@@ -53,12 +53,17 @@ export abstract class Exporter extends Transform<string> {
 	/** Get relative path to another namespace within the cache. */
 
 	getPathTo(name: string) {
+		// Append and then strip a file extension so references to a parent
+		// directory will target the directory by name instead of .. or similar.
+
+		var targetPath = this.getCache().getCachePathSync(new Address(name)) + '.js';
+
 		var relPath = path.relative(
 			this.cacheDir,
-			this.getCache().getCachePathSync(new Address(name))
-		).replace(new RegExp(path.sep, 'g'), '/');
+			targetPath
+		).replace(new RegExp(path.sep, 'g'), '/').replace(/\.js$/, '');
 
-		if(relPath.indexOf('/') < 0) relPath = './' + relPath;
+		if(!relPath.match(/^[./]/)) relPath = './' + relPath;
 
 		return(relPath);
 	}
