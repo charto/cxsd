@@ -9,7 +9,7 @@ function sanitizeName(name: string) {
 	return(name.replace(/[^_0-9A-Za-z]/g, '').replace(/^[^A-Za-z]+/, ''));
 }
 
-export type Output = { [namespaceId: string]: { [name: string]: boolean } };
+export type Output = { [namespaceId: string]: { [name: string]: Type } };
 
 export class ListImports extends Transform<Output> {
 	prepare() {
@@ -25,12 +25,14 @@ export class ListImports extends Transform<Output> {
 	}
 
 	visitType(type: Type) {
+		if(type.parent) this.visitTypeRef(type.parent);
+
 		for(var member of this.getTypeMembers(type)) {
-			for(var memberType of member.typeList) this.visitTypeRef(memberType, member, type);
+			for(var memberType of member.typeList) this.visitTypeRef(memberType);
 		}
 	}
 
-	visitTypeRef(type: Type, member: Member, parent: Type) {
+	visitTypeRef(type: Type) {
 		if(type.namespace && type.namespace != this.namespace) {
 			// Type from another, imported namespace.
 
@@ -42,7 +44,7 @@ export class ListImports extends Transform<Output> {
 
 			if(short) {
 				if(!this.output[id]) this.output[id] = {};
-				this.output[id][type.safeName] = true;
+				this.output[id][type.safeName] = type;
 			}
 		}
 	}

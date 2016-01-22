@@ -125,7 +125,10 @@ export class Namespace {
 	private importTbl: {[short: string]: Namespace};
 
 	/** List of referenced type names from each imported namespace. */
-	importTypeNameTbl: { [namespaceId: string]: { [name: string]: boolean } };
+	importTypeNameTbl: { [namespaceId: string]: { [name: string]: Type } };
+
+	/** True only for the special namespace containing primitives. */
+	isPrimitiveSpace: boolean;
 
 	/** Internal list of namespaces indexed by a surrogate key. */
 	private static list: Namespace[] = [];

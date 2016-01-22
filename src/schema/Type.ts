@@ -44,4 +44,7 @@ export class Type {
 
 	surrogateKey: number;
 	private static nextKey = 0;
+
+	static optionalFlag = 1;
+	static arrayFlag = 2;
 }

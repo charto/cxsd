@@ -23,16 +23,8 @@ export class AddImports extends Transform<void> {
 
 		if(type.parent) this.visitTypeRef(type.parent);
 
-		if(type.attributeList) {
-			for(var member of type.attributeList) {
-				for(var memberType of member.typeList) this.visitTypeRef(memberType, member);
-			}
-		}
-
-		if(type.childList) {
-			for(var member of type.childList) {
-				for(var memberType of member.typeList) this.visitTypeRef(memberType, member);
-			}
+		for(var member of this.getTypeMembers(type)) {
+			for(var memberType of member.typeList) this.visitTypeRef(memberType, member);
 		}
 	}
 

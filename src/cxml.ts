@@ -12,11 +12,11 @@ export interface ModuleExports {
 /** Tuple: module exports object, list of imported type names */
 export type ImportSpec = [ ModuleExports, string[] ];
 
-/** Tuple: name, type, flags */
-export type MemberSpec = [string, number, number];
+/** Tuple: name, flags, type ID list */
+export type MemberSpec = [ string, number, number[] ];
 
-/** Tuple: name, member list */
-export type TypeSpec = [ string, MemberSpec[] ];
+/** Tuple: parent type ID, child element list, attribute list */
+export type TypeSpec = [ number, MemberSpec[], MemberSpec[] ];
 
 function mark(exports: ModuleExports) {
 	if(!exports._cxml) {
@@ -26,12 +26,21 @@ function mark(exports: ModuleExports) {
 	}
 }
 
-export function register(name: string, exports: ModuleExports, imports: ImportSpec[], types: TypeSpec[]) {
-	mark(exports);
-	console.log(name);
-	console.log(imports);
+export function register(
+	name: string,
+	exportObject: ModuleExports,
+	importSpecList: ImportSpec[],
+	exportTypeNameList: string[],
+	typeSpecList: TypeSpec[]
+) {
+	mark(exportObject);
 
-	for(var spec of imports) mark(spec[0]);
+	console.log(name);
+	console.log(importSpecList);
+	console.log(exportTypeNameList);
+	console.log(typeSpecList);
+
+	for(var spec of importSpecList) mark(spec[0]);
 	if(--pendingCount == 0) {
 		console.log('done');
 		pendingList = [];
