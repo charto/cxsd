@@ -174,7 +174,7 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 		}
 
 		outType.primitiveList = primitiveList;
-		outType.literalType = parentPrimitive.name;
+		outType.literalType = parentPrimitive.getOutType();
 	}
 
 	var parent = type.parent;

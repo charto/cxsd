@@ -7,6 +7,7 @@ import {Scope} from './Scope';
 import {State} from './State';
 import {QName} from './QName';
 import {Primitive} from './types/Primitive';
+import * as schema from '../schema';
 
 /** XML namespace, binding it to syntax definitions. */
 
@@ -149,6 +150,7 @@ export class PrimitiveSpace extends Namespace {
 		var state = new State(null, null, source);
 
 		state.setScope(scope);
+		schema.Namespace.register(this.id, this.name, this.short).isPrimitiveSpace = true;
 
 		for(var typeSpec of spec) {
 			var type = new Primitive(null);
@@ -157,7 +159,7 @@ export class PrimitiveSpace extends Namespace {
 
 			var outType = type.getOutType();
 
-			outType.literalType = type.name;
+			outType.literalType = outType;
 			outType.safeName = type.name;
 
 			for(var name of typeSpec[0].split(' ')) {

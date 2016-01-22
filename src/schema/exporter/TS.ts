@@ -112,7 +112,7 @@ export class TS extends Exporter {
 		var outTypeList = member.typeList.map(
 			(type: Type) => {
 				if(type.literalType && (!type.primitiveList || !type.primitiveList.length)) {
-					return(type.literalType);
+					return(type.literalType.name);
 				} else return(this.writeTypeRef(type, ''));
 			}
 		);
@@ -142,7 +142,7 @@ export class TS extends Exporter {
 				if(primitiveList.length > 1) {
 					output.push('(' + primitiveList.join(' | ') + ')');
 				} else output.push(primitiveList[0]);
-			} else output.push(type.literalType);
+			} else output.push(type.literalType.name);
 		} else {
 			var outMemberList: string[] = [];
 
@@ -189,8 +189,17 @@ export class TS extends Exporter {
 
 		var content = this.writeTypeContent(type);
 
-		if(type.literalType) {
-			output.push(exportPrefix + 'type ' + name + ' = ' + content + ';');
+		if(namespace.isPrimitiveSpace) {
+			output.push(exportPrefix + 'interface _' + name + ' { ' + 'content' + ': ' + type.literalType.name + '; }' + '\n');
+		} else if(type.literalType) {
+			parentDef = this.writeTypeRef(type.parent, '_');
+
+			output.push(exportPrefix + 'type ' + name + ' = ' + content + ';' + '\n');
+			if(type.primitiveList && type.primitiveList.length) {
+				output.push('interface _' + name + ' extends ' + parentDef + ' { ' + 'content' + ': ' + name + '; }' + '\n');
+			} else {
+				output.push('type _' + name + ' = ' + parentDef + ';' + '\n');
+			}
 		} else {
 			if(type.parent) {
 				parentDef = ' extends ' + this.writeTypeRef(type.parent, '_');

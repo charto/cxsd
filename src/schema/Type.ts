@@ -24,9 +24,9 @@ export class Type {
 	safeName: string;
 	bytePos: number;
 
-	/** JavaScript type name, if the XML type only contains single value
+	/** Primitive type, if the XML type only contains single value
 	  * that can be parsed into a JavaScript value. */
-	literalType: string;
+	literalType: Type;
 	/** List of allowed literal values, if such a restriction is defined. */
 	primitiveList: string[];
 
@@ -39,8 +39,6 @@ export class Type {
 
 	/** Parent type this is derived from. */
 	parent: Type;
-
-	isRecursive: boolean;
 
 	comment: string;
 

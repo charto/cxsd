@@ -19,20 +19,24 @@ export class AddImports extends Transform<void> {
 	visitType(type: Type) {
 		var member: Member;
 
+		if(type.literalType && !type.parent) type.parent = type.literalType;
+
+		if(type.parent) this.visitTypeRef(type.parent);
+
 		if(type.attributeList) {
 			for(var member of type.attributeList) {
-				for(var memberType of member.typeList) this.visitTypeRef(memberType, member, type);
+				for(var memberType of member.typeList) this.visitTypeRef(memberType, member);
 			}
 		}
 
 		if(type.childList) {
 			for(var member of type.childList) {
-				for(var memberType of member.typeList) this.visitTypeRef(memberType, member, type);
+				for(var memberType of member.typeList) this.visitTypeRef(memberType, member);
 			}
 		}
 	}
 
-	visitTypeRef(type: Type, member: Member, parent: Type) {
+	visitTypeRef(type: Type, member?: Member) {
 		if(type.namespace && type.namespace != this.namespace) {
 			// Type from another, imported namespace.
 
@@ -40,7 +44,7 @@ export class AddImports extends Transform<void> {
 			var short = this.namespace.getShortRef(id);
 
 			if(!short) {
-				short = member.namespace.getShortRef(id) || type.namespace.short;
+				short = (member && member.namespace.getShortRef(id)) || type.namespace.short;
 				if(short) this.namespace.addRef(short, type.namespace);
 			}
 		}
