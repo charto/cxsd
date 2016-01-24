@@ -90,10 +90,7 @@ export class JS extends Exporter {
 				for(var name of Object.keys(importTypeNameTbl).sort()) {
 					var type = importTypeNameTbl[name];
 
-					name = type.safeName;
-					if(type.name != name) name += ':' + type.name;
-
-					importTypeNameList.push("'" + name + "'");
+					importTypeNameList.push("'" + type.safeName + "'");
 					typeNumTbl[type.surrogateKey] = typeNum++;
 				}
 			}
@@ -134,6 +131,15 @@ export class JS extends Exporter {
 			typeSpecList.push(this.writeType(type, typeNumTbl));
 		}
 
+		var exportSpecList: string[] = [];
+
+		for(var type of exportedTypeList) {
+			name = type.safeName;
+			if(type.name && type.name != name) name += ':' + type.name;
+
+			exportSpecList.push('\n\t' + "'" + name + "'");
+		}
+
 		return([].concat(
 			[
 				'var cxml = require("cxml");',
@@ -144,7 +150,7 @@ export class JS extends Exporter {
 				"'" + namespace.name+ "', " +
 				'exports, ' +
 				'[' + importSpecList.join(',') + '\n], ' +
-				'[' + exportedTypeList.map((type: Type) => '\n\t' + "'" + type.safeName + "'").join(',') + '\n], ' +
+				'[' + exportSpecList.join(',') + '\n], ' +
 				'[' + typeSpecList.join(',') + '\n]' +
 				');'
 			]

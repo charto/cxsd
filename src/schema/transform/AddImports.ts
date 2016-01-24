@@ -19,6 +19,8 @@ export class AddImports extends Transform<void> {
 	visitType(type: Type) {
 		var member: Member;
 
+		// Types holding primitives should inherit from them.
+		// NOTE: This makes base primitive types inherit themselves.
 		if(type.literalType && !type.parent) type.parent = type.literalType;
 
 		if(type.parent) this.visitTypeRef(type.parent);
