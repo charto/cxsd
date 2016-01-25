@@ -1,11 +1,7 @@
 // This file is part of cxsd, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as expat from 'node-expat';
-import {FetchOptions, Cache} from 'cget'
-
 import * as types from './types'
-import {Parser} from './Parser'
 import {Namespace} from './Namespace'
 import {Source} from './Source'
 import {Scope} from './Scope'

@@ -4,7 +4,7 @@
 import * as expat from 'node-expat';
 import * as Promise from 'bluebird';
 
-import {FetchOptions, Cache, CacheResult} from 'cget';
+import {CacheResult} from 'cget';
 import * as types from './types';
 import {State, Rule} from './State';
 import {Namespace} from './Namespace';

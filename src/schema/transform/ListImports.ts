@@ -2,7 +2,6 @@
 // Released under the MIT license, see LICENSE.
 
 import {Type} from '../Type';
-import {Member} from '../Member';
 import {Transform} from './Transform';
 
 function sanitizeName(name: string) {

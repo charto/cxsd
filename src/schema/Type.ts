@@ -3,7 +3,6 @@
 
 import {Namespace} from './Namespace';
 import {Member} from './Member';
-import * as exporter from './exporter';
 
 export class Type {
 	constructor() {

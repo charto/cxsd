@@ -2,12 +2,9 @@
 // Released under the MIT license, see LICENSE.
 
 import * as path from 'path';
-import * as Promise from 'bluebird';
 
 import {Transform} from '../transform/Transform';
 import {Address, Cache} from 'cget'
-import {Namespace} from '../Namespace';
-import {Type} from '../Type';
 
 export abstract class Exporter extends Transform<string> {
 	writeHeader() {

@@ -1,8 +1,6 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as Promise from 'bluebird';
-
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
 import {Namespace, TypeState} from '../Namespace';

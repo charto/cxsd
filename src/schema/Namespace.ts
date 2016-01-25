@@ -1,13 +1,8 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as path from 'path';
-
-import {Address, Cache} from 'cget'
-
 import {NamespaceRef} from './NamespaceRef';
 import {Type} from './Type';
-import {Member} from './Member';
 
 export enum TypeState {
 	anonymous,

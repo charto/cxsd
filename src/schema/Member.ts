@@ -3,7 +3,6 @@
 
 import {Namespace} from './Namespace';
 import {Type} from './Type';
-import * as exporter from './exporter';
 
 export class Member {
 	constructor(name: string, min: number, max: number) {
