@@ -207,6 +207,7 @@ export class TS extends Exporter {
 			output.push('interface _' + name + parentDef + ' ' + content + '\n');
 			//output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { new(): ' + name + '; }' + '\n');
 			output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { constructor: { new(): ' + name + ' }; }' + '\n');
+			if(visible) output.push(exportPrefix + 'var ' + name + ': { new(): ' + name + ' };' + '\n');
 		}
 
 		return(output.join(''));

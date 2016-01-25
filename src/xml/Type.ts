@@ -77,11 +77,14 @@ export class TypeSpec {
 		var typeNumList = spec[2];
 
 		if(typeNumList.length == 1) {
+			var safeName = parts.safeName;
 			var type = (this.type.prototype) as TypeClassMembers;
 			var memberType = new (this.namespace.typeByNum(typeNumList[0]).type);
 
-			if(flags & TypeSpec.arrayFlag) type[parts.safeName] = [memberType];
-			else type[parts.safeName] = memberType;
+			if(flags & TypeSpec.arrayFlag) type[safeName] = [memberType];
+			else type[safeName] = memberType;
+
+			if(flags & TypeSpec.optionalFlag) this.optionalList.push(safeName);
 		} else {
 			// TODO: What now? Make sure this is not reached.
 			// Different types shouldn't be joined with | in .d.ts, instead
@@ -96,6 +99,14 @@ export class TypeSpec {
 		for(spec of this.attributeSpecList) this.defineMember(spec);
 	}
 
+	cleanOptionals() {
+		var type = (this.type.prototype) as TypeClassMembers;
+
+		for(var name of this.optionalList) {
+			delete(type[name]);
+		}
+	}
+
 	namespace: Namespace;
 	name: string;
 	safeName: string;
@@ -104,6 +115,8 @@ export class TypeSpec {
 	parent: TypeSpec;
 	childSpecList: MemberSpec[];
 	attributeSpecList: MemberSpec[];
+
+	optionalList: string[] = [];
 
 	// Track dependents for Kahn's topological sort algorithm.
 	dependentList: TypeSpec[] = [];

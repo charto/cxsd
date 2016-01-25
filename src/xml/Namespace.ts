@@ -52,6 +52,8 @@ export class Namespace {
 			}
 		}
 
+		this.exportOffset = typeNum;
+
 		var typeSpecList = this.typeSpecList;
 		var typeCount = typeSpecList.length;
 
@@ -61,6 +63,17 @@ export class Namespace {
 			if(typeSpec.parentNum) {
 				typeSpec.setParent(typeSpecList[typeSpec.parentNum]);
 			}
+		}
+	}
+
+	exportTypes(exports: ModuleExports) {
+		var typeSpecList = this.typeSpecList;
+		var typeCount = typeSpecList.length;
+
+		for(var typeNum = this.exportOffset; typeNum < typeCount; ++typeNum) {
+			var typeSpec = typeSpecList[typeNum];
+
+			exports[typeSpec.safeName] = typeSpec.type;
 		}
 	}
 
@@ -76,6 +89,7 @@ export class Namespace {
 	importSpecList: ImportSpec[];
 	exportTypeNameList: string[];
 	typeSpecList: TypeSpec[] = [];
+	exportOffset: number;
 
 	exportTypeTbl: { [name: string]: TypeSpec } = {};
 }

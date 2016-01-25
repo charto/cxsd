@@ -10,6 +10,9 @@ var pendingNamespaceList: xml.ModuleExports[] = [];
 var pendingTypeList: xml.TypeSpec[] = [];
 var pendingCount = 0;
 
+var namespaceList: xml.Namespace[] = [];
+var typeList: xml.TypeSpec[] = [];
+
 function mark(exports: xml.ModuleExports, namespace?: xml.Namespace) {
 	if(!exports._cxml) {
 		exports._cxml = [null];
@@ -44,6 +47,8 @@ function process(pendingNamespaceList: xml.ModuleExports[], pendingTypeList: xml
 
 	for(var exportObject of pendingNamespaceList) {
 		var namespace = exportObject._cxml[0];
+
+		namespace.exportTypes(exportObject);
 		namespace.exportDocument(exportObject);
 	}
 }
@@ -61,6 +66,7 @@ export function register(
 	var typeName: string;
 
 	var namespace = new xml.Namespace(name, importSpecList);
+	namespaceList.push(namespace);
 
 	for(var typeNum = 0; typeNum < typeCount; ++typeNum) {
 		var rawSpec = rawTypeSpecList[typeNum];
@@ -73,7 +79,7 @@ export function register(
 
 		namespace.addType(typeSpec);
 		pendingTypeList.push(typeSpec);
-//		console.log(typeSpec.safeName);
+		typeList.push(typeSpec);
 	}
 
 	mark(exportObject, namespace);
@@ -85,4 +91,20 @@ export function register(
 		pendingNamespaceList = [];
 		pendingTypeList = [];
 	}
+}
+
+export function init() {
+	for(var namespace of namespaceList) {
+		namespace.importSpecList = null;
+		namespace.exportTypeNameList = null;
+		namespace.typeSpecList = null;
+		namespace.exportTypeTbl = null;
+	}
+
+	for(var typeSpec of typeList) {
+		typeSpec.cleanOptionals();
+	}
+
+	namespaceList = null;
+	typeList = null;
 }
