@@ -10,11 +10,19 @@ function capitalize(match: string, initial: string) {
 }
 
 function sanitizeName(name: string) {
-	return(name
+	var reserved = {
+		//'name': true
+		'constructor': true
+	};
+
+	name = name
 		.replace(/-([a-z])/, capitalize)
 		.replace(/[^_0-9A-Za-z]/g, '')
-		.replace(/^[^A-Za-z]+/, '')
-	);
+		.replace(/^[^A-Za-z]+/, '');
+
+	if(reserved.hasOwnProperty(name)) name = '_' + name;
+
+	return(name);
 }
 
 export class Sanitize extends Transform<void> {

@@ -37,6 +37,15 @@ function process(pendingNamespaceList: xml.ModuleExports[], pendingTypeList: xml
 			typeSpec.defineType();
 		}
 	}
+
+	for(var typeSpec of pendingTypeList) {
+		typeSpec.defineMembers();
+	}
+
+	for(var exportObject of pendingNamespaceList) {
+		var namespace = exportObject._cxml[0];
+		namespace.exportDocument(exportObject);
+	}
 }
 
 export function register(

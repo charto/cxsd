@@ -205,7 +205,8 @@ export class TS extends Exporter {
 				parentDef = ' extends ' + this.writeTypeRef(type.parent, '_');
 			}
 			output.push('interface _' + name + parentDef + ' ' + content + '\n');
-			output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { new(): ' + name + '; }' + '\n');
+			//output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { new(): ' + name + '; }' + '\n');
+			output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { constructor: { new(): ' + name + ' }; }' + '\n');
 		}
 
 		return(output.join(''));

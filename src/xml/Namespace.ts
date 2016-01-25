@@ -1,7 +1,7 @@
 // This file is part of cxml, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {Type, TypeSpec} from './Type';
+import {Type, TypeSpec, TypeClassWithMembers} from './Type';
 
 export interface ModuleExports {
 	[name: string]: any;
@@ -36,6 +36,10 @@ export class Namespace {
 		if(spec.safeName) this.exportTypeTbl[spec.safeName] = spec;
 	}
 
+	typeByNum(num: number) {
+		return(this.typeSpecList[num]);
+	}
+
 	link() {
 		// Skip the document type.
 		var typeNum = 1;
@@ -57,6 +61,15 @@ export class Namespace {
 			if(typeSpec.parentNum) {
 				typeSpec.setParent(typeSpecList[typeSpec.parentNum]);
 			}
+		}
+	}
+
+	exportDocument(exports: ModuleExports) {
+		//var doc = this.typeSpecList[0].type as TypeClassWithMembers;
+		var doc = this.typeSpecList[0].type.prototype as TypeClassWithMembers;
+
+		for(var safeName of Object.keys(doc)) {
+			exports[safeName] = doc[safeName];
 		}
 	}
 
