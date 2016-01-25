@@ -93,7 +93,7 @@ export function register(
 	}
 }
 
-export function init() {
+export function init(strict?: boolean) {
 	for(var namespace of namespaceList) {
 		namespace.importSpecList = null;
 		namespace.exportTypeNameList = null;
@@ -102,7 +102,7 @@ export function init() {
 	}
 
 	for(var typeSpec of typeList) {
-		typeSpec.cleanOptionals();
+		typeSpec.cleanPlaceholders(strict);
 	}
 
 	namespaceList = null;

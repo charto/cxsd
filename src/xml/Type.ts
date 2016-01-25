@@ -85,6 +85,7 @@ export class TypeSpec {
 			else type[safeName] = memberType;
 
 			if(flags & TypeSpec.optionalFlag) this.optionalList.push(safeName);
+			else this.requiredList.push(safeName);
 		} else {
 			// TODO: What now? Make sure this is not reached.
 			// Different types shouldn't be joined with | in .d.ts, instead
@@ -99,10 +100,13 @@ export class TypeSpec {
 		for(spec of this.attributeSpecList) this.defineMember(spec);
 	}
 
-	cleanOptionals() {
+	cleanPlaceholders(strict?: boolean) {
 		var type = (this.type.prototype) as TypeClassMembers;
+		var nameList = this.optionalList;
 
-		for(var name of this.optionalList) {
+		if(strict) nameList = nameList.concat(this.requiredList);
+
+		for(var name of nameList) {
 			delete(type[name]);
 		}
 	}
@@ -117,6 +121,7 @@ export class TypeSpec {
 	attributeSpecList: MemberSpec[];
 
 	optionalList: string[] = [];
+	requiredList: string[] = [];
 
 	// Track dependents for Kahn's topological sort algorithm.
 	dependentList: TypeSpec[] = [];
