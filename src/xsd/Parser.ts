@@ -5,12 +5,14 @@ import * as expat from 'node-expat';
 import * as Promise from 'bluebird';
 
 import {CacheResult} from 'cget';
+import {Rule} from 'cxml';
+
 import * as types from './types';
-import {State, Rule} from './State';
+import {State} from './State';
 import {Namespace} from './Namespace';
 import {Loader} from './Loader';
 import {Source} from './Source';
-import {QName} from './QName'
+import {QName} from './QName';
 
 import * as util from 'util';
 
@@ -19,11 +21,12 @@ import * as util from 'util';
 function parseRule(ctor: types.BaseClass) {
 	if(ctor.rule) return(ctor.rule as Rule);
 
-	var rule = new Rule(new QName().parseClass(ctor.name, ctor.getNamespace()), ctor);
+	var rule = new Rule(ctor);
 
 	ctor.rule = rule;
 
-	for(var follower of ctor.mayContain()) {
+	for(var baseFollower of ctor.mayContain()) {
+		var follower = baseFollower as types.BaseClass;
 		var followerName = new QName().parseClass(follower.name, follower.getNamespace());
 
 		rule.followerTbl[followerName.nameFull] = parseRule(follower);
@@ -64,7 +67,7 @@ export class Parser {
 
 		if(!rule || !rule.proto) return(state);
 
-		var xsdElem = new rule.proto(state);
+		var xsdElem = new (rule.proto as types.BaseClass)(state);
 
 		state.xsdElement = xsdElem;
 

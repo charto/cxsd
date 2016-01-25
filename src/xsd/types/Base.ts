@@ -1,23 +1,16 @@
 // This file is part of cxsd, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {State, Rule} from '../State';
+import {Rule, BaseClass as XmlBaseClass} from 'cxml';
+import {State} from '../State';
 import {Namespace} from '../Namespace';
 import {Scope} from '../Scope';
 import {QName} from '../QName';
 
-/** Common constructor type for schema tag handler classes. */
-
-export interface BaseClass {
+export interface BaseClass extends XmlBaseClass {
 	new(state?: State): Base;
 
-	/** Returns other classes allowed as children. */
-	mayContain(): BaseClass[];
-
 	getNamespace(): Namespace;
-
-	name: string;
-	rule: Rule;
 }
 
 /** Common handler base class for all schema tags. */

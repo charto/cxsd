@@ -1,11 +1,12 @@
 // This file is part of cxsd, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as types from './types'
-import {Namespace} from './Namespace'
-import {Source} from './Source'
-import {Scope} from './Scope'
-import {QName} from './QName'
+import * as types from './types';
+import {Rule} from 'cxml';
+import {Namespace} from './Namespace';
+import {Source} from './Source';
+import {Scope} from './Scope';
+import {QName} from './QName';
 
 /** Parser state, passed around between functions. */
 
@@ -52,25 +53,4 @@ export class State {
 		textHandlerList: types.Base[];
 		textDepth: number;
 	};
-}
-
-/** Parser rule, defines a handler class, valid attributes and children
-  * for an XSD tag. */
-
-export class Rule {
-	constructor(qName: QName, proto: types.BaseClass) {
-		this.qName = qName;
-		this.proto = proto;
-	}
-
-	qName: QName;
-
-	/** Constructor function for creating objects handling and representing the results of this parsing rule. */
-	proto: types.BaseClass;
-
-	/** List of allowed attributes. */
-	attributeList: string[] = [];
-
-	/** Table mapping the names of allowed child tags, to their parsing rules. */
-	followerTbl: {[id: string]: Rule} = {};
 }
