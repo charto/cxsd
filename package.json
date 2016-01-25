@@ -1,6 +1,6 @@
 {
   "name": "cxsd",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "(incomplete) fast schema-aware XML parser with XSD support",
   "bin": {
     "cxsd": "dist/cli.js"
@@ -15,15 +15,16 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/charto/fast-xml.git"
+    "url": "git+https://github.com/charto/cxsd.git"
   },
   "bugs": {
-    "url": "https://github.com/charto/fast-xml/issues"
+    "url": "https://github.com/charto/cxsd/issues"
   },
-  "homepage": "https://github.com/charto/fast-xml#readme",
+  "homepage": "https://github.com/charto/cxsd#readme",
   "dependencies": {
     "bluebird": "~3.1.1",
     "cget": "~0.0.3",
+    "cxml": "~0.0.4",
     "node-expat": "~2.3.12"
   },
   "devDependencies": {
