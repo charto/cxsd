@@ -11,7 +11,6 @@ function capitalize(match: string, initial: string) {
 
 function sanitizeName(name: string) {
 	var reserved = {
-		//'name': true
 		'constructor': true
 	};
 

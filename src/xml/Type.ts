@@ -77,9 +77,7 @@ export class TypeSpec {
 		var typeNumList = spec[2];
 
 		if(typeNumList.length == 1) {
-			//var type = (this.type as TypeClassWithMembers);
-			//var memberType = this.namespace.typeByNum(typeNumList[0]).type;
-			var type = (this.type.prototype) as TypeClassWithMembers;
+			var type = (this.type.prototype) as TypeClassMembers;
 			var memberType = new (this.namespace.typeByNum(typeNumList[0]).type);
 
 			if(flags & TypeSpec.arrayFlag) type[parts.safeName] = [memberType];
@@ -120,8 +118,7 @@ export interface TypeClass {
 	new(): Type;
 }
 
-//export interface TypeClassWithMembers extends TypeClass {
-export interface TypeClassWithMembers {
+export interface TypeClassMembers {
 	[name: string]: Type | Type[];
 }
 

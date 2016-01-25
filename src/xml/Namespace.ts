@@ -1,7 +1,7 @@
 // This file is part of cxml, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {Type, TypeSpec, TypeClassWithMembers} from './Type';
+import {Type, TypeSpec, TypeClassMembers} from './Type';
 
 export interface ModuleExports {
 	[name: string]: any;
@@ -65,8 +65,7 @@ export class Namespace {
 	}
 
 	exportDocument(exports: ModuleExports) {
-		//var doc = this.typeSpecList[0].type as TypeClassWithMembers;
-		var doc = this.typeSpecList[0].type.prototype as TypeClassWithMembers;
+		var doc = this.typeSpecList[0].type.prototype as TypeClassMembers;
 
 		for(var safeName of Object.keys(doc)) {
 			exports[safeName] = doc[safeName];
