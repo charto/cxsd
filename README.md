@@ -1,9 +1,7 @@
-cxml
+cxsd
 ====
 
-(Currently incomplete and not operational) streaming XML parser using node-expat (requires node-gyp to compile).
-
-Uses XSD schema information to read XML into nice JavaScript structures.
+(Currently incomplete and not operational) streaming XSD parser using node-expat (requires node-gyp to compile).
 
 Downloads schema files and keeps a local cache in the file system.
 
@@ -32,11 +30,9 @@ The XSD parser proceeds in stages (the parser and all syntax element classes hav
 - `resolve` which resolves references by name and finds out how many times they may appear. Because possible attributes and child elements can be defined through deeply nested references that can point to other namespaces, it's generally impossible to know them all before all references in all namespaces have been resolved.
 - TODO: `transform` which renames things to avoid naming conflicts between child elements and attributes (which will be merged into members of a single JSON object) and possibly deals with scope issues for TypeScript definition output.
 
-TODO: after parsing, the resulting data structure should be exportable as JSON or a TypeScript definition file with ambient declarations of the XML namespaces.
-
 License
 =======
 
-[The MIT License](https://raw.githubusercontent.com/charto/fast-xml/master/LICENSE)
+[The MIT License](https://raw.githubusercontent.com/charto/cxsd/master/LICENSE)
 
 Copyright (c) 2015-2016 BusFaster Ltd

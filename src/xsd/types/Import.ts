@@ -1,4 +1,4 @@
-// This file is part of cxml, copyright (c) 2015 BusFaster Ltd.
+// This file is part of cxsd, copyright (c) 2015 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
 import {State} from '../State';

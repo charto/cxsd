@@ -12,7 +12,6 @@
 		"typings/tsd.d.ts",
 		"typings-custom/node-expat.d.ts",
 
-		"src/cxml.ts",
 		"src/cli.ts"
 	]
 }
