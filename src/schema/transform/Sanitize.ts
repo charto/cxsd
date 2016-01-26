@@ -39,6 +39,16 @@ export class Sanitize extends Transform<void> {
 			this.visitType(type);
 		}
 
+		for(var key of Object.keys(this.pendingAnonTbl)) {
+			var spec = this.pendingAnonTbl[key];
+
+			if(spec) {
+				for(var typeMember of spec.memberList) {
+					this.addNameToMemberTypes(spec.type, typeMember, false);
+				}
+			}
+		}
+
 		for(type of typeList) {
 			if(!type.safeName) type.safeName = 'Type';
 		}
@@ -55,6 +65,8 @@ export class Sanitize extends Transform<void> {
 			+!!b.name - +!!a.name ||
 			(a.name && a.name.localeCompare(b.name))
 		);
+
+		// Add numeric suffix to duplicate names.
 
 		var name = '';
 		var suffix = 2;
@@ -148,13 +160,41 @@ export class Sanitize extends Transform<void> {
 			// TODO: Detect duplicate names from other namespaces and prefix them.
 
 			member.safeName = (member.prefix || '') + sanitizeName(member.name);
-			for(var childType of member.typeList) {
-				if(!childType.safeName) {
-					childType.safeName = member.safeName.replace(/^([a-z])/, capitalize) + 'Type';
+
+			this.addNameToMemberTypes(type, member, true);
+		}
+	}
+
+	addNameToMemberTypes(type: Type, member: Member, allowDefer: boolean) {
+		for(var memberType of member.typeList) {
+			if(!memberType.safeName) {
+				if(type.safeName || !allowDefer) {
+					memberType.safeName = (type.safeName || '') + member.safeName.replace(/^([a-z])/, capitalize) + 'Type';
+
+					var spec = this.pendingAnonTbl[memberType.surrogateKey];
+
+					if(spec) {
+						for(var typeMember of spec.memberList) {
+							this.addNameToMemberTypes(memberType, typeMember, false);
+						}
+
+						this.pendingAnonTbl[memberType.surrogateKey] = null;
+					}
+				} else {
+					var spec = this.pendingAnonTbl[type.surrogateKey];
+
+					if(!spec) {
+						spec = { type: type, memberList: [] };
+						this.pendingAnonTbl[type.surrogateKey] = spec;
+					}
+
+					spec.memberList.push(member);
 				}
 			}
 		}
 	}
+
+	pendingAnonTbl: { [typeId: number]: { type: Type, memberList: Member[] } } = {};
 
 	construct = Sanitize;
 }
