@@ -45,7 +45,7 @@ export class TS extends Exporter {
 		return(output.join('\n'));
 	}
 
-	writeImport(shortName: string, relativePath: string) {
+	writeImport(shortName: string, relativePath: string, absolutePath: string) {
 		return(
 			'import * as ' +
 			shortName +
@@ -220,6 +220,7 @@ export class TS extends Exporter {
 		var prefix: string;
 		var exportCount = 0;
 
+		output.push('');
 		output = output.concat(this.exportSourceList(namespace.sourceList));
 
 		for(var type of namespace.typeList.slice(0).sort((a: Type, b: Type) => a.safeName.localeCompare(b.safeName))) {

@@ -14,14 +14,13 @@ export abstract class Exporter extends Transform<string> {
 		for(var shortName of Object.keys(importTbl).sort()) {
 			var namespace = importTbl[shortName];
 			var relativePath = this.getPathTo(namespace.name);
-			output.push(this.writeImport(shortName, relativePath));
+			output.push(this.writeImport(shortName, relativePath, namespace.name));
 		}
 
-		output.push('');
 		return(output);
 	}
 
-	abstract writeImport(shortName: string, relativePath: string): string;
+	abstract writeImport(shortName: string, relativePath: string, absolutePath: string): string;
 
 	/** Output namespace contents to cache, if not already exported. */
 

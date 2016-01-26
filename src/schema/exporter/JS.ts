@@ -8,7 +8,7 @@ import {Member} from '../Member';
 import {Type} from '../Type';
 
 export class JS extends Exporter {
-	writeImport(shortName: string, relativePath: string) {
+	writeImport(shortName: string, relativePath: string, absolutePath: string) {
 		return(
 			'var ' +
 			shortName +
@@ -144,6 +144,7 @@ export class JS extends Exporter {
 			],
 			this.writeHeader(),
 			[
+				'',
 				'cxml.register(' +
 				"'" + namespace.name+ "', " +
 				'exports, ' +
