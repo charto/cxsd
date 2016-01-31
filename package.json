@@ -3,7 +3,7 @@
   "version": "0.0.4",
   "description": "(incomplete) fast schema-aware XML parser with XSD support",
   "bin": {
-    "cxsd": "dist/cli.js"
+    "cxsd": "cxsd-cli.js"
   },
   "scripts": {
     "tsc": "tsc",

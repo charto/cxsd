@@ -14,10 +14,7 @@ Cache.patchRequest();
 
 Namespace.register('http://www.w3.org/XML/1998/namespace', 'http://www.w3.org/2001/xml.xsd', 'xml');
 
-var loader = new Loader({
-	forceHost: '127.0.0.1',
-	forcePort: 12345
-});
+var loader = new Loader({});
 
 loader.import(process.argv[2]).then((namespace: Namespace) => {
 	try {
