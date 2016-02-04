@@ -8,6 +8,7 @@ import {Transform} from './Transform';
 export interface State {
 	pendingAnonTbl: { [typeId: string]: { type: Type, memberTypeList: Type[] } };
 	pendingAnonList: Type[];
+	typeListList: Type[][];
 }
 
 function capitalize(match: string, initial: string) {
@@ -44,13 +45,19 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 			this.visitType(type);
 		}
 
+		this.state.typeListList.push(typeList);
+
+		return(true);
+	}
+
+	renameDuplicates(typeList: Type[]) {
 		// TODO: handle collisions between names of types and members of doc.
 
 		// Sort types by sanitized name and duplicates by original name
 		// (missing original names sorted after existing original names).
 
 		// TODO: merge types with identical contents.
-/*
+
 		typeList = typeList.sort((a: Type, b: Type) =>
 			a.safeName.localeCompare(b.safeName) ||
 			+!!b.name - +!!a.name ||
@@ -62,7 +69,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 		var name = '';
 		var suffix = 2;
 
-		for(type of typeList) {
+		for(var type of typeList) {
 			if(type.safeName == name) {
 				type.safeName += '_' + (suffix++);
 			} else {
@@ -70,8 +77,6 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 				suffix = 2;
 			}
 		}
-*/
-		return(true);
 	}
 
 	finish() {
@@ -87,6 +92,10 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 
 		for(var type of this.state.pendingAnonList) {
 			if(!type.safeName) type.safeName = 'Type';
+		}
+
+		for(var typeList of this.state.typeListList) {
+			this.renameDuplicates(typeList);
 		}
 	}
 
@@ -216,7 +225,11 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 		}
 	}
 
-	protected state: State = { pendingAnonTbl: {}, pendingAnonList: [] };
+	protected state: State = {
+		pendingAnonTbl: {},
+		pendingAnonList: [],
+		typeListList: []
+	};
 
 	construct = Sanitize;
 }
