@@ -6,7 +6,7 @@ import * as path from 'path';
 import {Transform} from '../transform/Transform';
 import {Address, Cache} from 'cget'
 
-export abstract class Exporter extends Transform<string> {
+export abstract class Exporter extends Transform<Exporter, string, void> {
 	writeHeader() {
 		var output: string[] = [];
 		var importTbl = this.namespace.getUsedImportTbl();

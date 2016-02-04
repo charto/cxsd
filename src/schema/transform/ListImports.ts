@@ -10,7 +10,7 @@ function sanitizeName(name: string) {
 
 export type Output = { [namespaceId: string]: { [name: string]: Type } };
 
-export class ListImports extends Transform<Output> {
+export class ListImports extends Transform<ListImports, Output, void> {
 	prepare() {
 		this.visitType(this.doc);
 

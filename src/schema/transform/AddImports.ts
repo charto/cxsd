@@ -5,7 +5,7 @@ import {Type} from '../Type';
 import {Member} from '../Member';
 import {Transform} from './Transform';
 
-export class AddImports extends Transform<void> {
+export class AddImports extends Transform<AddImports, void, void> {
 	prepare() {
 		this.visitType(this.doc);
 

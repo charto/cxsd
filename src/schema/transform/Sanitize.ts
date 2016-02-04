@@ -5,6 +5,11 @@ import {Type} from '../Type';
 import {Member} from '../Member';
 import {Transform} from './Transform';
 
+export interface State {
+	pendingAnonTbl: { [typeId: string]: { type: Type, memberTypeList: Type[] } };
+	pendingAnonList: Type[];
+}
+
 function capitalize(match: string, initial: string) {
 	return(initial.toUpperCase());
 }
@@ -24,7 +29,7 @@ function sanitizeName(name: string) {
 	return(name);
 }
 
-export class Sanitize extends Transform<void> {
+export class Sanitize extends Transform<Sanitize, void, State> {
 	prepare() {
 		var typeList = this.namespace.typeList.filter((type: Type) => !!type);
 		var type: Type;
@@ -39,27 +44,13 @@ export class Sanitize extends Transform<void> {
 			this.visitType(type);
 		}
 
-		for(var key of Object.keys(this.pendingAnonTbl)) {
-			var spec = this.pendingAnonTbl[key];
-
-			if(spec) {
-				for(var typeMember of spec.memberList) {
-					this.addNameToMemberTypes(spec.type, typeMember, false);
-				}
-			}
-		}
-
-		for(type of typeList) {
-			if(!type.safeName) type.safeName = 'Type';
-		}
-
 		// TODO: handle collisions between names of types and members of doc.
 
 		// Sort types by sanitized name and duplicates by original name
 		// (missing original names sorted after existing original names).
 
 		// TODO: merge types with identical contents.
-
+/*
 		typeList = typeList.sort((a: Type, b: Type) =>
 			a.safeName.localeCompare(b.safeName) ||
 			+!!b.name - +!!a.name ||
@@ -79,8 +70,24 @@ export class Sanitize extends Transform<void> {
 				suffix = 2;
 			}
 		}
-
+*/
 		return(true);
+	}
+
+	finish() {
+		for(var key of Object.keys(this.state.pendingAnonTbl)) {
+			var spec = this.state.pendingAnonTbl[key];
+
+			if(spec) {
+				for(var memberType of spec.memberTypeList) {
+					if(memberType.containingType.safeName) this.addNameToType(memberType);
+				}
+			}
+		}
+
+		for(var type of this.state.pendingAnonList) {
+			if(!type.safeName) type.safeName = 'Type';
+		}
 	}
 
 	visitType(type: Type) {
@@ -91,6 +98,7 @@ export class Sanitize extends Transform<void> {
 		var iter: number;
 
 		if(type.name) type.safeName = sanitizeName(type.name);
+		else this.state.pendingAnonList.push(type);
 
 		if(type.attributeList) {
 			for(member of type.attributeList) {
@@ -161,40 +169,54 @@ export class Sanitize extends Transform<void> {
 
 			member.safeName = (member.prefix || '') + sanitizeName(member.name);
 
-			this.addNameToMemberTypes(type, member, true);
+			this.addNameToMemberTypes(type, member);
 		}
 	}
 
-	addNameToMemberTypes(type: Type, member: Member, allowDefer: boolean) {
+	addNameToType(type: Type) {
+		var containingType = type.containingType;
+		var containingMember = type.containingMember;
+
+		if(containingMember) {
+			type.namespace = containingMember.namespace;
+
+			type.safeName = (containingType ? containingType.safeName : '') + (containingMember.safeName || '').replace(/^([a-z])/, capitalize) + 'Type';
+		}
+
+		var spec = this.state.pendingAnonTbl[type.surrogateKey];
+
+		if(spec) {
+			for(var memberType of spec.memberTypeList) {
+				this.addNameToType(memberType);
+			}
+
+			this.state.pendingAnonTbl[type.surrogateKey] = null;
+		}
+	}
+
+	addNameToMemberTypes(type: Type, member: Member) {
 		for(var memberType of member.typeList) {
-			if(!memberType.safeName) {
-				if(type.safeName || !allowDefer) {
-					memberType.safeName = (type.safeName || '') + member.safeName.replace(/^([a-z])/, capitalize) + 'Type';
+			if(!memberType.safeName && memberType.namespace == this.namespace) {
+				if(memberType.containingType) {
+					if(memberType.containingType.safeName) this.addNameToType(memberType);
+					else {
+						var spec = this.state.pendingAnonTbl[memberType.containingType.surrogateKey];
 
-					var spec = this.pendingAnonTbl[memberType.surrogateKey];
-
-					if(spec) {
-						for(var typeMember of spec.memberList) {
-							this.addNameToMemberTypes(memberType, typeMember, false);
+						if(!spec) {
+							spec = { type: memberType.containingType, memberTypeList: [] };
+							this.state.pendingAnonTbl[memberType.containingType.surrogateKey] = spec;
 						}
 
-						this.pendingAnonTbl[memberType.surrogateKey] = null;
+						spec.memberTypeList.push(memberType);
 					}
-				} else {
-					var spec = this.pendingAnonTbl[type.surrogateKey];
-
-					if(!spec) {
-						spec = { type: type, memberList: [] };
-						this.pendingAnonTbl[type.surrogateKey] = spec;
-					}
-
-					spec.memberList.push(member);
+				} else if(memberType.containingMember) {
+					if(memberType.containingMember.safeName) this.addNameToType(memberType);
 				}
 			}
 		}
 	}
 
-	pendingAnonTbl: { [typeId: number]: { type: Type, memberList: Member[] } } = {};
+	protected state: State = { pendingAnonTbl: {}, pendingAnonList: [] };
 
 	construct = Sanitize;
 }

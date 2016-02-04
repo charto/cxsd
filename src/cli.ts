@@ -12,16 +12,21 @@ import {ListImports} from './schema/transform/ListImports';
 
 Cache.patchRequest();
 
-Namespace.register('http://www.w3.org/XML/1998/namespace', 'http://www.w3.org/2001/xml.xsd', 'xml');
+var xmlSpace = Namespace.register('http://www.w3.org/XML/1998/namespace', 'http://www.w3.org/2001/xml.xsd', 'xml');
 
 var loader = new Loader({});
 
 loader.import(process.argv[2]).then((namespace: Namespace) => {
 	try {
 		exportNamespace(PrimitiveSpace.get());
+		exportNamespace(xmlSpace);
+
 		var spec = exportNamespace(namespace);
+
 		new AddImports(spec).exec().then(() =>
 			new Sanitize(spec).exec()
+		).then((sanitize: Sanitize) =>
+			sanitize.finish()
 		).then(() =>
 			new ListImports(spec).exec()
 		).then(() =>

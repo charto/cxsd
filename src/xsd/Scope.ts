@@ -121,11 +121,19 @@ console.log('Missing ' + type + ': ' + name.name);
 
 	setType(type: types.TypeBase) {
 		// TODO: set to some invalid value if called more than once.
-		if(!this.type) this.type = type;
+		if(!this.type && this.namespace.getScope() != this) this.type = type;
 	}
 
 	setParentType(type: types.TypeBase) {
 		this.parent.setType(type);
+	}
+
+	getParentType(namespace: Namespace): types.TypeBase {
+		for(var parent = this.parent; parent && parent.namespace == namespace; parent = parent.parent) {
+			if(parent.type) return(parent.type);
+		}
+
+		return(null);
 	}
 
 	getType(): types.TypeBase { return(this.type); }

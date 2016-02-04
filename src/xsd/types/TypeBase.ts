@@ -11,7 +11,10 @@ export class TypeBase extends Base {
 		if(!this.scope) this.scope = state.getScope();
 
 		this.qName = this.define(state, 'type');
+		// Set type of parent element, in case it has none.
 		this.scope.setParentType(this);
+		// Add reference from current scope to allow naming nested anonymous types.
+		this.scope.setType(this);
 		this.surrogateKey = TypeBase.nextKey++;
 	}
 

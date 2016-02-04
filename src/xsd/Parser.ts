@@ -206,17 +206,17 @@ export class Parser {
 
 	/** Bind references, call after all imports have been initialized. */
 	resolve() {
-		try {
-			for(var pos = 0; pos < this.pendingList.length; ++pos) {
-				var state = this.pendingList[pos];
+		for(var pos = 0; pos < this.pendingList.length; ++pos) {
+			var state = this.pendingList[pos];
+			try {
 				state.xsdElement.resolve(state);
+			} catch(err) {
+				console.error(err);
+				console.error(err.stack);
 			}
-
-			this.pendingList = [];
-		} catch(err) {
-			console.error(err);
-			console.error(err.stack);
 		}
+
+		this.pendingList = [];
 	}
 
 	/** Temporarily holds a qualified name, re-used to avoid allocating objects. */

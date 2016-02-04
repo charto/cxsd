@@ -85,7 +85,18 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 
 			if(!qName && !type.name && !type.exported) {
 				// Anonymous type defined only within this element.
-				exportType(type, namespace);
+
+				outType.containingMember = outMember;
+
+				// Look through parent scopes for a containing type,
+				// If the member was referenced from another namespace,
+				// its scope points to definition in that namespace.
+				var parentType = scope.getParentType(otherNamespace);
+				if(parentType) {
+					outType.containingType = parentType.getOutType();
+				}
+
+				exportType(type, outMember.namespace);
 			}
 
 			return(outType);
