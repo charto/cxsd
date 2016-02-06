@@ -247,16 +247,9 @@ export class TS extends Exporter {
 		return(output.join('\n'));
 	}
 
-	getCache() {
-		return(TS.cache);
-	}
-
 	getOutName(name: string) {
 		return(name + '.d.ts');
 	}
 
 	construct = TS;
-
-	/** Cache where all output is written. */
-	private static cache = new Cache('cache/js', '_index.js');
 }

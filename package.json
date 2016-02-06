@@ -24,6 +24,7 @@
   "dependencies": {
     "bluebird": "~3.2.2",
     "cget": "~0.0.3",
+    "commander": "~2.9.0",
     "cxml": "~0.0.4",
     "node-expat": "~2.3.13"
   },

@@ -156,16 +156,9 @@ export class JS extends Exporter {
 		).join('\n'));
 	}
 
-	getCache() {
-		return(JS.cache);
-	}
-
 	getOutName(name: string) {
 		return(name + '.js');
 	}
 
 	construct = JS;
-
-	/** Cache where all output is written. */
-	private static cache = new Cache('cache/js', '_index.js');
 }

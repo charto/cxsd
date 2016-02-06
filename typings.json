@@ -4,6 +4,7 @@
   },
   "devDependencies": {},
   "ambientDependencies": {
+    "commander": "github:DefinitelyTyped/DefinitelyTyped/commander/commander.d.ts#6d09e1a5aea3240e7290be602ed03c88e38cd07d",
     "form-data": "github:DefinitelyTyped/DefinitelyTyped/form-data/form-data.d.ts#bb1b99052bf1d697f0368fbff56898bc1f5a525c",
     "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#1c56e368e17bb28ca57577250624ca5bd561aa81",
     "request": "github:DefinitelyTyped/DefinitelyTyped/request/request.d.ts#e252a088123eb595d9d772eb373f41c084360278"

@@ -4,10 +4,21 @@
 import * as Promise from 'bluebird';
 import * as path from 'path';
 
-import {Transform} from '../transform/Transform';
 import {Address, Cache} from 'cget'
 
-export abstract class Exporter extends Transform<Exporter, string, void> {
+import {Transform} from '../transform/Transform';
+import {Type} from '../Type';
+
+export interface State {
+	cache: Cache;
+}
+
+export abstract class Exporter extends Transform<Exporter, string, State> {
+	constructor(doc: Type, cache: Cache) {
+		super(doc);
+		this.state = { cache: cache };
+	}
+
 	writeHeader() {
 		var output: string[] = [];
 		var importTbl = this.namespace.getUsedImportTbl();
@@ -30,15 +41,15 @@ export abstract class Exporter extends Transform<Exporter, string, void> {
 		if(!doc) return(null);
 
 		this.cacheDir = path.dirname(
-			this.getCache().getCachePathSync(new Address(doc.namespace.name))
+			this.state.cache.getCachePathSync(new Address(doc.namespace.name))
 		);
 
 		var outName = this.getOutName(doc.namespace.name);
 
-		return(this.getCache().ifCached(outName).then((isCached: boolean) => {
+		return(this.state.cache.ifCached(outName).then((isCached: boolean) => {
 			if(isCached) return(null)
 
-			return(this.getCache().store(
+			return(this.state.cache.store(
 				outName,
 				this.writeContents()
 			)).then(() => false);
@@ -53,7 +64,7 @@ export abstract class Exporter extends Transform<Exporter, string, void> {
 		// Append and then strip a file extension so references to a parent
 		// directory will target the directory by name instead of .. or similar.
 
-		var targetPath = this.getCache().getCachePathSync(new Address(name)) + '.js';
+		var targetPath = this.state.cache.getCachePathSync(new Address(name)) + '.js';
 
 		var relPath = path.relative(
 			this.cacheDir,
@@ -65,9 +76,9 @@ export abstract class Exporter extends Transform<Exporter, string, void> {
 		return(relPath);
 	}
 
-	abstract getCache(): Cache;
-
 	protected abstract getOutName(name: string): string;
+
+	protected state: State;
 
 	/** Full path of directory containing exported output for the current namespace. */
 	protected cacheDir: string;
