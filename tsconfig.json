@@ -9,7 +9,7 @@
 		"target": "es5"
 	},
 	"files": [
-		"typings/tsd.d.ts",
+		"typings/main.d.ts",
 		"typings-custom/node-expat.d.ts",
 
 		"src/cli.ts"
