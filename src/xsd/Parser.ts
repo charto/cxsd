@@ -9,6 +9,7 @@ import {CacheResult} from 'cget';
 import {Rule} from 'cxml';
 
 import * as types from './types';
+import {Context} from './Context';
 import {State} from './State';
 import {Namespace} from './Namespace';
 import {Loader} from './Loader';
@@ -19,7 +20,7 @@ import * as util from 'util';
 
 /** Parse syntax rules encoded into handler classes. */
 
-function parseRule(ctor: types.BaseClass) {
+function parseRule(ctor: types.BaseClass, context: Context) {
 	if(ctor.rule) return(ctor.rule as Rule);
 
 	var rule = new Rule(ctor);
@@ -28,10 +29,10 @@ function parseRule(ctor: types.BaseClass) {
 
 	for(var baseFollower of ctor.mayContain()) {
 		var follower = baseFollower as types.BaseClass;
-		var followerName = new QName().parseClass(follower.name, follower.getNamespace());
+		var followerName = new QName().parseClass(follower.name, context.xsdSpace);
 
-		rule.followerTbl[followerName.nameFull] = parseRule(follower);
-		rule.followerTbl[followerName.name] = parseRule(follower);
+		rule.followerTbl[followerName.nameFull] = parseRule(follower, context);
+		rule.followerTbl[followerName.name] = parseRule(follower, context);
 	}
 
 	var obj = new ctor();
@@ -44,8 +45,9 @@ function parseRule(ctor: types.BaseClass) {
 }
 
 export class Parser {
-	constructor() {
-		this.rootRule = parseRule(types.Root);
+	constructor(context: Context) {
+		this.context = context;
+		this.rootRule = parseRule(types.Root, context);
 	}
 
 	startElement(state: State, name: string, attrTbl: {[name: string]: string}) {
@@ -107,6 +109,8 @@ export class Parser {
 		// var xml = sax.createStream(true, { position: true });
 
 		state.stateStatic = {
+			context: this.context,
+
 			addImport: (namespaceTarget: Namespace, urlRemote: string) => {
 				importList.push({namespace: namespaceTarget, url: urlRemote});
 			},
@@ -148,6 +152,7 @@ export class Parser {
 			} catch(err) {
 				// Exceptions escaping from node-expat's event handlers cause weird effects.
 				console.error(err);
+				console.log('Stack:');
 				console.error(err.stack);
 			}
 		});
@@ -195,7 +200,7 @@ export class Parser {
 
 			resolve(importList.map((spec: {namespace: Namespace, url: string}) => {
 				console.log('IMPORT into ' + spec.namespace.name + ' from ' + spec.url);
-				return(spec.namespace.importSchema(loader, spec.url));
+				return(loader.importFile(spec.url, spec.namespace));
 			}))
 		});
 
@@ -212,12 +217,15 @@ export class Parser {
 				state.xsdElement.resolve(state);
 			} catch(err) {
 				console.error(err);
+				console.log('Stack:');
 				console.error(err.stack);
 			}
 		}
 
 		this.pendingList = [];
 	}
+
+	private context: Context;
 
 	/** Temporarily holds a qualified name, re-used to avoid allocating objects. */
 	private qName = new QName();

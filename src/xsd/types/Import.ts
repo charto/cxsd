@@ -32,7 +32,7 @@ export class Import extends Include {
 			// without a schemaLocation.
 
 			var urlRemote = state.source.urlResolve(this.schemaLocation);
-			state.stateStatic.addImport(Namespace.register(this.namespace, urlRemote), urlRemote);
+			state.stateStatic.addImport(state.stateStatic.context.registerNamespace(this.namespace), urlRemote);
 		}
 	}
 

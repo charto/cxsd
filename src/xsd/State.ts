@@ -3,6 +3,8 @@
 
 import * as types from './types';
 import {Rule} from 'cxml';
+
+import {Context} from './Context';
 import {Namespace} from './Namespace';
 import {Source} from './Source';
 import {Scope} from './Scope';
@@ -47,6 +49,7 @@ export class State {
 	index: number;
 
 	stateStatic: {
+		context: Context;
 		addImport: (namespaceTarget: Namespace, urlRemote: string) => void;
 		getLineNumber: () => number;
 		getBytePos: () => number;

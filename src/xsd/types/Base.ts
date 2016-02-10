@@ -9,8 +9,6 @@ import {QName} from '../QName';
 
 export interface BaseClass extends XmlBaseClass {
 	new(state?: State): Base;
-
-	getNamespace(): Namespace;
 }
 
 /** Common handler base class for all schema tags. */
@@ -54,23 +52,11 @@ export class Base {
 
 	getScope() { return(this.scope); }
 
-	static getNamespace() {
-		if(!Base.namespace) {
-			Base.namespace = Namespace.register(
-				'http://www.w3.org/2001/XMLSchema',
-				'http://www.w3.org/2009/XMLSchema/XMLSchema.xsd',
-				'xsd'
-			);
-		}
-		return(Base.namespace);
-	}
-
 	protected scope: Scope;
 	lineNumber: number;
 	bytePos: number;
 	name: string;
 
-	private static namespace: Namespace;
 	static name: string;
 	static rule: Rule;
 }

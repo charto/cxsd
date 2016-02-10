@@ -3,47 +3,44 @@
 
 import * as Promise from 'bluebird';
 
-import {Address, FetchOptions, Cache, CacheResult, util} from 'cget'
-import {Namespace} from './Namespace'
-import {Source} from './Source'
-import {Parser} from './Parser'
+import {Address, FetchOptions, Cache, CacheResult, util} from 'cget';
+
+import {Context} from './Context';
+import {Namespace} from './Namespace';
+import {Source} from './Source';
+import {Parser} from './Parser';
 
 /** Loader handles caching schema definitions and calling parser stages. */
 
 export class Loader {
-	constructor(options?: FetchOptions) {
+	constructor(context: Context, options?: FetchOptions) {
+		this.context = context;
 		this.options = util.clone(options);
-		this.parser = new Parser();
+		this.parser = new Parser(context);
 	}
 
 	import(urlRemote: string) {
-		var namespace = Namespace.register(null, urlRemote);
-
 		var promise = new Promise<Namespace>((resolve, reject) => {
 			this.resolve = resolve;
 			this.reject = reject;
-		})
 
-		namespace.importSchema(this);
-		this.targetNamespace = namespace;
+			this.source = this.importFile(urlRemote);
+		});
 
 		return(promise);
 	}
 
-	/** Internal function called by Namespace.importSchema. */
-
-	importFile(namespace: Namespace, urlRemote: string) {
+	importFile(urlRemote: string, namespace?: Namespace) {
 		var options = this.options;
 		options.address = new Address(urlRemote);
 
 		var source = Loader.sourceTbl[urlRemote];
 
 		if(!source) {
-			source = new Source(namespace, urlRemote);
+			source = new Source(urlRemote, this.context, namespace);
 
 			Loader.cache.fetch(options).then((cached: CacheResult) => {
-				source.updateUrl(cached.address.url);
-				namespace.updateUrl(urlRemote, cached.address.url);
+				source.updateUrl(urlRemote, cached.address.url);
 
 				return(this.parser.init(cached, source, this));
 			}).then((dependencyList: Source[]) => {
@@ -62,7 +59,7 @@ export class Loader {
 
 	private finish() {
 		this.parser.resolve();
-		this.resolve(this.targetNamespace);
+		this.resolve(this.source.targetNamespace);
 	}
 
 	getOptions() { return(this.options); }
@@ -70,10 +67,11 @@ export class Loader {
 	private static cache = new Cache('cache/xsd', '_index.xsd');
 	private static sourceTbl: {[url: string]: Source} = {};
 
+	private context: Context;
 	private options: FetchOptions;
 	private parser: Parser;
+	private source: Source;
 
-	private targetNamespace: Namespace;
 	private pendingCount = 0;
 
 	private resolve: (result: Namespace) => void;

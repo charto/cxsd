@@ -4,7 +4,10 @@
 import * as cmd from 'commander';
 
 import {Cache, FetchOptions} from 'cget';
-import {Namespace, PrimitiveSpace} from './xsd/Namespace';
+import * as cxml from 'cxml';
+
+import {Context} from './xsd/Context';
+import {Namespace} from './xsd/Namespace';
 import {Loader} from './xsd/Loader';
 import {exportNamespace} from './xsd/Exporter';
 import * as schema from './schema';
@@ -30,7 +33,7 @@ interface ICommand extends _ICommand {
 );
 
 function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
-	var xmlSpace = Namespace.register('http://www.w3.org/XML/1998/namespace', 'http://www.w3.org/2001/xml.xsd', 'xml');
+	var context = new Context();
 
 	var fetchOptions: FetchOptions = {};
 
@@ -44,12 +47,12 @@ function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
 	var jsCache = new Cache(opts['outJs'] || 'cache/js', '_index.js');
 	var tsCache = new Cache(opts['outTs'] || 'cache/js', '_index.d.ts');
 
-	var loader = new Loader(fetchOptions);
+	var loader = new Loader(context, fetchOptions);
 
 	loader.import(urlRemote).then((namespace: Namespace) => {
 		try {
-			exportNamespace(PrimitiveSpace.get());
-			exportNamespace(xmlSpace);
+			exportNamespace(context.primitiveSpace);
+			exportNamespace(context.xmlSpace);
 
 			var spec = exportNamespace(namespace);
 
@@ -65,8 +68,9 @@ function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
 				new schema.exporter.TS(spec, tsCache).exec()
 			);
 		} catch(err) {
-			console.log(err);
-			console.log(err.stack);
+			console.error(err);
+			console.log('Stack:');
+			console.error(err.stack);
 		}
 	});
 }

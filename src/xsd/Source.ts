@@ -4,19 +4,24 @@
 import * as Promise from 'bluebird';
 import * as url from 'url';
 
+import {Context} from './Context'
 import {Namespace} from './Namespace'
 import {Loader} from './Loader'
 
 /** Details of a single XSD source file. */
 
 export class Source {
-	constructor(targetNamespace: Namespace, urlRemote: string) {
+	constructor(urlRemote: string, context: Context, targetNamespace?: Namespace) {
 		var id = Source.list.length;
 
+		this.context = context;
 		this.id = id;
-		this.targetNamespace = targetNamespace;
 		this.url = urlRemote;
 		this.urlOriginal = urlRemote;
+		if(targetNamespace) {
+			this.targetNamespace = targetNamespace;
+			this.targetNamespace.addSource(this);
+		}
 
 		Source.list[id] = this;
 	}
@@ -28,13 +33,16 @@ export class Source {
 		// For the schema file itself, it should be http://www.w3.org/2001/XMLSchema
 
 		if(attrTbl['xmlns']) {
-			this.defaultNamespace = Namespace.register(attrTbl['xmlns']);
+			this.defaultNamespace = this.context.registerNamespace(attrTbl['xmlns']);
 		}
 
 		// Everything defined in the current file belongs to the target namespace by default.
 
 		if(attrTbl['targetnamespace']) {
-			this.targetNamespace.init(attrTbl['targetnamespace']);
+			if(!this.targetNamespace) {
+				this.targetNamespace = this.context.registerNamespace(attrTbl['targetnamespace'], this.urlOriginal);
+				this.targetNamespace.addSource(this);
+			}
 		}
 
 		// Read the current file's preferred shorthand codes for other XML namespaces.
@@ -43,26 +51,31 @@ export class Source {
 			if(attr.match(/^xmlns:/i)) {
 				var short = attr.substr(attr.indexOf(':') + 1);
 
-				this.namespaceRefTbl[short] = Namespace.register(attrTbl[attr], null, short);
+				this.namespaceRefTbl[short] = this.context.registerNamespace(attrTbl[attr]).init(null, short);
 			}
 		}
+
+		this.namespaceRefTbl['xml'] = this.context.registerNamespace('http://www.w3.org/XML/1998/namespace');
 	}
 
 	/** Find a namespace according to its full name or the short name as used in this source file. */
 
 	lookupNamespace(ref: string) {
-		return(this.namespaceRefTbl[ref] || Namespace.lookup(ref));
+		return(this.namespaceRefTbl[ref] || this.context.getNamespace(ref));
 	}
 
 	/** Resolve a possible relative URL in the context of this source file. */
 
 	urlResolve(urlRemote: string) {
-		return(url.resolve(this.targetNamespace.url, urlRemote));
+		return(url.resolve(this.targetNamespace.schemaUrl, urlRemote));
 	}
 
 	/** Update current remote address, in case the previous address got redirected. */
 
-	updateUrl(urlRemote: string) { this.url = urlRemote; }
+	updateUrl(urlOld: string, urlNew: string) {
+		this.url = urlNew;
+		if(this.targetNamespace) this.targetNamespace.updateUrl(urlOld, urlNew);
+	}
 
 	getNamespaceRefs() {
 		return(this.namespaceRefTbl);
@@ -70,6 +83,8 @@ export class Source {
 
 	/** Internal list of source files indexed by a surrogate key. */
 	private static list: Source[] = [];
+
+	private context: Context;
 
 	/** Surrogate key, used internally as a unique source file ID. */
 	id: number;
