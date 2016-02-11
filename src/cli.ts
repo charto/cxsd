@@ -33,8 +33,8 @@ interface ICommand extends _ICommand {
 );
 
 function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
-	var xsdContext = new Context();
 	var schemaContext = new schema.Context();
+	var xsdContext = new Context(schemaContext);
 
 	var fetchOptions: FetchOptions = {};
 

@@ -18,7 +18,7 @@ export class TypeBase extends Base {
 		this.surrogateKey = TypeBase.nextKey++;
 	}
 
-	getOutType(): schema.Type {
+	getOutType(schemaContext: schema.Context): schema.Type {
 		var outType = this.outType;
 
 		if(!outType) {
@@ -28,7 +28,7 @@ export class TypeBase extends Base {
 			if(this.scope) {
 				var namespace = this.scope.namespace;
 
-				schema.Namespace.register(namespace.name, namespace.id, namespace.short, null).addType(outType);
+				schema.Namespace.register(namespace.name, namespace.id, namespace.short, schemaContext).addType(outType);
 			}
 
 			this.outType = outType;

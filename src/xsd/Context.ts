@@ -15,12 +15,12 @@ import * as schema from '../schema';
 /** XML parser context, holding definitions of all imported namespaces. */
 
 export class Context extends cxml.ContextBase<Context, Namespace> {
-	constructor() {
+	constructor(schemaContext: schema.Context) {
 		super(Namespace);
 
 		this.primitiveSpace = this.registerNamespace('xml-primitives');
 		this.primitiveSpace.init(null, 'Primitive');
-		this.primitiveScope = this.populatePrimitives(this.primitiveSpace);
+		this.primitiveScope = this.populatePrimitives(this.primitiveSpace, schemaContext);
 
 		this.xmlSpace = this.registerNamespace('http://www.w3.org/XML/1998/namespace');
 		this.xmlSpace.init('http://www.w3.org/2001/xml.xsd', 'xml');
@@ -44,7 +44,7 @@ export class Context extends cxml.ContextBase<Context, Namespace> {
 
 	/** Initialize special namespace containing primitive types. */
 
-	private populatePrimitives(primitiveSpace: Namespace) {
+	private populatePrimitives(primitiveSpace: Namespace, schemaContext: schema.Context) {
 		var scope = primitiveSpace.getScope();
 
 		var spec = [
@@ -70,7 +70,7 @@ export class Context extends cxml.ContextBase<Context, Namespace> {
 			primitiveSpace.name,
 			primitiveSpace.id,
 			primitiveSpace.short,
-			null
+			schemaContext
 		).isPrimitiveSpace = true;
 
 		for(var typeSpec of spec) {
@@ -78,7 +78,7 @@ export class Context extends cxml.ContextBase<Context, Namespace> {
 			type.name = typeSpec[1];
 			type.init(new State(state, null));
 
-			var outType = type.getOutType();
+			var outType = type.getOutType(schemaContext);
 
 			outType.literalType = outType;
 			outType.safeName = type.name;

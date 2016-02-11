@@ -66,7 +66,7 @@ function mergeDuplicateElements(specList: TypeMember[]) {
 	return(Object.keys(groupTbl).sort().map((name: string) => groupTbl[name]));
 }
 
-function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.Namespace) {
+function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.Namespace, context: schema.Context) {
 	var member = group.item;
 	var scope = member.getScope();
 	var otherNamespace = scope.namespace;
@@ -80,7 +80,7 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 
 	outMember.typeList = mergeDuplicateTypes(group.typeList).map(
 		(type: types.TypeBase) => {
-			var outType = type.getOutType();
+			var outType = type.getOutType(context);
 			var qName = type.qName;
 
 			if(!qName && !type.name && !type.exported) {
@@ -93,10 +93,10 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 				// its scope points to definition in that namespace.
 				var parentType = scope.getParentType(otherNamespace);
 				if(parentType) {
-					outType.containingType = parentType.getOutType();
+					outType.containingType = parentType.getOutType(context);
 				}
 
-				exportType(type, outMember.namespace);
+				exportType(type, outMember.namespace, context);
 			}
 
 			return(outType);
@@ -106,7 +106,7 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 	return(outMember);
 }
 
-function exportAttributes(scope: Scope, namespace: schema.Namespace) {
+function exportAttributes(scope: Scope, namespace: schema.Namespace, context: schema.Context) {
 	var attributeTbl = scope.dumpAttributes();
 	var attributeList: schema.Member[] = [];
 
@@ -121,14 +121,14 @@ function exportAttributes(scope: Scope, namespace: schema.Namespace) {
 			typeList: attribute.getTypes()
 		};
 
-		var outAttribute = exportMember(group, scope, namespace);
+		var outAttribute = exportMember(group, scope, namespace, context);
 		if(outAttribute) attributeList.push(outAttribute);
 	}
 
 	return(attributeList);
 }
 
-function exportChildren(scope: Scope, namespace: schema.Namespace) {
+function exportChildren(scope: Scope, namespace: schema.Namespace, context: schema.Context) {
 	var elementTbl = scope.dumpElements();
 	var childList: schema.Member[] = [];
 	var specList: TypeMember[] = [];
@@ -155,20 +155,20 @@ function exportChildren(scope: Scope, namespace: schema.Namespace) {
 	var groupList = mergeDuplicateElements(specList);
 
 	for(var group of groupList) {
-		var outChild = exportMember(group, scope, namespace);
+		var outChild = exportMember(group, scope, namespace, context);
 		if(outChild) childList.push(outChild);
 	}
 
 	return(childList);
 }
 
-function exportType(type: types.TypeBase, namespace: schema.Namespace) {
+function exportType(type: types.TypeBase, namespace: schema.Namespace, context: schema.Context) {
 	var scope = type.getScope();
 	var comment = scope.getComments();
 
 	type.exported = true;
 
-	var outType = type.getOutType();
+	var outType = type.getOutType(context);
 	outType.comment = comment;
 	outType.bytePos = type.bytePos;
 
@@ -185,17 +185,17 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 		}
 
 		outType.primitiveList = primitiveList;
-		outType.literalType = parentPrimitive.getOutType();
+		outType.literalType = parentPrimitive.getOutType(context);
 	}
 
 	var parent = type.parent;
 
 	if(parent instanceof types.TypeBase && parent != parentPrimitive) {
-		outType.parent = parent.getOutType();
+		outType.parent = parent.getOutType(context);
 	}
 
-	outType.attributeList = exportAttributes(scope, namespace);
-	outType.childList = exportChildren(scope, namespace);
+	outType.attributeList = exportAttributes(scope, namespace, context);
+	outType.childList = exportChildren(scope, namespace, context);
 
 	return(outType);
 }
@@ -203,7 +203,7 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 /** Export parsed xsd into a simpler internal schema format. */
 
 export function exportNamespace(namespace: Namespace, context: schema.Context): schema.Type {
-	var outNamespace = schema.Namespace.register(namespace.name, namespace.id, namespace.short, null);
+	var outNamespace = schema.Namespace.register(namespace.name, namespace.id, namespace.short, context);
 	var doc = outNamespace.doc;
 
 	if(!doc) {
@@ -218,7 +218,7 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 			for(var name of Object.keys(namespaceRefTbl)) {
 				var otherNamespace = namespaceRefTbl[name];
 
-				outNamespace.addRef(name, schema.Namespace.register(otherNamespace.name, otherNamespace.id, otherNamespace.short, null));
+				outNamespace.addRef(name, schema.Namespace.register(otherNamespace.name, otherNamespace.id, otherNamespace.short, context));
 
 				importTbl[otherNamespace.id] = otherNamespace;
 			}
@@ -229,14 +229,14 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 		var typeTbl = scope.dumpTypes();
 
 		for(var key of Object.keys(typeTbl)) {
-			outNamespace.exportType(exportType(typeTbl[key].item as types.TypeBase, outNamespace));
+			outNamespace.exportType(exportType(typeTbl[key].item as types.TypeBase, outNamespace, context));
 		}
 
 		doc = new schema.Type();
 
 		doc.namespace = outNamespace;
-		doc.attributeList = exportAttributes(scope, outNamespace);
-		doc.childList = exportChildren(scope, outNamespace);
+		doc.attributeList = exportAttributes(scope, outNamespace, context);
+		doc.childList = exportChildren(scope, outNamespace, context);
 
 		outNamespace.doc = doc;
 
