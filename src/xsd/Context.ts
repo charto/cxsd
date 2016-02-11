@@ -38,6 +38,7 @@ export class Context extends cxml.ContextBase<Context, Namespace> {
 	}
 
 	getPrimitiveScope() {
+		// While primitiveSpace is still being initialized, this must return null.
 		return(this.primitiveScope);
 	}
 
@@ -66,9 +67,10 @@ export class Context extends cxml.ContextBase<Context, Namespace> {
 
 		state.setScope(scope);
 		schema.Namespace.register(
-			primitiveSpace.id,
 			primitiveSpace.name,
-			primitiveSpace.short
+			primitiveSpace.id,
+			primitiveSpace.short,
+			null
 		).isPrimitiveSpace = true;
 
 		for(var typeSpec of spec) {

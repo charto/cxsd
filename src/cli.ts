@@ -33,7 +33,8 @@ interface ICommand extends _ICommand {
 );
 
 function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
-	var context = new Context();
+	var xsdContext = new Context();
+	var schemaContext = new schema.Context();
 
 	var fetchOptions: FetchOptions = {};
 
@@ -47,14 +48,14 @@ function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
 	var jsCache = new Cache(opts['outJs'] || 'cache/js', '_index.js');
 	var tsCache = new Cache(opts['outTs'] || 'cache/js', '_index.d.ts');
 
-	var loader = new Loader(context, fetchOptions);
+	var loader = new Loader(xsdContext, fetchOptions);
 
 	loader.import(urlRemote).then((namespace: Namespace) => {
 		try {
-			exportNamespace(context.primitiveSpace);
-			exportNamespace(context.xmlSpace);
+			exportNamespace(xsdContext.primitiveSpace, schemaContext);
+			exportNamespace(xsdContext.xmlSpace, schemaContext);
 
-			var spec = exportNamespace(namespace);
+			var spec = exportNamespace(namespace, schemaContext);
 
 			new AddImports(spec).exec().then(() =>
 				new Sanitize(spec).exec()

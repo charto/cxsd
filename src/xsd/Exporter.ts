@@ -75,7 +75,7 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 	outMember.comment = scope.getComments();
 
 	if(otherNamespace != parentScope.namespace) {
-		outMember.namespace = schema.Namespace.register(otherNamespace.id, otherNamespace.name, otherNamespace.short);
+		outMember.namespace = schema.Namespace.register(otherNamespace.name, otherNamespace.id, otherNamespace.short, null);
 	} else outMember.namespace = namespace;
 
 	outMember.typeList = mergeDuplicateTypes(group.typeList).map(
@@ -202,8 +202,8 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace) {
 
 /** Export parsed xsd into a simpler internal schema format. */
 
-export function exportNamespace(namespace: Namespace): schema.Type {
-	var outNamespace = schema.Namespace.register(namespace.id, namespace.name, namespace.short);
+export function exportNamespace(namespace: Namespace, context: schema.Context): schema.Type {
+	var outNamespace = schema.Namespace.register(namespace.name, namespace.id, namespace.short, null);
 	var doc = outNamespace.doc;
 
 	if(!doc) {
@@ -218,7 +218,7 @@ export function exportNamespace(namespace: Namespace): schema.Type {
 			for(var name of Object.keys(namespaceRefTbl)) {
 				var otherNamespace = namespaceRefTbl[name];
 
-				outNamespace.addRef(name, schema.Namespace.register(otherNamespace.id, otherNamespace.name, otherNamespace.short));
+				outNamespace.addRef(name, schema.Namespace.register(otherNamespace.name, otherNamespace.id, otherNamespace.short, null));
 
 				importTbl[otherNamespace.id] = otherNamespace;
 			}
@@ -241,7 +241,7 @@ export function exportNamespace(namespace: Namespace): schema.Type {
 		outNamespace.doc = doc;
 
 		for(var namespaceId of Object.keys(importTbl)) {
-			exportNamespace(importTbl[namespaceId]);
+			exportNamespace(importTbl[namespaceId], context);
 		}
 	}
 

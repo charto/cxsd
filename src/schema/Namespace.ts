@@ -1,6 +1,9 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import * as cxml from 'cxml';
+
+import {Context} from './Context';
 import {NamespaceRef} from './NamespaceRef';
 import {Type} from './Type';
 
@@ -9,13 +12,7 @@ export enum TypeState {
 	exported
 }
 
-export class Namespace {
-	constructor(id: number, name: string, short: string) {
-		this.id = id;
-		this.name = name;
-		this.short = short;
-	}
-
+export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 	addRef(shortName: string, namespace: Namespace) {
 		var id = namespace.id;
 
@@ -76,11 +73,12 @@ export class Namespace {
 		this.typeStateList[type.surrogateKey] = TypeState.exported;
 	}
 
-	static register(id: number, name: string, short: string) {
+	static register(name: string, id: number, short: string, context: Context) {
 		var namespace = Namespace.list[id];
 
 		if(!namespace) {
-			namespace = new Namespace(id, name, short);
+			namespace = new Namespace(name, id, context);
+			namespace.short = short;
 			Namespace.list[id] = namespace;
 		} else if(!namespace.short) namespace.short = short;
 

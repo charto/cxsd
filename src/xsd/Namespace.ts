@@ -50,12 +50,6 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 		return(this.sourceList);
 	}
 
-	/** URL address where main schema file was downloaded. */
-	schemaUrl: string;
-
-	/** Example short name for this namespace. */
-	short: string;
-
 	/** List of all source files potentially contributing to this namespace. */
 	private sourceList: Source[] = [];
 

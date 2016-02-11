@@ -28,7 +28,7 @@ export class TypeBase extends Base {
 			if(this.scope) {
 				var namespace = this.scope.namespace;
 
-				schema.Namespace.register(namespace.id, namespace.name, namespace.short).addType(outType);
+				schema.Namespace.register(namespace.name, namespace.id, namespace.short, null).addType(outType);
 			}
 
 			this.outType = outType;
