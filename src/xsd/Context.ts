@@ -66,12 +66,7 @@ export class Context extends cxml.ContextBase<Context, Namespace> {
 		var state = new State(null, null, source);
 
 		state.setScope(scope);
-		schema.Namespace.register(
-			primitiveSpace.name,
-			primitiveSpace.id,
-			primitiveSpace.short,
-			schemaContext
-		).isPrimitiveSpace = true;
+		schemaContext.copyNamespace(primitiveSpace).isPrimitiveSpace = true;
 
 		for(var typeSpec of spec) {
 			var type = new Primitive(null);

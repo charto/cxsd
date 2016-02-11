@@ -37,7 +37,7 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 				for(var key of Object.keys(this.importTypeNameTbl)) {
 					var id = +key;
 					var short = this.getShortRef(id);
-					importTbl[this.getShortRef(id)] = Namespace.list[id];
+					importTbl[this.getShortRef(id)] = this.context.namespaceById(id);
 				}
 
 				this.importTbl = importTbl;
@@ -56,7 +56,7 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 			));
 		} else {
 			return(Object.keys(this.shortNameTbl).map((id: string) =>
-				Namespace.list[+id]
+				this.context.namespaceById(+id)
 			));
 		}
 	}
@@ -73,20 +73,6 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 		this.typeStateList[type.surrogateKey] = TypeState.exported;
 	}
 
-	static register(name: string, id: number, short: string, context: Context) {
-		var namespace = Namespace.list[id];
-
-		if(!namespace) {
-			namespace = new Namespace(name, id, context);
-			namespace.short = short;
-			Namespace.list[id] = namespace;
-		} else if(!namespace.short) namespace.short = short;
-
-		return(namespace);
-	}
-
-	id: number;
-	name: string;
 	cachePath: string;
 
 	/** Invisible document element defining the types of XML file root elements. */
@@ -107,10 +93,6 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 
 	private cacheDir: string;
 
-	/** Example short name for this namespace, currently used only for elements
-	  * or attributes referenced from another namespace where they are defined. */
-	short: string;
-
 	/** Short names used to reference other namespaces in schemas defining this namespace. */
 	shortNameTbl: {[namespaceId: string]: string[]} = {};
 
@@ -122,7 +104,4 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 
 	/** True only for the special namespace containing primitives. */
 	isPrimitiveSpace: boolean;
-
-	/** Internal list of namespaces indexed by a surrogate key. */
-	private static list: Namespace[] = [];
 }

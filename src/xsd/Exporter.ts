@@ -75,7 +75,7 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 	outMember.comment = scope.getComments();
 
 	if(otherNamespace != parentScope.namespace) {
-		outMember.namespace = schema.Namespace.register(otherNamespace.name, otherNamespace.id, otherNamespace.short, null);
+		outMember.namespace = context.copyNamespace(otherNamespace);
 	} else outMember.namespace = namespace;
 
 	outMember.typeList = mergeDuplicateTypes(group.typeList).map(
@@ -203,7 +203,7 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 /** Export parsed xsd into a simpler internal schema format. */
 
 export function exportNamespace(namespace: Namespace, context: schema.Context): schema.Type {
-	var outNamespace = schema.Namespace.register(namespace.name, namespace.id, namespace.short, context);
+	var outNamespace = context.copyNamespace(namespace);
 	var doc = outNamespace.doc;
 
 	if(!doc) {
@@ -218,7 +218,7 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 			for(var name of Object.keys(namespaceRefTbl)) {
 				var otherNamespace = namespaceRefTbl[name];
 
-				outNamespace.addRef(name, schema.Namespace.register(otherNamespace.name, otherNamespace.id, otherNamespace.short, context));
+				outNamespace.addRef(name, context.copyNamespace(otherNamespace));
 
 				importTbl[otherNamespace.id] = otherNamespace;
 			}
