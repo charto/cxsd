@@ -6,7 +6,7 @@ import * as expat from 'node-expat';
 import * as Promise from 'bluebird';
 
 import {CacheResult} from 'cget';
-import {Rule} from 'cxml';
+import {Rule} from './Rule';
 
 import * as types from './types';
 import {Context} from './Context';

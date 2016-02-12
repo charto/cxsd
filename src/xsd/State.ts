@@ -2,8 +2,8 @@
 // Released under the MIT license, see LICENSE.
 
 import * as types from './types';
-import {Rule} from 'cxml';
 
+import {Rule} from './Rule';
 import {Context} from './Context';
 import {Namespace} from './Namespace';
 import {Source} from './Source';

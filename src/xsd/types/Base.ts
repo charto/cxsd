@@ -1,14 +1,20 @@
 // This file is part of cxsd, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {Rule, BaseClass as XmlBaseClass} from 'cxml';
+import {Rule} from '../Rule';
 import {State} from '../State';
 import {Namespace} from '../Namespace';
 import {Scope} from '../Scope';
 import {QName} from '../QName';
 
-export interface BaseClass extends XmlBaseClass {
+export interface BaseClass {
 	new(state?: State): Base;
+
+	/** Returns other classes allowed as children. */
+	mayContain(): BaseClass[];
+
+	name: string;
+	rule: Rule;
 }
 
 /** Common handler base class for all schema tags. */
