@@ -27,6 +27,16 @@ export class ListImports extends Transform<ListImports, Output, void> {
 		if(type.parent) this.visitTypeRef(type.parent);
 
 		for(var member of this.getTypeMembers(type)) {
+			if(member.namespace && member.namespace != this.namespace) {
+				// Member from another, imported namespace.
+
+				var id = member.namespace.id;
+				var short = this.namespace.getShortRef(id);
+
+				if(short) {
+					if(!this.output[id]) this.output[id] = {};
+				}
+			}
 			for(var memberType of member.typeList) this.visitTypeRef(memberType);
 		}
 	}

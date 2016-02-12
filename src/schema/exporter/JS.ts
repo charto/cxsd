@@ -7,6 +7,8 @@ import {Namespace, TypeState} from '../Namespace';
 import {Member} from '../Member';
 import {Type} from '../Type';
 
+export type NumTbl = { [id: string]: number };
+
 export class JS extends Exporter {
 	writeImport(shortName: string, relativePath: string, absolutePath: string) {
 		return(
@@ -18,7 +20,7 @@ export class JS extends Exporter {
 		);
 	}
 
-	writeMember(member: Member, typeNumTbl: { [id: number]: number }) {
+	writeMember(member: Member, typeNumTbl: NumTbl, importNumTbl: NumTbl) {
 		var name = member.safeName;
 		if(member.name != name) name += ':' + member.name;
 
@@ -35,23 +37,24 @@ export class JS extends Exporter {
 			"'" + name + "', " +
 			flags + ', ' +
 			'[' + memberTypeList.join(', ') + ']' +
+			((member.namespace != this.namespace) ? ', ' + importNumTbl[member.namespace.id] : '') +
 			']'
 		);
 	}
 
-	writeType(type: Type, typeNumTbl: { [id: number]: number }) {
+	writeType(type: Type, typeNumTbl: NumTbl, importNumTbl: NumTbl) {
 		var childSpecList: string[] = [];
 		var attributeSpecList: string[] = [];
 
 		if(type.childList) {
 			for(var member of type.childList) {
-				childSpecList.push(this.writeMember(member, typeNumTbl));
+				childSpecList.push(this.writeMember(member, typeNumTbl, importNumTbl));
 			}
 		}
 
 		if(type.attributeList) {
 			for(var member of type.attributeList) {
-				attributeSpecList.push(this.writeMember(member, typeNumTbl));
+				attributeSpecList.push(this.writeMember(member, typeNumTbl, importNumTbl));
 			}
 		}
 
@@ -72,14 +75,15 @@ export class JS extends Exporter {
 		var doc = this.doc;
 		var namespace = doc.namespace;
 
-		var typeNumTbl: { [id: number]: number } = {};
+		var typeNumTbl: NumTbl = {};
 		var typeNum = 1;
 
 		var importTbl = namespace.getUsedImportTbl();
-		var importNameList = Object.keys(importTbl);
 		var importSpecList: string[] = [];
+		var importNumTbl: NumTbl = {};
+		var num = 0;
 
-		for(var importName of importNameList) {
+		for(var importName of Object.keys(importTbl)) {
 			var otherNamespaceId = importTbl[importName].id;
 			var importTypeNameTbl = namespace.importTypeNameTbl[otherNamespaceId];
 			var importTypeNameList: string[] = [];
@@ -98,6 +102,8 @@ export class JS extends Exporter {
 				importTypeNameList.join(', ') +
 				']]'
 			);
+
+			importNumTbl[otherNamespaceId] = num++;
 		}
 
 		var exportedTypeList: Type[] = [];
@@ -123,10 +129,10 @@ export class JS extends Exporter {
 
 		var parentNum: number;
 
-		typeSpecList.push(this.writeType(namespace.doc, typeNumTbl));
+		typeSpecList.push(this.writeType(namespace.doc, typeNumTbl, importNumTbl));
 
 		for(var type of typeList) {
-			typeSpecList.push(this.writeType(type, typeNumTbl));
+			typeSpecList.push(this.writeType(type, typeNumTbl, importNumTbl));
 		}
 
 		var exportSpecList: string[] = [];
