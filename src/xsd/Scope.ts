@@ -61,19 +61,23 @@ export class Scope {
 		this.parent.add(name, type, target, min, max);
 	}
 
-	addAllToParent(type: string, min = 1, max = 1, target?: Scope) {
-		// Check if there's anything to add.
-		if(!this.visible[type]) return;
-		if(!target) target = this;
-		target = target.parent;
-
-		var exposeTbl = this.expose[type];
+	addAll(type: string, source: Scope, min = 1, max = 1) {
+		var exposeTbl = source.expose[type];
 
 		for(var name of Object.keys(exposeTbl)) {
 			var spec = exposeTbl[name];
 			// TODO: If target is a choice, it must take the overall min and max.
-			target.addString(name, type, spec.item, spec.min * min, spec.max * max);
+			this.addString(name, type, spec.item, spec.min * min, spec.max * max);
 		}
+	}
+
+	addAllToParent(type: string, min = 1, max = 1, target?: Scope) {
+		// Check if there's anything to add.
+		if(!this.expose[type]) return;
+		if(!target) target = this;
+		target = target.parent;
+
+		target.addAll(type, this, min, max);
 	}
 
 	addComments(commentList: string[]) {
@@ -146,8 +150,38 @@ console.log('Missing ' + type + ': ' + name.name);
 		return((this.expose['element'] || {}) as {[name: string]: TypeMember});
 	}
 
+	// TODO: handle this.expose['group'] in dumpElements exactly like attributegroup here!
 	dumpAttributes() {
-		return((this.expose['attribute'] || {}) as {[name: string]: TypeMember});
+		var attributeTbl = this.expose['attribute'] || {};
+		var groupTbl = (this.expose['attributegroup'] || {});
+		var output: {[name: string]: TypeMember} = {};
+
+		for(var key of Object.keys(attributeTbl)) {
+			output[key] = attributeTbl[key];
+		}
+
+		for(var key of Object.keys(groupTbl)) {
+			var group = groupTbl[key];
+			var min = group.min;
+			var max = group.max;
+			if(!max) continue;
+
+			attributeTbl = group.item.scope.dumpAttributes();
+
+			for(var key of Object.keys(attributeTbl)) {
+				var spec = attributeTbl[key];
+				spec = {item: spec.item, min: spec.min * min, max: spec.max * max };
+
+				if(output[key]) {
+					spec.min += output[key].min;
+					spec.max += output[key].max;
+				}
+
+				output[key] = spec;
+			}
+		}
+
+		return(output);
 	}
 
 	hasAttributes() {

@@ -16,7 +16,7 @@ export class AttributeGroup extends types.Base {
 	];
 
 	init(state: State) {
-		this.define(state, 'attributegroup');
+		this.define(state, 'attributegroup', 0, 0);
 	}
 
 	resolve(state: State) {
@@ -30,9 +30,14 @@ export class AttributeGroup extends types.Base {
 		// Named attribute groups are only models for referencing elsewhere.
 
 		if(!this.name) {
-			if(attributeGroup) attributeGroup.scope.addAllToParent('attribute', 1, 1, this.scope);
-			else throw new types.MissingReferenceError(this, state, 'attributeGroup', ref);
+			if(attributeGroup) {
+//				if(attributeGroup != this && !attributeGroup.resolved) console.log('OH NOES! AttributeGroup ' + attributeGroup.name);
+//				attributeGroup.scope.addAllToParent('attribute', 1, 1, this.scope);
+				attributeGroup.define(state, 'attributegroup', 1, 1, this.scope);
+			} else throw new types.MissingReferenceError(this, state, 'attributeGroup', ref);
 		}
+
+//		super.resolve(state);
 	}
 
 	id: string = null;

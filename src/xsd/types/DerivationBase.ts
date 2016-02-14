@@ -25,6 +25,10 @@ export class DerivationBase extends types.Base {
 
 		this.scope.addAllToParent('element');
 		this.scope.addAllToParent('attribute');
+		this.scope.addAllToParent('group');
+		this.scope.addAllToParent('attributeGroup');
+
+//		super.resolve(state);
 	}
 
 	id: string = null;

@@ -22,6 +22,8 @@ export class Documentation extends types.Base {
 
 	resolve(state: State) {
 		this.scope.addCommentsToGrandParent(this.commentList);
+
+		super.resolve(state);
 	}
 
 	commentList: string[] = [];

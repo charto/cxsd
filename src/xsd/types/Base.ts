@@ -41,7 +41,9 @@ export class Base {
 	loaded(state: State) {}
 
 	/** Hook, runs after all dependencies have been loaded. */
-	resolve(state: State) {}
+	resolve(state: State) {
+//		this.resolved = true;
+	}
 
 	/** Add this named tag to scope, listed under given type.
 	  * Optionally set number of allowed occurrences, for optional elements, sequences etc.
@@ -62,6 +64,7 @@ export class Base {
 	lineNumber: number;
 	bytePos: number;
 	name: string;
+//	resolved: boolean;
 
 	static name: string;
 	static rule: Rule;

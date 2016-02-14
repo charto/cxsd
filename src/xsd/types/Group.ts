@@ -77,9 +77,13 @@ export class Group extends GroupBase {
 		// Named groups are only models for referencing elsewhere.
 
 		if(!this.name) {
-			if(group) group.scope.addAllToParent('element', this.min, this.max, this.scope);
-			else throw new types.MissingReferenceError(this, state, 'group', ref);
+			if(group) {
+//				if(group != this && !group.resolved) console.log('OH NOES! Group ' + group.name);
+				group.scope.addAllToParent('element', this.min, this.max, this.scope);
+			} else throw new types.MissingReferenceError(this, state, 'group', ref);
 		}
+
+//		super.resolve(state);
 	}
 
 	name: string = null;

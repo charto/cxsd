@@ -45,6 +45,8 @@ export class Element extends MemberBase implements ElementLike {
 			if(groupBase) groupBase.addSubstitute(element);
 			else throw new types.MissingReferenceError(this, state, 'element', ref);
 		}
+
+//		super.resolve(state);
 	}
 
 	addSubstitute(element: Element) {

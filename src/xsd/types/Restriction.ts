@@ -26,6 +26,8 @@ export class Restriction extends DerivationBase {
 		if(parent instanceof types.SimpleType) {
 			parent.setEnumerationList(this.enumerationList);
 		}
+
+//		super.resolve(state);
 	}
 */
 

@@ -35,6 +35,8 @@ export class Type {
 	attributeList: Member[];
 	/** Allowed child elements for an element of this type. */
 	childList: Member[];
+	/** TODO: Other types added as mixins. */
+	// groupList: Member[];
 
 	/** Parent type this is derived from. */
 	parent: Type;
