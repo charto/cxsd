@@ -57,8 +57,8 @@ function mergeDuplicateElements(specList: TypeMember[]) {
 
 			groupTbl[element.name] = group;
 		} else {
-			if(group.min > spec.min) group.min = spec.min;
-			if(group.max < spec.max) group.max = spec.max;
+			group.min += spec.min;
+			group.max += spec.max;
 			group.typeList = group.typeList.concat(element.getTypes());
 		}
 	}
