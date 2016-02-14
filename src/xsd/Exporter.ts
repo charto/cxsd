@@ -107,7 +107,7 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 }
 
 function exportAttributes(scope: Scope, namespace: schema.Namespace, context: schema.Context) {
-	var attributeTbl = scope.dumpAttributes();
+	var attributeTbl = scope.dumpMembers('attribute', 'attributegroup');
 	var attributeList: schema.Member[] = [];
 
 	for(var key of Object.keys(attributeTbl).sort()) {
@@ -129,7 +129,7 @@ function exportAttributes(scope: Scope, namespace: schema.Namespace, context: sc
 }
 
 function exportChildren(scope: Scope, namespace: schema.Namespace, context: schema.Context) {
-	var elementTbl = scope.dumpElements();
+	var elementTbl = scope.dumpMembers('element', 'group');
 	var childList: schema.Member[] = [];
 	var specList: TypeMember[] = [];
 
@@ -161,6 +161,15 @@ function exportChildren(scope: Scope, namespace: schema.Namespace, context: sche
 
 	return(childList);
 }
+
+/* TODO
+function exportGroups(scope: Scope, namespace: schema.Namespace, context: schema.Context) {
+//	var groupTbl = scope.dumpGroups();
+	var groupList: schema.Member[] = [];
+
+	return(groupList);
+}
+*/
 
 function exportType(type: types.TypeBase, namespace: schema.Namespace, context: schema.Context) {
 	var scope = type.getScope();
@@ -196,6 +205,7 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 
 	outType.attributeList = exportAttributes(scope, namespace, context);
 	outType.childList = exportChildren(scope, namespace, context);
+//	outType.groupList = exportGroups(scope, namespace, context);
 
 	return(outType);
 }
@@ -226,10 +236,8 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 
 		outNamespace.sourceList = sourceList.map((source: Source) => source.url).sort();
 
-		var typeTbl = scope.dumpTypes();
-
-		for(var key of Object.keys(typeTbl)) {
-			outNamespace.exportType(exportType(typeTbl[key].item as types.TypeBase, outNamespace, context));
+		for(var spec of scope.dumpTypes()) {
+			if(spec.name) outNamespace.exportType(exportType(spec.item as types.TypeBase, outNamespace, context));
 		}
 
 		doc = new schema.Type();

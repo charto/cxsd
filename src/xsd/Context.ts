@@ -79,16 +79,21 @@ export class Context extends cxml.ContextBase<Context, Namespace> {
 			outType.safeName = type.name;
 
 			for(var name of typeSpec[0].split(' ')) {
-				scope.add(new QName().parsePrimitive(name, primitiveSpace), 'type', type, 1, 1);
+				scope.add(new QName().parsePrimitive(name, primitiveSpace).nameFull, 'type', type, 1, 1);
 			}
 		}
 
 		return(scope);
 	}
 
+	/** Scope containing XML primitive types.
+	  * Parent of global scopes of all other namespaces. */
 	private primitiveScope: Scope = null;
 
+	/** Namespace containing XML primitive types. */
 	primitiveSpace: Namespace;
+	/** The official "xml" namespace defining commonly used types.  */
 	xmlSpace: Namespace;
+	/** The official "xsd" namespace used for schema parsing.  */
 	xsdSpace: Namespace;
 }

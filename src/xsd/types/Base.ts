@@ -49,11 +49,15 @@ export class Base {
 	  * Optionally set number of allowed occurrences, for optional elements, sequences etc.
 		* @return fully qualified name. */
 	define(state: State, type: string, min = 1, max = 1, scope?: Scope) {
-		if(!this.name) return(null);
+		var name = this.name;
+		var qName: QName = null;
 
-		var qName = new QName(this.name, state.source);
+		if(name) {
+			qName = new QName(name, state.source);
+			name = qName.nameFull;
+		}
 
-		(scope || this.scope).addToParent(qName, type, this, min, max);
+		(scope || this.scope).addToParent(name, type, this, min, max);
 
 		return(qName);
 	}

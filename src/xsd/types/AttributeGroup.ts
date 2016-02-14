@@ -20,19 +20,19 @@ export class AttributeGroup extends types.Base {
 	}
 
 	resolve(state: State) {
-		var attributeGroup = this;
+		var attributeGroup: AttributeGroup = this;
 
 		if(this.ref) {
 			var ref = new QName(this.ref, state.source);
-			attributeGroup = this.scope.lookup(ref, 'attributegroup');
+			attributeGroup = this.scope.lookup(ref, 'attributegroup') as AttributeGroup;
 		}
 
 		// Named attribute groups are only models for referencing elsewhere.
 
 		if(!this.name) {
 			if(attributeGroup) {
-//				if(attributeGroup != this && !attributeGroup.resolved) console.log('OH NOES! AttributeGroup ' + attributeGroup.name);
-//				attributeGroup.scope.addAllToParent('attribute', 1, 1, this.scope);
+				// if(attributeGroup != this && !attributeGroup.resolved) console.log('OH NOES! AttributeGroup ' + attributeGroup.name);
+				// attributeGroup.scope.addAllToParent('attribute', 1, 1, this.scope);
 				attributeGroup.define(state, 'attributegroup', 1, 1, this.scope);
 			} else throw new types.MissingReferenceError(this, state, 'attributeGroup', ref);
 		}

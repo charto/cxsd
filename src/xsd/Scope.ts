@@ -8,7 +8,28 @@ import {QName} from './QName'
 export interface TypeMember {
 	min: number;
 	max: number;
-	item: any;
+	item: types.Base;
+}
+
+export interface NamedTypeMember extends TypeMember {
+	name: string;
+}
+
+function addMemberToTable(tbl: { [name: string]: TypeMember }, name: string, specNew: TypeMember, min = 1, max = 1) {
+	var spec = tbl[name];
+
+	if(spec) {
+		spec.min += specNew.min * min;
+		spec.max += specNew.max * max;
+	} else {
+		spec = {
+			min: specNew.min * min,
+			max: specNew.max * max,
+			item: specNew.item
+		}
+
+		tbl[name] = spec;
+	}
 }
 
 /** Scope handles looking up references by type and name, and binding member
@@ -22,53 +43,37 @@ export class Scope {
 		this.namespace = namespace;
 	}
 
-	private addString(name: string, type: string, target: any, min: number, max: number) {
-		var visibleTbl = this.visible[type];
+	add(name: string, type: string, target: types.Base, min: number, max: number) {
+		if(name) {
+			var visibleTbl = this.visible[type];
 
-		if(!visibleTbl) {
-			visibleTbl = {} as {[name: string]: any};
-			this.visible[type] = visibleTbl;
+			if(!visibleTbl) {
+				visibleTbl = {};
+				this.visible[type] = visibleTbl;
+			}
+
+			visibleTbl[name] = target;
 		}
 
-		visibleTbl[name] = target;
+		if(max) {
+			var exposeList = this.expose[type];
 
-		var exposeTbl = this.expose[type];
+			if(!exposeList) {
+				exposeList = [];
+				this.expose[type] = exposeList;
+			}
 
-		if(!exposeTbl) {
-			exposeTbl = {} as {[name: string]: TypeMember};
-			this.expose[type] = exposeTbl;
+			exposeList.push({
+				name: name,
+				min: min,
+				max: max,
+				item: target
+			});
 		}
-
-		if(exposeTbl[name]) {
-			// For sequences, sum occurrence counts among matching element types.
-
-			min += exposeTbl[name].min;
-			max += exposeTbl[name].max;
-		}
-
-		exposeTbl[name] = {
-			min: min,
-			max: max,
-			item: target
-		};
 	}
 
-	add(name: QName, type: string, target: any, min: number, max: number) {
-		this.addString(name.nameFull, type, target, min, max);
-	}
-
-	addToParent(name: QName, type: string, target: any, min: number, max: number) {
+	addToParent(name: string, type: string, target: types.Base, min: number, max: number) {
 		this.parent.add(name, type, target, min, max);
-	}
-
-	addAll(type: string, source: Scope, min = 1, max = 1) {
-		var exposeTbl = source.expose[type];
-
-		for(var name of Object.keys(exposeTbl)) {
-			var spec = exposeTbl[name];
-			// TODO: If target is a choice, it must take the overall min and max.
-			this.addString(name, type, spec.item, spec.min * min, spec.max * max);
-		}
 	}
 
 	addAllToParent(type: string, min = 1, max = 1, target?: Scope) {
@@ -77,7 +82,10 @@ export class Scope {
 		if(!target) target = this;
 		target = target.parent;
 
-		target.addAll(type, this, min, max);
+		for(var spec of this.expose[type]) {
+			// TODO: If target is a choice, it must take the overall min and max.
+			target.add(spec.name, type, spec.item, spec.min * min, spec.max * max);
+		}
 	}
 
 	addComments(commentList: string[]) {
@@ -95,7 +103,7 @@ export class Scope {
 		return(this.commentList.join('').replace(/\r\n?|\n/g, '\n'));
 	}
 
-	lookup(name: QName, type: string): any {
+	lookup(name: QName, type: string): types.Base {
 		var scope: Scope = this;
 		var nameFull = name.nameFull;
 		var nameWild = '*:' + name.name;
@@ -143,41 +151,26 @@ console.log('Missing ' + type + ': ' + name.name);
 	getType(): types.TypeBase { return(this.type); }
 
 	dumpTypes() {
-		return((this.expose['type'] || {}) as {[name: string]: TypeMember});
+		return(this.expose['type'] || []);
 	}
 
-	dumpElements() {
-		return((this.expose['element'] || {}) as {[name: string]: TypeMember});
-	}
+	dumpMembers(itemType: string, groupType: string) {
+		var itemList = this.expose[itemType] || [];
+		var groupList = this.expose[groupType] || [];
+		var output: { [name: string]: TypeMember } = {};
 
-	// TODO: handle this.expose['group'] in dumpElements exactly like attributegroup here!
-	dumpAttributes() {
-		var attributeTbl = this.expose['attribute'] || {};
-		var groupTbl = (this.expose['attributegroup'] || {});
-		var output: {[name: string]: TypeMember} = {};
-
-		for(var key of Object.keys(attributeTbl)) {
-			output[key] = attributeTbl[key];
+		for(var spec of itemList) {
+			if(spec.name) addMemberToTable(output, spec.name, spec);
 		}
 
-		for(var key of Object.keys(groupTbl)) {
-			var group = groupTbl[key];
+		for(var group of groupList) {
 			var min = group.min;
 			var max = group.max;
-			if(!max) continue;
 
-			attributeTbl = group.item.scope.dumpAttributes();
+			var attributeTbl = group.item.getScope().dumpMembers(itemType, groupType);
 
 			for(var key of Object.keys(attributeTbl)) {
-				var spec = attributeTbl[key];
-				spec = {item: spec.item, min: spec.min * min, max: spec.max * max };
-
-				if(output[key]) {
-					spec.min += output[key].min;
-					spec.max += output[key].max;
-				}
-
-				output[key] = spec;
+				addMemberToTable(output, key, attributeTbl[key], min, max);
 			}
 		}
 
@@ -196,12 +189,12 @@ console.log('Missing ' + type + ': ' + name.name);
 	namespace: Namespace;
 
 	private visible = {} as {
-		[type: string]: {[name: string]: any}
+		[type: string]: { [name: string]: types.Base }
 	};
 
-	private expose = {} as {
-		[type: string]: {[name: string]: TypeMember}
-	};
+	private expose: {
+		[type: string]: NamedTypeMember[];
+	} = {};
 
 	private type: types.TypeBase;
 
