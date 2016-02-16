@@ -75,7 +75,7 @@ export class Context extends cxml.ContextBase<Context, Namespace> {
 
 			var outType = type.getOutType(schemaContext);
 
-			outType.literalType = outType;
+			outType.primitiveType = outType;
 			outType.safeName = type.name;
 
 			for(var name of typeSpec[0].split(' ')) {

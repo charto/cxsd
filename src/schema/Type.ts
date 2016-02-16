@@ -23,11 +23,14 @@ export class Type {
 	safeName: string;
 	bytePos: number;
 
-	/** Primitive type, if the XML type only contains single value
-	  * that can be parsed into a JavaScript value. */
-	literalType: Type;
+	/** Primitive type of child text node if defined
+	  * (representable as a JavaScript value). */
+	primitiveType: Type;
 	/** List of allowed literal values, if such a restriction is defined. */
-	primitiveList: string[];
+	literalList: string[];
+
+	/** Type only contains a child text node and no other data. */
+	isPlainPrimitive: boolean;
 
 	attributeTbl: {[name: string]: Member} = {};
 	childTbl: {[name: string]: Member} = {};
@@ -51,5 +54,6 @@ export class Type {
 	surrogateKey: number;
 	private static nextKey = 0;
 
-	static literalFlag = 1;
+	static primitiveFlag = 1;
+	static plainPrimitiveFlag = 2;
 }

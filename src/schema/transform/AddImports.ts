@@ -21,7 +21,7 @@ export class AddImports extends Transform<AddImports, void, void> {
 
 		// Types holding primitives should inherit from them.
 		// NOTE: This makes base primitive types inherit themselves.
-		if(type.literalType && !type.parent) type.parent = type.literalType;
+		if(type.primitiveType && !type.parent) type.parent = type.primitiveType;
 
 		if(type.parent) this.visitTypeRef(type.parent);
 

@@ -180,21 +180,31 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 	var outType = type.getOutType(context);
 	outType.comment = comment;
 	outType.bytePos = type.bytePos;
-
-	var parentPrimitive = type.getParent(types.Primitive, true);
+	// If the type derives from a primitive type, it may have text content.
+	var parentPrimitive = type.getParent(types.Primitive, false);
 
 	if(parentPrimitive) {
-		var primitiveList: string[];
+		// Get equivalent JavaScript type.
+		outType.primitiveType = parentPrimitive.getOutType(context);
+
+		// Check if primitive type is inherited without any additional attributes
+		// or children, so contents can be represented as a JavaScript primitive.
+		parentPrimitive = type.getParent(types.Primitive, true);
+	}
+
+	if(parentPrimitive) {
+		var literalList: string[];
 		var parentSimple = type.getParent(types.SimpleType, false) as types.SimpleType;
 
 		if(parentSimple) {
 			// If parent is restricted to enumerated alternatives, output those instead.
-			primitiveList = parentSimple.getEnumerationList();
-			if(primitiveList) primitiveList = primitiveList.map((content: string) => '"' + content + '"');
+			literalList = parentSimple.getEnumerationList();
+			if(literalList) literalList = literalList.map((content: string) => '"' + content + '"');
 		}
 
-		outType.primitiveList = primitiveList;
-		outType.literalType = parentPrimitive.getOutType(context);
+		outType.literalList = literalList;
+		outType.isPlainPrimitive = true;
+		outType.primitiveType = parentPrimitive.getOutType(context);
 	}
 
 	var parent = type.parent;

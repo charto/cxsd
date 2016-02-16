@@ -22,11 +22,8 @@ export class TS extends Exporter {
 		var prefix = '/\**';
 
 		for(var line of lineList) {
-			// Remove leading whitespace.
-			line = line.replace(/^\s+/, '');
-
-			// Remove trailing whitespace.
-			line = line.replace(/\s+$/, '');
+			// Remove leading and trailing whitespace.
+			line = line.trim();
 
 			if(!line) ++blankCount;
 			else {
@@ -111,8 +108,8 @@ export class TS extends Exporter {
 
 		var outTypeList = member.typeList.map(
 			(type: Type) => {
-				if(type.literalType && (!type.primitiveList || !type.primitiveList.length)) {
-					return(type.literalType.name);
+				if(type.isPlainPrimitive && (!type.literalList || !type.literalList.length)) {
+					return(type.primitiveType.name);
 				} else return(this.writeTypeRef(type, ''));
 			}
 		);
@@ -135,14 +132,14 @@ export class TS extends Exporter {
 	writeTypeContent(type: Type) {
 		var output: string[] = [];
 
-		if(type.literalType) {
-			var primitiveList = type.primitiveList;
+		if(type.isPlainPrimitive) {
+			var literalList = type.literalList;
 
-			if(primitiveList && primitiveList.length > 0) {
-				if(primitiveList.length > 1) {
-					output.push('(' + primitiveList.join(' | ') + ')');
-				} else output.push(primitiveList[0]);
-			} else output.push(type.literalType.name);
+			if(literalList && literalList.length > 0) {
+				if(literalList.length > 1) {
+					output.push('(' + literalList.join(' | ') + ')');
+				} else output.push(literalList[0]);
+			} else output.push(type.primitiveType.name);
 		} else {
 			var outMemberList: string[] = [];
 
@@ -190,12 +187,12 @@ export class TS extends Exporter {
 		var content = this.writeTypeContent(type);
 
 		if(namespace.isPrimitiveSpace) {
-			output.push(exportPrefix + 'interface _' + name + ' { ' + 'content' + ': ' + type.literalType.name + '; }' + '\n');
-		} else if(type.literalType) {
+			output.push(exportPrefix + 'interface _' + name + ' { ' + 'content' + ': ' + type.primitiveType.name + '; }' + '\n');
+		} else if(type.isPlainPrimitive) {
 			parentDef = this.writeTypeRef(type.parent, '_');
 
 			output.push(exportPrefix + 'type ' + name + ' = ' + content + ';' + '\n');
-			if(type.primitiveList && type.primitiveList.length) {
+			if(type.literalList && type.literalList.length) {
 				output.push('interface _' + name + ' extends ' + parentDef + ' { ' + 'content' + ': ' + name + '; }' + '\n');
 			} else {
 				output.push('type _' + name + ' = ' + parentDef + ';' + '\n');

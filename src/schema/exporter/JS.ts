@@ -47,7 +47,8 @@ export class JS extends Exporter {
 		var attributeSpecList: string[] = [];
 
 		var flags = 0;
-		if(type.literalType) flags |= Type.literalFlag;
+		if(type.primitiveType) flags |= Type.primitiveFlag;
+		if(type.isPlainPrimitive) flags |= Type.plainPrimitiveFlag;
 
 		if(type.childList) {
 			for(var member of type.childList) {
