@@ -22,4 +22,7 @@ export class Member {
 	typeList: Type[];
 
 	comment: string;
+
+	static optionalFlag = 1;
+	static arrayFlag = 2;
 }

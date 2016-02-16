@@ -25,8 +25,8 @@ export class JS extends Exporter {
 		if(member.name != name) name += ':' + member.name;
 
 		var flags = 0;
-		if(member.min < 1) flags |= Type.optionalFlag;
-		if(member.max > 1) flags |= Type.arrayFlag;
+		if(member.min < 1) flags |= Member.optionalFlag;
+		if(member.max > 1) flags |= Member.arrayFlag;
 
 		var memberTypeList = member.typeList.map((memberType: Type) =>
 			typeNumTbl[memberType.surrogateKey]
@@ -46,6 +46,9 @@ export class JS extends Exporter {
 		var childSpecList: string[] = [];
 		var attributeSpecList: string[] = [];
 
+		var flags = 0;
+		if(type.literalType) flags |= Type.literalFlag;
+
 		if(type.childList) {
 			for(var member of type.childList) {
 				childSpecList.push(this.writeMember(member, typeNumTbl, importNumTbl));
@@ -62,6 +65,7 @@ export class JS extends Exporter {
 
 		return(
 			'\n\t[' +
+			flags + ', ' +
 			parentNum + ', ' +
 			'[' + childSpecList.join(', ') + '], ' +
 			'[' + attributeSpecList.join(', ') + ']' +
