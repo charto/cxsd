@@ -11,8 +11,8 @@ export class SimpleType extends types.TypeBase {
 	static mayContain: () => types.BaseClass[] = () => [
 		types.Annotation,
 		types.Restriction,
-		List,
-		Union
+		types.List,
+		types.Union
 	];
 
 	setEnumerationList(enumerationList: string[]) {
@@ -73,20 +73,4 @@ export class SimpleContent extends ContentBase {
 /** <xsd:complexcontent> */
 
 export class ComplexContent extends ContentBase {
-}
-
-export class ListBase extends types.Base {
-	static mayContain: () => types.BaseClass[] = () => [
-		SimpleType
-	]
-}
-
-/** <xsd:list> */
-
-export class List extends ListBase {
-}
-
-/** <xsd:union> */
-
-export class Union extends ListBase {
 }
