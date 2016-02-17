@@ -52,7 +52,9 @@ export class Context extends cxml.ContextBase<Context, Namespace> {
 				'boolean',
 				'boolean'
 			], [
-				'date dateTime duration time ' +
+				'date dateTime',
+				'Date'
+			], [
 				'byte decimal double float int integer long short ' +
 				'unsignedLong unsignedInt unsignedShort unsignedByte ' +
 				'negativeInteger nonNegativeInteger nonPositiveInteger positiveInteger ',
@@ -61,7 +63,8 @@ export class Context extends cxml.ContextBase<Context, Namespace> {
 				'Name NCName QName anyURI language normalizedString string token ' +
 				'ENTITY ENTITIES ID IDREF IDREFS NMTOKEN NMTOKENS ' +
 				'gDay gMonth gMonthDay gYear gYearMonth ' +
-				'hexBinary base64Binary',
+				'hexBinary base64Binary ' +
+				'duration time',
 				'string'
 			]
 		];
