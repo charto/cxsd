@@ -43,7 +43,7 @@ export class Element extends MemberBase implements ElementLike {
 			var groupBase = this.scope.lookup(ref, 'element') as Element;
 
 			if(groupBase) groupBase.addSubstitute(element);
-			else throw new types.MissingReferenceError(this, state, 'element', ref);
+			else throw new types.MissingReferenceError('element', ref);
 		}
 
 //		super.resolve(state);

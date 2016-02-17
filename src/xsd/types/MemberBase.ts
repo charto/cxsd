@@ -4,8 +4,9 @@
 import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
+import {TypedBase} from './TypedBase';
 
-export class MemberBase extends types.Base {
+export class MemberBase extends TypedBase {
 	resolveMember(state: State, kind: string) {
 		var member = this as MemberBase;
 
@@ -16,18 +17,10 @@ export class MemberBase extends types.Base {
 			member = this.scope.lookup(ref, kind) as MemberBase;
 
 			if(member) member.define(state, kind, this.min, this.max, this.scope);
-			else throw new types.MissingReferenceError(this, state, kind, ref);
+			else throw new types.MissingReferenceError(kind, ref);
 		}
 
-		// If the element has a type set through an attribute, look it up in scope.
-
-		if(this.type) {
-			var type = new QName(this.type as string, state.source);
-			this.type = this.scope.lookup(type, 'type') as types.TypeBase || type;
-		} else {
-			// If there's a single type as a child, use it as the element's type.
-			this.type = this.scope.getType();
-		}
+		this.resolveType(state);
 
 		return(member);
 	}
@@ -49,7 +42,6 @@ export class MemberBase extends types.Base {
 	id: string = null;
 	name: string = null;
 	ref: string = null;
-	type: string | QName | types.TypeBase = null;
 
 	min: number;
 	max: number;

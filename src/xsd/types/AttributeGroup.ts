@@ -34,7 +34,7 @@ export class AttributeGroup extends types.Base {
 				// if(attributeGroup != this && !attributeGroup.resolved) console.log('OH NOES! AttributeGroup ' + attributeGroup.name);
 				// attributeGroup.scope.addAllToParent('attribute', 1, 1, this.scope);
 				attributeGroup.define(state, 'attributegroup', 1, 1, this.scope);
-			} else throw new types.MissingReferenceError(this, state, 'attributeGroup', ref);
+			} else throw new types.MissingReferenceError('attributeGroup', ref);
 		}
 
 //		super.resolve(state);

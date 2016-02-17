@@ -82,7 +82,7 @@ export class Group extends GroupBase {
 				// if(group != this && !group.resolved) console.log('OH NOES! Group ' + group.name);
 				// group.scope.addAllToParent('element', this.min, this.max, this.scope);
 				group.define(state, 'group', this.min, this.max, this.scope);
-			} else throw new types.MissingReferenceError(this, state, 'group', ref);
+			} else throw new types.MissingReferenceError('group', ref);
 		}
 
 //		super.resolve(state);

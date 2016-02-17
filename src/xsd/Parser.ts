@@ -216,7 +216,7 @@ export class Parser {
 			try {
 				state.xsdElement.resolve(state);
 			} catch(err) {
-				console.error(err);
+				console.error(err + ' on line ' + state.xsdElement.lineNumber + ' of ' + state.source.url);
 				console.log('Stack:');
 				console.error(err.stack);
 			}
