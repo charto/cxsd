@@ -14,7 +14,10 @@ export class Union extends TypedBase {
 	]
 
 	resolve(state: State) {
-		var type = this.resolveType(this.memberType, state);
+		// var type = this.resolveType(this.memberType, state);
+		// Convert union types to strings for now.
+		var type = this.resolveType('string', state);
+		(state.parent.xsdElement as types.SimpleType).parent = type;
 	}
 
 	memberType: string = null;
