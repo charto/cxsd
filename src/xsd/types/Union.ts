@@ -14,8 +14,7 @@ export class Union extends TypedBase {
 	]
 
 	resolve(state: State) {
-		this.type = this.memberType;
-		this.resolveType(state);
+		var type = this.resolveType(this.memberType, state);
 	}
 
 	memberType: string = null;

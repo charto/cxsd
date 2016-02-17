@@ -91,6 +91,25 @@ export class TS extends Exporter {
 		return(output.join(''));
 	}
 
+	writeTypeList(member: Member) {
+		var outTypeList = member.typeList.map(
+			(type: Type) => {
+				if(type.isPlainPrimitive && (!type.literalList || !type.literalList.length)) {
+					return(type.primitiveType.name);
+				} else return(this.writeTypeRef(type, ''));
+			}
+		);
+
+		if(outTypeList.length == 0) return(null);
+
+		var outTypes = outTypeList.sort().join(' | ');
+
+		if(member.max > 1) {
+			if(outTypeList.length > 1) return('(' + outTypes + ')[]');
+			else return(outTypes + '[]');
+		} else return(outTypes);
+	}
+
 	writeMember(member: Member, isExported: boolean) {
 		var output: string[] = [];
 		var comment = member.comment;
@@ -106,25 +125,11 @@ export class TS extends Exporter {
 		if(!isExported && member.min == 0) output.push('?');
 		output.push(': ');
 
-		var outTypeList = member.typeList.map(
-			(type: Type) => {
-				if(type.isPlainPrimitive && (!type.literalList || !type.literalList.length)) {
-					return(type.primitiveType.name);
-				} else return(this.writeTypeRef(type, ''));
-			}
-		);
-
-		if(outTypeList.length == 0) return('');
-
-		var outTypes = outTypeList.sort().join(' | ');
-		var suffix = '';
-
-		if(member.max > 1) suffix = '[]';
-
-		if(suffix && outTypeList.length > 1) outTypes = '(' + outTypes + ')';
+		var outTypes = this.writeTypeList(member);
+		if(!outTypes) return('');
 
 		output.push(outTypes);
-		output.push(suffix + ';');
+		output.push(';');
 
 		return(output.join(''));
 	}
@@ -140,6 +145,8 @@ export class TS extends Exporter {
 					output.push('(' + literalList.join(' | ') + ')');
 				} else output.push(literalList[0]);
 			} else output.push(type.primitiveType.name);
+		} else if(type.isList) {
+			output.push(this.writeTypeList(type.childList[0]));
 		} else {
 			var outMemberList: string[] = [];
 
@@ -188,6 +195,8 @@ export class TS extends Exporter {
 
 		if(namespace.isPrimitiveSpace) {
 			output.push(exportPrefix + 'interface _' + name + ' { ' + 'content' + ': ' + type.primitiveType.name + '; }' + '\n');
+		} else if(type.isList) {
+			output.push(exportPrefix + 'type ' + name + ' = ' + content + ';' + '\n');
 		} else if(type.isPlainPrimitive) {
 			parentDef = this.writeTypeRef(type.parent, '_');
 

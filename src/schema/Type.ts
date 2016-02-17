@@ -32,6 +32,8 @@ export class Type {
 	/** Type only contains a child text node and no other data. */
 	isPlainPrimitive: boolean;
 
+	isList: boolean;
+
 	attributeTbl: {[name: string]: Member} = {};
 	childTbl: {[name: string]: Member} = {};
 	/** XML attributes in an element of this type. */
@@ -56,4 +58,5 @@ export class Type {
 
 	static primitiveFlag = 1;
 	static plainPrimitiveFlag = 2;
+	static listFlag = 4;
 }

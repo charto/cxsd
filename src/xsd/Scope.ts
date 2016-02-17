@@ -43,24 +43,24 @@ export class Scope {
 		this.namespace = namespace;
 	}
 
-	add(name: string, type: string, target: types.Base, min: number, max: number) {
+	add(name: string, kind: string, target: types.Base, min: number, max: number) {
 		if(name) {
-			var visibleTbl = this.visible[type];
+			var visibleTbl = this.visible[kind];
 
 			if(!visibleTbl) {
 				visibleTbl = {};
-				this.visible[type] = visibleTbl;
+				this.visible[kind] = visibleTbl;
 			}
 
 			visibleTbl[name] = target;
 		}
 
 		if(max) {
-			var exposeList = this.expose[type];
+			var exposeList = this.expose[kind];
 
 			if(!exposeList) {
 				exposeList = [];
-				this.expose[type] = exposeList;
+				this.expose[kind] = exposeList;
 			}
 
 			exposeList.push({
@@ -72,19 +72,23 @@ export class Scope {
 		}
 	}
 
-	addToParent(name: string, type: string, target: types.Base, min: number, max: number) {
-		this.parent.add(name, type, target, min, max);
+	addToParent(name: string, kind: string, target: types.Base, min: number, max: number) {
+		this.parent.add(name, kind, target, min, max);
 	}
 
-	addAllToParent(type: string, min = 1, max = 1, target?: Scope) {
+	addContentToParent(kind: string, target: types.Base, min: number, max: number) {
+		this.parent.add(null, kind, target, min, max);
+	}
+
+	addAllToParent(kind: string, min = 1, max = 1, target?: Scope) {
 		// Check if there's anything to add.
-		if(!this.expose[type]) return;
+		if(!this.expose[kind]) return;
 		if(!target) target = this;
 		target = target.parent;
 
-		for(var spec of this.expose[type]) {
+		for(var spec of this.expose[kind]) {
 			// TODO: If target is a choice, it must take the overall min and max.
-			target.add(spec.name, type, spec.item, spec.min * min, spec.max * max);
+			target.add(spec.name, kind, spec.item, spec.min * min, spec.max * max);
 		}
 	}
 
@@ -103,7 +107,7 @@ export class Scope {
 		return(this.commentList.join('').replace(/\r\n?|\n/g, '\n'));
 	}
 
-	lookup(name: QName, type: string): types.Base {
+	lookup(name: QName, kind: string): types.Base {
 		var scope: Scope = this;
 		var nameFull = name.nameFull;
 		var nameWild = '*:' + name.name;
@@ -115,8 +119,8 @@ export class Scope {
 		var iter = 100;
 
 		while(scope && --iter) {
-			if(scope.visible[type]) {
-				var result = scope.visible[type][nameFull] || scope.visible[type][nameWild];
+			if(scope.visible[kind]) {
+				var result = scope.visible[kind][nameFull] || scope.visible[kind][nameWild];
 
 				if(result) return(result);
 			}
@@ -124,9 +128,11 @@ export class Scope {
 			scope = scope.parent;
 		}
 
-console.log('Missing ' + type + ': ' + name.name);
-
-		return(null);
+try {
+		throw(new Error('Missing ' + kind + ': ' + name.name));
+} catch(err) {
+console.log(err.stack);
+}
 	}
 
 	// Types
@@ -150,13 +156,13 @@ console.log('Missing ' + type + ': ' + name.name);
 
 	getType(): types.TypeBase { return(this.type); }
 
-	dumpTypes() {
-		return(this.expose['type'] || []);
+	dumpTypes(kind: string) {
+		return(this.expose[kind] || []);
 	}
 
-	dumpMembers(itemType: string, groupType: string) {
-		var itemList = this.expose[itemType] || [];
-		var groupList = this.expose[groupType] || [];
+	dumpMembers(kind: string, groupKind: string) {
+		var itemList = this.expose[kind] || [];
+		var groupList = this.expose[groupKind] || [];
 		var output: { [name: string]: TypeMember } = {};
 
 		for(var spec of itemList) {
@@ -167,7 +173,7 @@ console.log('Missing ' + type + ': ' + name.name);
 			var min = group.min;
 			var max = group.max;
 
-			var attributeTbl = group.item.getScope().dumpMembers(itemType, groupType);
+			var attributeTbl = group.item.getScope().dumpMembers(kind, groupKind);
 
 			for(var key of Object.keys(attributeTbl)) {
 				addMemberToTable(output, key, attributeTbl[key], min, max);
@@ -189,11 +195,11 @@ console.log('Missing ' + type + ': ' + name.name);
 	namespace: Namespace;
 
 	private visible = {} as {
-		[type: string]: { [name: string]: types.Base }
+		[kind: string]: { [name: string]: types.Base }
 	};
 
 	private expose: {
-		[type: string]: NamedTypeMember[];
+		[kind: string]: NamedTypeMember[];
 	} = {};
 
 	private type: types.TypeBase;

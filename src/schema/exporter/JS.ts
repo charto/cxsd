@@ -49,6 +49,7 @@ export class JS extends Exporter {
 		var flags = 0;
 		if(type.primitiveType) flags |= Type.primitiveFlag;
 		if(type.isPlainPrimitive) flags |= Type.plainPrimitiveFlag;
+		if(type.isList) flags |= Type.listFlag;
 
 		if(type.childList) {
 			for(var member of type.childList) {

@@ -20,7 +20,7 @@ export class MemberBase extends TypedBase {
 			else throw new types.MissingReferenceError(kind, ref);
 		}
 
-		this.resolveType(state);
+		this.typeRef = this.resolveType(this.type, state);
 
 		return(member);
 	}
@@ -30,10 +30,10 @@ export class MemberBase extends TypedBase {
 
 		// Filter out types of unresolved elements.
 		if(
-			typeof(this.type) == 'object' &&
-			this.type instanceof types.TypeBase
+			this.typeRef &&
+			this.typeRef instanceof types.TypeBase
 		) {
-			typeList = [this.type as types.TypeBase];
+			typeList = [this.typeRef as types.TypeBase];
 		} else typeList = [];
 
 		return(typeList);
@@ -42,9 +42,11 @@ export class MemberBase extends TypedBase {
 	id: string = null;
 	name: string = null;
 	ref: string = null;
+	type: string = null;
 
 	min: number;
 	max: number;
 
 	surrogateKey: number;
+	typeRef: QName | types.TypeBase;
 }

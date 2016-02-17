@@ -14,8 +14,8 @@ export class List extends TypedBase {
 	]
 
 	resolve(state: State) {
-		this.type = this.itemType;
-		this.resolveType(state);
+		var type = this.resolveType(this.itemType, state);
+		this.scope.addContentToParent('list', type as types.TypeBase, 0, Infinity);
 	}
 
 	itemType: string = null;

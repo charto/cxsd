@@ -217,6 +217,23 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 	outType.childList = exportChildren(scope, namespace, context);
 //	outType.groupList = exportGroups(scope, namespace, context);
 
+	var listType = scope.dumpTypes('list');
+
+	if(listType.length) {
+		for(var spec of listType) {
+			var outMember = new schema.Member('', spec.min, spec.max);
+
+			outMember.namespace = namespace;
+			outMember.typeList = [
+				exportType(spec.item as types.TypeBase, namespace, context)
+			];
+
+			outType.childList.push(outMember);
+		}
+
+		outType.isList = true;
+	}
+
 	return(outType);
 }
 
@@ -246,7 +263,7 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 
 		outNamespace.sourceList = sourceList.map((source: Source) => source.url).sort();
 
-		for(var spec of scope.dumpTypes()) {
+		for(var spec of scope.dumpTypes('type')) {
 			if(spec.name) outNamespace.exportType(exportType(spec.item as types.TypeBase, outNamespace, context));
 		}
 
