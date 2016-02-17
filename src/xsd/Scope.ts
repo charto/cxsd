@@ -157,7 +157,7 @@ console.log(err.stack);
 	getType(): types.TypeBase { return(this.type); }
 
 	dumpTypes(kind: string) {
-		return(this.expose[kind] || []);
+		return(this.expose[kind]);
 	}
 
 	dumpMembers(kind: string, groupKind: string) {
@@ -181,14 +181,6 @@ console.log(err.stack);
 		}
 
 		return(output);
-	}
-
-	hasAttributes() {
-		var tbl = this.expose['attribute'];
-
-		for(var key in tbl) if(tbl.hasOwnProperty(key)) return(true);
-
-		return(false);
 	}
 
 	private parent: Scope;

@@ -46,24 +46,29 @@ export class JS extends Exporter {
 		var childSpecList: string[] = [];
 		var attributeSpecList: string[] = [];
 
+		var parentNum = 0;
 		var flags = 0;
+
 		if(type.primitiveType) flags |= Type.primitiveFlag;
 		if(type.isPlainPrimitive) flags |= Type.plainPrimitiveFlag;
-		if(type.isList) flags |= Type.listFlag;
-
-		if(type.childList) {
-			for(var member of type.childList) {
-				childSpecList.push(this.writeMember(member, typeNumTbl, importNumTbl));
+		if(type.isList) {
+			flags |= Type.listFlag | Type.primitiveFlag | Type.plainPrimitiveFlag;
+			parentNum = typeNumTbl[type.childList[0].typeList[0].surrogateKey];
+		} else {
+			if(type.childList) {
+				for(var member of type.childList) {
+					childSpecList.push(this.writeMember(member, typeNumTbl, importNumTbl));
+				}
 			}
-		}
 
-		if(type.attributeList) {
-			for(var member of type.attributeList) {
-				attributeSpecList.push(this.writeMember(member, typeNumTbl, importNumTbl));
+			if(type.attributeList) {
+				for(var member of type.attributeList) {
+					attributeSpecList.push(this.writeMember(member, typeNumTbl, importNumTbl));
+				}
 			}
-		}
 
-		var parentNum = type.parent ? typeNumTbl[type.parent.surrogateKey] : 0;
+			if(type.parent) parentNum = typeNumTbl[type.parent.surrogateKey];
+		}
 
 		return(
 			'\n\t[' +
