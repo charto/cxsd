@@ -99,12 +99,12 @@ export class JS extends Exporter {
 
 		for(var importName of Object.keys(importTbl)) {
 			var otherNamespaceId = importTbl[importName].id;
-			var importTypeNameTbl = namespace.importTypeNameTbl[otherNamespaceId];
+			var typeTbl = namespace.importContentTbl[otherNamespaceId].typeTbl;
 			var importTypeNameList: string[] = [];
 
-			if(importTypeNameTbl) {
-				for(var name of Object.keys(importTypeNameTbl).sort()) {
-					var type = importTypeNameTbl[name];
+			if(typeTbl) {
+				for(var name of Object.keys(typeTbl).sort()) {
+					var type = typeTbl[name];
 
 					importTypeNameList.push("'" + type.safeName + "'");
 					typeNumTbl[type.surrogateKey] = typeNum++;

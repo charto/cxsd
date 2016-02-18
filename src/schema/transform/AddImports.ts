@@ -1,13 +1,13 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {Namespace} from '../Namespace';
+import {Namespace, ImportContent} from '../Namespace';
 import {Type} from '../Type';
 import {Member} from '../Member';
 import {MemberRef} from '../MemberRef';
 import {Transform} from './Transform';
 
-export type Output = { [namespaceId: string]: { [key: string]: Type } };
+export type Output = { [namespaceId: string]: ImportContent };
 
 export class AddImports extends Transform<AddImports, Output, void> {
 	prepare() {
@@ -17,7 +17,7 @@ export class AddImports extends Transform<AddImports, Output, void> {
 			if(type) this.visitType(type);
 		}
 
-		this.namespace.importTypeNameTbl = this.output;
+		this.namespace.importContentTbl = this.output;
 
 		return(this.output);
 	}
@@ -26,12 +26,23 @@ export class AddImports extends Transform<AddImports, Output, void> {
 	finish(result: Output[]) {
 		for(var namespaceTbl of result) {
 			for(var namespaceId of Object.keys(namespaceTbl)) {
-				var output: { [name: string]: Type } = {};
-				var typeTbl = namespaceTbl[namespaceId];
+				var output: ImportContent = {
+					typeTbl: {},
+					memberTbl: {}
+				};
+
+				var typeTbl = namespaceTbl[namespaceId].typeTbl;
 
 				for(var key of Object.keys(typeTbl)) {
 					var type = typeTbl[key];
-					output[type.safeName] = type;
+					output.typeTbl[type.safeName] = type;
+				}
+
+				var memberTbl = namespaceTbl[namespaceId].memberTbl;
+
+				for(var key of Object.keys(memberTbl)) {
+					var member = memberTbl[key];
+					output.memberTbl[member.name] = member;
 				}
 
 				namespaceTbl[namespaceId] = output;
@@ -56,8 +67,20 @@ export class AddImports extends Transform<AddImports, Output, void> {
 			}
 
 			if(short) {
-				if(!this.output[id]) this.output[id] = {};
-				if(type) this.output[id][type.surrogateKey] = type;
+				if(!this.output[id]) {
+					this.output[id] = {
+						typeTbl: {},
+						memberTbl: {}
+					};
+				}
+
+				if(type && type.namespace == namespace) {
+					this.output[id].typeTbl[type.surrogateKey] = type;
+				}
+
+				if(member && member.namespace == namespace) {
+					this.output[id].memberTbl[member.surrogateKey] = member;
+				}
 			}
 		}
 	}

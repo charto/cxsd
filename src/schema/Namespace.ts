@@ -13,6 +13,11 @@ export enum TypeState {
 	exported
 }
 
+export interface ImportContent {
+	typeTbl: { [key: string]: Type },
+	memberTbl: { [key: string]: Member }
+}
+
 export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 	addRef(shortName: string, namespace: Namespace) {
 		var id = namespace.id;
@@ -34,8 +39,8 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 		if(!importTbl) {
 			importTbl = {};
 
-			if(this.importTypeNameTbl) {
-				for(var key of Object.keys(this.importTypeNameTbl)) {
+			if(this.importContentTbl) {
+				for(var key of Object.keys(this.importContentTbl)) {
 					var id = +key;
 					var short = this.getShortRef(id);
 					importTbl[this.getShortRef(id)] = this.context.namespaceById(id);
@@ -49,7 +54,7 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 	}
 
 	getUsedImportList() {
-		if(this.importTypeNameTbl) {
+		if(this.importContentTbl) {
 			var importTbl = this.getUsedImportTbl();
 
 			return(Object.keys(importTbl).map((shortName: string) =>
@@ -110,7 +115,7 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 	private importTbl: { [short: string]: Namespace };
 
 	/** List of referenced type names from each imported namespace. */
-	importTypeNameTbl: { [namespaceId: string]: { [name: string]: Type } };
+	importContentTbl: { [namespaceId: string]: ImportContent };
 
 	/** True only for the special namespace containing primitives. */
 	isPrimitiveSpace: boolean;
