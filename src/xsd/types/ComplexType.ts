@@ -36,8 +36,6 @@ export class ContentBase extends types.Base {
 		this.scope.addAllToParent('attribute');
 		this.scope.addAllToParent('group');
 		this.scope.addAllToParent('attributeGroup');
-
-//		super.resolve(state);
 	}
 
 	// Internally used members

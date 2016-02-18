@@ -47,6 +47,5 @@ export class MemberBase extends TypedBase {
 	min: number;
 	max: number;
 
-	surrogateKey: number;
 	typeRef: QName | types.TypeBase;
 }

@@ -14,8 +14,8 @@ export class GroupBase extends types.Base implements ElementLike {
 	}
 
 	id: string = null;
-	minOccurs: string = "1";
-	maxOccurs: string = "1";
+	minOccurs: string = '1';
+	maxOccurs: string = '1';
 
 	min: number;
 	max: number;
@@ -84,8 +84,6 @@ export class Group extends GroupBase {
 				group.define(state, 'group', this.min, this.max, this.scope);
 			} else throw new types.MissingReferenceError('group', ref);
 		}
-
-//		super.resolve(state);
 	}
 
 	name: string = null;

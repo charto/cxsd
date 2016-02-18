@@ -36,8 +36,6 @@ export class AttributeGroup extends types.Base {
 				attributeGroup.define(state, 'attributegroup', 1, 1, this.scope);
 			} else throw new types.MissingReferenceError('attributeGroup', ref);
 		}
-
-//		super.resolve(state);
 	}
 
 	id: string = null;

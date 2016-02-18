@@ -31,7 +31,6 @@ export class Element extends MemberBase implements ElementLike {
 		else this.max = +this.maxOccurs;
 
 		this.define(state, 'element', this.min, this.max);
-		this.surrogateKey = Element.nextKey++;
 	}
 
 	resolve(state: State) {
@@ -45,8 +44,6 @@ export class Element extends MemberBase implements ElementLike {
 			if(groupBase) groupBase.addSubstitute(element);
 			else throw new types.MissingReferenceError('element', ref);
 		}
-
-//		super.resolve(state);
 	}
 
 	addSubstitute(element: Element) {
@@ -71,5 +68,4 @@ export class Element extends MemberBase implements ElementLike {
 	substitutionGroup: string = null;
 
 	substituteList: Element[];
-	private static nextKey = 0;
 }

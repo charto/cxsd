@@ -22,7 +22,6 @@ export class Attribute extends MemberBase {
 		this.max = 1;
 
 		this.define(state, 'attribute', this.min, this.max);
-		this.surrogateKey = Attribute.nextKey++;
 	}
 
 	resolve(state: State) {
@@ -31,6 +30,4 @@ export class Attribute extends MemberBase {
 
 	use: string = null;
 	default: XmlAttribute = null;
-
-	private static nextKey = 0;
 }
