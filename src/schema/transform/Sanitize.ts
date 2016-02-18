@@ -46,8 +46,6 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 		}
 
 		this.state.typeListList.push(typeList);
-
-		return(true);
 	}
 
 	renameDuplicates(typeList: Type[]) {

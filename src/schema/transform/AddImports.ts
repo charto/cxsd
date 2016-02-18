@@ -7,7 +7,9 @@ import {Element} from '../Element';
 import {Member} from '../Member';
 import {Transform} from './Transform';
 
-export class AddImports extends Transform<AddImports, void, void> {
+export type Output = { [namespaceId: string]: { [key: string]: Type } };
+
+export class AddImports extends Transform<AddImports, Output, void> {
 	prepare() {
 		this.visitType(this.doc);
 
@@ -15,19 +17,47 @@ export class AddImports extends Transform<AddImports, void, void> {
 			if(type) this.visitType(type);
 		}
 
-		return(true);
+		this.namespace.importTypeNameTbl = this.output;
+
+		return(this.output);
 	}
 
-	addRef(namespace: Namespace, element?: Element) {
+	/** Replace imported type IDs with sanitized names. */
+	finish(result: Output[]) {
+		for(var namespaceTbl of result) {
+			for(var namespaceId of Object.keys(namespaceTbl)) {
+				var output: { [name: string]: Type } = {};
+				var typeTbl = namespaceTbl[namespaceId];
+
+				for(var key of Object.keys(typeTbl)) {
+					var type = typeTbl[key];
+					output[type.safeName] = type;
+				}
+
+				namespaceTbl[namespaceId] = output;
+			}
+		}
+	}
+
+	addRef(namespace: Namespace, element?: Element, type?: Type) {
 		if(namespace && namespace != this.namespace) {
 			// Type from another, imported namespace.
+
+			// Make sure it gets exported.
+			if(type) namespace.exportType(type);
 
 			var id = namespace.id;
 			var short = this.namespace.getShortRef(id);
 
 			if(!short) {
 				short = (element && element.namespace.getShortRef(id)) || namespace.short;
+
 				if(short) this.namespace.addRef(short, namespace);
+			}
+
+			if(short) {
+				if(!this.output[id]) this.output[id] = {};
+				if(type) this.output[id][type.surrogateKey] = type;
 			}
 		}
 	}
@@ -37,7 +67,7 @@ export class AddImports extends Transform<AddImports, void, void> {
 
 		if(element.substitutes) this.addRef(element.substitutes.namespace, element);
 
-		for(var type of element.typeList) this.addRef(type.namespace, element);
+		for(var type of element.typeList) this.addRef(type.namespace, element, type);
 	}
 
 	visitType(type: Type) {
@@ -45,10 +75,11 @@ export class AddImports extends Transform<AddImports, void, void> {
 		// NOTE: This makes base primitive types inherit themselves.
 		if(type.primitiveType && !type.parent) type.parent = type.primitiveType;
 
-		if(type.parent) this.addRef(type.parent.namespace);
+		if(type.parent) this.addRef(type.parent.namespace, null, type.parent);
 
 		for(var member of this.getTypeMembers(type)) this.visitElement(member.element);
 	}
 
 	construct = AddImports;
+	output: Output = {};
 }

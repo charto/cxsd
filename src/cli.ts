@@ -13,7 +13,6 @@ import {exportNamespace} from './xsd/Exporter';
 import * as schema from './schema';
 import {AddImports} from './schema/transform/AddImports';
 import {Sanitize} from './schema/transform/Sanitize';
-import {ListImports} from './schema/transform/ListImports';
 
 type _ICommand = typeof cmd;
 interface ICommand extends _ICommand {
@@ -57,12 +56,20 @@ function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
 
 			var spec = exportNamespace(namespace, schemaContext);
 
-			new AddImports(spec).exec().then(() =>
-				new Sanitize(spec).exec()
-			).then((sanitize: Sanitize) =>
+			var addImports = new AddImports(spec);
+			var sanitize = new Sanitize(spec);
+
+			var importsAdded = addImports.exec();
+
+			// Find ID numbers of all types imported from other namespaces.
+			importsAdded.then(() =>
+				// Rename types to valid JavaScript class names,
+				// adding a prefix or suffix to duplicates.
+				sanitize.exec()
+			).then(() =>
 				sanitize.finish()
 			).then(() =>
-				new ListImports(spec).exec()
+				addImports.finish(importsAdded.value())
 			).then(() =>
 				new schema.exporter.JS(spec, jsCache).exec()
 			).then(() =>

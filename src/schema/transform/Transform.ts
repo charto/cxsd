@@ -9,7 +9,7 @@ import {Member} from '../Member';
 
 /** TransformType is a class derived from Transform, used like CRTP in C++. */
 
-export abstract class Transform<TransformType, Output, State> {
+export abstract class Transform<TransformType extends Transform<TransformType, Output, State>, Output, State> {
 	constructor(doc: Type) {
 		this.doc = doc;
 		this.namespace = doc.namespace;
@@ -30,12 +30,12 @@ export abstract class Transform<TransformType, Output, State> {
 		return(memberList);
 	}
 
-	prepare(): boolean | Promise<any> { return(true); }
+	prepare(): Output | Promise<Output> { return(this.output); }
 
 	exec(
 		visitedNamespaceTbl?: { [key: string]: Namespace },
 		state?: any
-	): Promise<TransformType> {
+	): Promise<Output[]> {
 		var doc = this.doc;
 		var namespace = doc.namespace;
 
@@ -44,7 +44,7 @@ export abstract class Transform<TransformType, Output, State> {
 		if(!visitedNamespaceTbl) visitedNamespaceTbl = {};
 		visitedNamespaceTbl[namespace.id] = namespace;
 
-		return(Promise.resolve(this.prepare()).then(() => Promise.map(
+		return(Promise.resolve(this.prepare()).then((output: Output) => Promise.map(
 			namespace.getUsedImportList(),
 			(namespace: Namespace) => {
 				if(!visitedNamespaceTbl[namespace.id]) {
@@ -55,12 +55,13 @@ export abstract class Transform<TransformType, Output, State> {
 					}
 				}
 
-				return(null);
+				return([]);
 			}
-		).then(() => this as any as TransformType)));
+		).then((outputList: Output[][]) => Array.prototype.concat.apply([output], outputList))));
 	}
 
 	construct: { new(...args: any[]): Transform<TransformType, Output, State>; };
+	output: Output;
 
 	protected doc: Type;
 	protected namespace: Namespace;

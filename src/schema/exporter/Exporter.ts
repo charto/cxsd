@@ -13,7 +13,7 @@ export interface State {
 	cache: Cache;
 }
 
-export abstract class Exporter extends Transform<Exporter, string, State> {
+export abstract class Exporter extends Transform<Exporter, boolean, State> {
 	constructor(doc: Type, cache: Cache) {
 		super(doc);
 		this.state = { cache: cache };
@@ -52,7 +52,7 @@ export abstract class Exporter extends Transform<Exporter, string, State> {
 			return(this.state.cache.store(
 				outName,
 				this.writeContents()
-			)).then(() => false);
+			));
 		}));
 	}
 
@@ -82,6 +82,4 @@ export abstract class Exporter extends Transform<Exporter, string, State> {
 
 	/** Full path of directory containing exported output for the current namespace. */
 	protected cacheDir: string;
-
-	protected output: string;
 }
