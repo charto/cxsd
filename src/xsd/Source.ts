@@ -55,6 +55,8 @@ export class Source {
 			}
 		}
 
+		// xml prefix may be used without defining xmlns:xml.
+
 		this.namespaceRefTbl['xml'] = this.context.registerNamespace('http://www.w3.org/XML/1998/namespace');
 	}
 

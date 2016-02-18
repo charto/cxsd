@@ -99,15 +99,15 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 	exported: boolean;
 
 	private refList: NamespaceRef[];
-	private refTbl: {[namespaceId: number]: NamespaceRef};
+	private refTbl: { [namespaceId: number]: NamespaceRef };
 
 	private cacheDir: string;
 
 	/** Short names used to reference other namespaces in schemas defining this namespace. */
-	shortNameTbl: {[namespaceId: string]: string[]} = {};
+	shortNameTbl: { [namespaceId: string]: string[] } = {};
 
 	/** Table of namespaces actually imported, by short name. */
-	private importTbl: {[short: string]: Namespace};
+	private importTbl: { [short: string]: Namespace };
 
 	/** List of referenced type names from each imported namespace. */
 	importTypeNameTbl: { [namespaceId: string]: { [name: string]: Type } };

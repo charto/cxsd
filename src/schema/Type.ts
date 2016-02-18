@@ -16,8 +16,8 @@ export class Type {
 	buildMemberTbl() {
 		var ref: MemberRef;
 
-		if(this.attributeList) for(ref of this.attributeList) this.attributeTbl[ref.member.name] = ref;
-		if(this.childList) for(ref of this.childList) this.childTbl[ref.member.name] = ref;
+		for(ref of this.attributeList || []) this.attributeTbl[ref.member.name] = ref;
+		for(ref of this.childList || []) this.childTbl[ref.member.name] = ref;
 	}
 
 	name: string;
@@ -36,8 +36,8 @@ export class Type {
 
 	isList: boolean;
 
-	attributeTbl: {[name: string]: MemberRef} = {};
-	childTbl: {[name: string]: MemberRef} = {};
+	attributeTbl: { [name: string]: MemberRef } = {};
+	childTbl: { [name: string]: MemberRef } = {};
 	/** XML attributes in an element of this type. */
 	attributeList: MemberRef[];
 	/** Allowed child elements for an element of this type. */
