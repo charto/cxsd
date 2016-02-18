@@ -27,6 +27,7 @@ export class JS extends Exporter {
 		var flags = 0;
 		if(member.min < 1) flags |= Member.optionalFlag;
 		if(member.max > 1) flags |= Member.arrayFlag;
+		if(member.name == '*') flags |= Member.anyFlag;
 
 		var memberTypeList = member.typeList.map((memberType: Type) =>
 			typeNumTbl[memberType.surrogateKey]
@@ -51,6 +52,7 @@ export class JS extends Exporter {
 
 		if(type.primitiveType) flags |= Type.primitiveFlag;
 		if(type.isPlainPrimitive) flags |= Type.plainPrimitiveFlag;
+
 		if(type.isList) {
 			flags |= Type.listFlag | Type.primitiveFlag | Type.plainPrimitiveFlag;
 			parentNum = typeNumTbl[type.childList[0].typeList[0].surrogateKey];

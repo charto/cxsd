@@ -25,4 +25,5 @@ export class Member {
 
 	static optionalFlag = 1;
 	static arrayFlag = 2;
+	static anyFlag = 4;
 }

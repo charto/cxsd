@@ -4,9 +4,9 @@
 import {State} from '../State';
 import * as types from '../types';
 
-/** <xsd:anyAttribute> */
+// <xsd:any>
 
-export class AnyAttribute extends types.Attribute {
+export class Any extends types.Element {
 	init(state: State) {
 		this.name = '*';
 		super.init(state);

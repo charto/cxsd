@@ -116,6 +116,7 @@ export class TS extends Exporter {
 		var indent = isExported ? '' : '\t';
 		var exportPrefix = isExported ? 'export var ' : '';
 
+		if(member.name == '*') return('');
 		if(comment) {
 			output.push(TS.formatComment(indent, comment));
 			output.push('\n');

@@ -66,6 +66,9 @@ export class Context extends cxml.ContextBase<Context, Namespace> {
 				'hexBinary base64Binary ' +
 				'duration time',
 				'string'
+			], [
+				'anytype',
+				'any'
 			]
 		];
 

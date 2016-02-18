@@ -8,6 +8,7 @@ export {Schema, Root} from './types/Schema';
 export {MemberBase} from './types/MemberBase';
 export {Element} from './types/Element';
 export {Group, Sequence, Choice, All} from './types/Group';
+export {Any} from './types/Any';
 export {Attribute} from './types/Attribute';
 export {AttributeGroup} from './types/AttributeGroup';
 export {AnyAttribute} from './types/AnyAttribute';
