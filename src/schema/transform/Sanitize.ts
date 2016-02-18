@@ -99,7 +99,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 	}
 
 	visitType(type: Type) {
-		var memberList: Member[] = [];
+		var refList: MemberRef[] = [];
 		var ref: MemberRef;
 		var other: Type;
 		var otherMember: MemberRef;
@@ -108,88 +108,84 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 		if(type.name) type.safeName = sanitizeName(type.name);
 		else this.state.pendingAnonList.push(type);
 
-		if(type.attributeList) {
-			for(ref of type.attributeList) {
-				// Add a $ prefix to attributes of this type
-				// conflicting with children of this or parent types.
+		for(ref of type.attributeList || []) {
+			// Add a $ prefix to attributes of this type
+			// conflicting with children of this or parent types.
 
-				other = type;
-				iter = 100;
+			other = type;
+			iter = 100;
 
-				while(other && --iter) {
-					otherMember = other.childTbl[ref.member.name];
-					if(otherMember) {
-						ref.member.prefix = '$';
-						break;
-					}
-
-					other = other.parent;
+			while(other && --iter) {
+				otherMember = other.childTbl[ref.member.name];
+				if(otherMember) {
+					ref.prefix = '$';
+					break;
 				}
 
-				memberList.push(ref.member);
+				other = other.parent;
 			}
+
+			refList.push(ref);
 		}
 
-		if(type.childList) {
-			for(ref of type.childList) {
-				// Add a $ prefix to attributes of parent types
-				// conflicting with children of this type.
+		for(ref of type.childList || []) {
+			// Add a $ prefix to attributes of parent types
+			// conflicting with children of this type.
 
+			other = type;
+			iter = 100;
+
+			while((other = other.parent) && --iter) {
+				otherMember = other.attributeTbl[ref.member.name];
+				if(otherMember && !otherMember.prefix) {
+					otherMember.prefix = '$';
+					if(otherMember.safeName) otherMember.safeName = otherMember.prefix + otherMember.safeName;
+				}
+			}
+
+			// Ensure maximum allowed occurrence count is no less than in parent types,
+			// because overriding a parent class member with a different type
+			// (array vs non-array) doesn't compile.
+
+			if(ref.max < 2) {
 				other = type;
 				iter = 100;
 
+				// TODO: Topologically sort dependencies to start processing from root types,
+				// to avoid continuing search after one parent with a matching member is found.
+
 				while((other = other.parent) && --iter) {
-					otherMember = other.attributeTbl[ref.member.name];
-					if(otherMember && !otherMember.member.prefix) {
-						otherMember.member.prefix = '$';
-						if(otherMember.member.safeName) otherMember.member.safeName = otherMember.member.prefix + otherMember.member.safeName;
+					otherMember = other.childTbl[ref.member.name];
+					if(otherMember && otherMember.max > ref.max) {
+						ref.max = otherMember.max;
+						if(ref.max > 1) break;
 					}
 				}
-
-				// Ensure maximum allowed occurrence count is no less than in parent types,
-				// because overriding a parent class member with a different type
-				// (array vs non-array) doesn't compile.
-
-				if(ref.max < 2) {
-					other = type;
-					iter = 100;
-
-					// TODO: Topologically sort dependencies to start processing from root types,
-					// to avoid continuing search after one parent with a matching member is found.
-
-					while((other = other.parent) && --iter) {
-						otherMember = other.childTbl[ref.member.name];
-						if(otherMember && otherMember.max > ref.max) {
-							ref.max = otherMember.max;
-							if(ref.max > 1) break;
-						}
-					}
-				}
-
-				memberList.push(ref.member);
 			}
+
+			refList.push(ref);
 		}
 
 		// Add names to any unnamed types of members, based on the member name.
 
-		for(var member of memberList) {
+		for(var ref of refList) {
 			// TODO: Detect duplicate names from other namespaces and prefix them.
 
-			if(member.name == '*') member.safeName = '*';
-			else member.safeName = (member.prefix || '') + sanitizeName(member.name);
+			if(ref.member.name == '*') ref.safeName = '*';
+			else ref.safeName = (ref.prefix || '') + sanitizeName(ref.member.name);
 
-			this.addNameToMemberTypes(type, member);
+			this.addNameToMemberTypes(type, ref.member);
 		}
 	}
 
 	addNameToType(type: Type) {
 		var containingType = type.containingType;
-		var containingMember = type.containingMember;
+		var containingRef = type.containingRef;
 
-		if(containingMember) {
-			type.namespace = containingMember.namespace;
+		if(containingRef) {
+			type.namespace = containingRef.member.namespace;
 
-			type.safeName = (containingType ? containingType.safeName : '') + (containingMember.safeName || '').replace(/^([a-z])/, capitalize) + 'Type';
+			type.safeName = (containingType ? containingType.safeName : '') + (containingRef.safeName || '').replace(/^([a-z])/, capitalize) + 'Type';
 		}
 
 		var spec = this.state.pendingAnonTbl[type.surrogateKey];
@@ -218,8 +214,8 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 
 						spec.memberTypeList.push(memberType);
 					}
-				} else if(memberType.containingMember) {
-					if(memberType.containingMember.safeName) this.addNameToType(memberType);
+				} else if(memberType.containingRef) {
+					if(memberType.containingRef.safeName) this.addNameToType(memberType);
 				}
 			}
 		}

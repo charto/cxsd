@@ -51,7 +51,7 @@ export class Type {
 	/** For an anonymous type, the member (of another type) that it defines.
 	  * Used for giving the type a descriptive name. */
 	containingType: Type;
-	containingMember: Member;
+	containingRef: MemberRef;
 
 	comment: string;
 

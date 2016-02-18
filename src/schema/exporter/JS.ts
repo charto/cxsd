@@ -22,7 +22,7 @@ export class JS extends Exporter {
 
 	writeMember(ref: MemberRef, typeNumTbl: NumTbl, importNumTbl: NumTbl) {
 		var member = ref.member;
-		var name = member.safeName;
+		var name = ref.safeName;
 		if(member.name != name) name += ':' + member.name;
 
 		var flags = 0;

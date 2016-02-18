@@ -16,6 +16,9 @@ export class MemberRef {
 	min: number;
 	max: number;
 
+	safeName: string;
+	prefix: string;
+
 	static optionalFlag = 1;
 	static arrayFlag = 2;
 	static anyFlag = 4;

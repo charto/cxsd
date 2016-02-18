@@ -125,7 +125,7 @@ export class TS extends Exporter {
 			output.push('\n');
 		}
 
-		output.push(indent + exportPrefix + member.safeName);
+		output.push(indent + exportPrefix + ref.safeName);
 		if(!isGlobal && ref.min == 0) output.push('?');
 		output.push(': ');
 

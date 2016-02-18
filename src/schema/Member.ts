@@ -12,8 +12,6 @@ export class Member {
 
 	name: string;
 	namespace: Namespace;
-	safeName: string;
-	prefix: string;
 
 	typeList: Type[];
 
