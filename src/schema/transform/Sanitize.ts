@@ -118,9 +118,9 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 				iter = 100;
 
 				while(other && --iter) {
-					otherMember = other.childTbl[member.name];
+					otherMember = other.childTbl[member.element.name];
 					if(otherMember) {
-						member.prefix = '$';
+						member.element.prefix = '$';
 						break;
 					}
 
@@ -140,10 +140,10 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 				iter = 100;
 
 				while((other = other.parent) && --iter) {
-					otherMember = other.attributeTbl[member.name];
-					if(otherMember && !otherMember.prefix) {
-						otherMember.prefix = '$';
-						if(otherMember.safeName) otherMember.safeName = otherMember.prefix + otherMember.safeName;
+					otherMember = other.attributeTbl[member.element.name];
+					if(otherMember && !otherMember.element.prefix) {
+						otherMember.element.prefix = '$';
+						if(otherMember.element.safeName) otherMember.element.safeName = otherMember.element.prefix + otherMember.element.safeName;
 					}
 				}
 
@@ -159,7 +159,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 					// to avoid continuing search after one parent with a matching member is found.
 
 					while((other = other.parent) && --iter) {
-						otherMember = other.childTbl[member.name];
+						otherMember = other.childTbl[member.element.name];
 						if(otherMember && otherMember.max > member.max) {
 							member.max = otherMember.max;
 							if(member.max > 1) break;
@@ -176,8 +176,8 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 		for(var member of memberList) {
 			// TODO: Detect duplicate names from other namespaces and prefix them.
 
-			if(member.name == '*') member.safeName = '*';
-			else member.safeName = (member.prefix || '') + sanitizeName(member.name);
+			if(member.element.name == '*') member.element.safeName = '*';
+			else member.element.safeName = (member.element.prefix || '') + sanitizeName(member.element.name);
 
 			this.addNameToMemberTypes(type, member);
 		}
@@ -188,9 +188,9 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 		var containingMember = type.containingMember;
 
 		if(containingMember) {
-			type.namespace = containingMember.namespace;
+			type.namespace = containingMember.element.namespace;
 
-			type.safeName = (containingType ? containingType.safeName : '') + (containingMember.safeName || '').replace(/^([a-z])/, capitalize) + 'Type';
+			type.safeName = (containingType ? containingType.safeName : '') + (containingMember.element.safeName || '').replace(/^([a-z])/, capitalize) + 'Type';
 		}
 
 		var spec = this.state.pendingAnonTbl[type.surrogateKey];
@@ -205,7 +205,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 	}
 
 	addNameToMemberTypes(type: Type, member: Member) {
-		for(var memberType of member.typeList) {
+		for(var memberType of member.element.typeList) {
 			if(!memberType.safeName && memberType.namespace == this.namespace) {
 				if(memberType.containingType) {
 					if(memberType.containingType.safeName) this.addNameToType(memberType);
@@ -220,7 +220,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 						spec.memberTypeList.push(memberType);
 					}
 				} else if(memberType.containingMember) {
-					if(memberType.containingMember.safeName) this.addNameToType(memberType);
+					if(memberType.containingMember.element.safeName) this.addNameToType(memberType);
 				}
 			}
 		}

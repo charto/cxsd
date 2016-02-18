@@ -22,55 +22,12 @@ function mergeDuplicateTypes(typeList: types.TypeBase[]) {
 	return(Object.keys(tbl).map((key: string) => tbl[key]));
 }
 
-/** Handle substitution groups. */
-
-function expandSubstitutes(element: types.Element) {
-	// Filter out types of abstract elements.
-	var elementList = element.isAbstract() ? [] : [element];
-
-	if(element.substituteList) {
-		elementList = elementList.concat.apply(
-			elementList,
-			element.substituteList.map(expandSubstitutes)
-		);
-	}
-
-	return(elementList);
-}
-
-/** Group elements by name and list all their different types. */
-
-function mergeDuplicateElements(specList: TypeMember[]) {
-	var groupTbl: {[name: string]: MemberGroup} = {};
-
-	for(var spec of specList) {
-		var element = spec.item as types.Element;
-		var group = groupTbl[element.getScope().namespace.id + ':' + element.name];
-
-		if(!group) {
-			group = {
-				min: spec.min,
-				max: spec.max,
-				item: element,
-				typeList: element.getTypes()
-			};
-
-			groupTbl[element.name] = group;
-		} else {
-			group.min += spec.min;
-			group.max += spec.max;
-			group.typeList = group.typeList.concat(element.getTypes());
-		}
-	}
-
-	return(Object.keys(groupTbl).sort().map((name: string) => groupTbl[name]));
-}
-
-function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.Namespace, context: schema.Context) {
-	var member = group.item;
+function exportMember(spec: TypeMember, parentScope: Scope, namespace: schema.Namespace, context: schema.Context) {
+	var member = spec.item as types.MemberBase;
 	var scope = member.getScope();
 	var otherNamespace = scope.namespace;
-	var outMember = new schema.Member(member.name, group.min, group.max);
+	var outMember = member.getOutMember(context);
+	var outMemberRef = new schema.Member(outMember, spec.min, spec.max);
 
 	outMember.comment = scope.getComments();
 
@@ -78,7 +35,7 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 		outMember.namespace = context.copyNamespace(otherNamespace);
 	} else outMember.namespace = namespace;
 
-	outMember.typeList = mergeDuplicateTypes(group.typeList).map(
+	outMember.typeList = mergeDuplicateTypes(member.getTypes()).map(
 		(type: types.TypeBase) => {
 			var outType = type.getOutType(context);
 			var qName = type.qName;
@@ -86,7 +43,7 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 			if(!qName && !type.name && !type.exported) {
 				// Anonymous type defined only within this element.
 
-				outType.containingMember = outMember;
+				outType.containingMember = outMemberRef;
 
 				// Look through parent scopes for a containing type,
 				// If the member was referenced from another namespace,
@@ -103,63 +60,25 @@ function exportMember(group: MemberGroup, parentScope: Scope, namespace: schema.
 		}
 	);
 
-	return(outMember);
+	outMember.isAbstract = member.isAbstract();
+
+	return(outMemberRef);
+}
+
+function exportMembers(kind: string, groupKind: string, scope: Scope, namespace: schema.Namespace, context: schema.Context) {
+	var attributeTbl = scope.dumpMembers(kind, groupKind);
+
+	return(Object.keys(attributeTbl).sort().map((key: string) =>
+		exportMember(attributeTbl[key], scope, namespace, context)
+	));
 }
 
 function exportAttributes(scope: Scope, namespace: schema.Namespace, context: schema.Context) {
-	var attributeTbl = scope.dumpMembers('attribute', 'attributegroup');
-	var attributeList: schema.Member[] = [];
-
-	for(var key of Object.keys(attributeTbl).sort()) {
-		var spec = attributeTbl[key];
-		var attribute = spec.item as types.Attribute;
-
-		var group = {
-			min: spec.min,
-			max: spec.max,
-			item: attribute,
-			typeList: attribute.getTypes()
-		};
-
-		var outAttribute = exportMember(group, scope, namespace, context);
-		if(outAttribute) attributeList.push(outAttribute);
-	}
-
-	return(attributeList);
+	return(exportMembers('attribute', 'attributegroup', scope, namespace, context));
 }
 
 function exportChildren(scope: Scope, namespace: schema.Namespace, context: schema.Context) {
-	var elementTbl = scope.dumpMembers('element', 'group');
-	var childList: schema.Member[] = [];
-	var specList: TypeMember[] = [];
-
-	for(var key of Object.keys(elementTbl)) {
-		var spec = elementTbl[key];
-		var min = spec.min;
-		var max = spec.max;
-
-		var substituteList = expandSubstitutes(spec.item as types.Element);
-
-		// If there are several alternatives, no specific one is mandatory.
-		if(substituteList.length > 1) min = 0;
-
-		for(var element of substituteList) {
-			specList.push({
-				min: min,
-				max: max,
-				item: element
-			});
-		}
-	}
-
-	var groupList = mergeDuplicateElements(specList);
-
-	for(var group of groupList) {
-		var outChild = exportMember(group, scope, namespace, context);
-		if(outChild) childList.push(outChild);
-	}
-
-	return(childList);
+	return(exportMembers('element', 'group', scope, namespace, context));
 }
 
 /* TODO
@@ -221,14 +140,15 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 
 	if(listType) {
 		for(var spec of listType) {
-			var outMember = new schema.Member('', spec.min, spec.max);
+			var outMember = new schema.Element('');
+			var outMemberRef = new schema.Member(outMember, spec.min, spec.max);
 
 			outMember.namespace = namespace;
 			outMember.typeList = [
 				exportType(spec.item as types.TypeBase, namespace, context)
 			];
 
-			outType.childList.push(outMember);
+			outType.childList.push(outMemberRef);
 		}
 
 		outType.isList = true;
@@ -267,7 +187,7 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 			if(spec.name) outNamespace.exportType(exportType(spec.item as types.TypeBase, outNamespace, context));
 		}
 
-		doc = new schema.Type();
+		doc = new schema.Type(null);
 
 		doc.namespace = outNamespace;
 		doc.attributeList = exportAttributes(scope, outNamespace, context);

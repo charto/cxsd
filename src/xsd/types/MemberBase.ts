@@ -5,6 +5,7 @@ import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
 import {TypedBase} from './TypedBase';
+import * as schema from '../../schema';
 
 export class MemberBase extends TypedBase {
 	resolveMember(state: State, kind: string) {
@@ -25,6 +26,22 @@ export class MemberBase extends TypedBase {
 		return(member);
 	}
 
+	getOutMember(schemaContext: schema.Context): schema.Element {
+		var outMember = this.outMember;
+
+		if(!outMember) {
+			outMember = new schema.Element(this.name);
+
+			if(this.scope) {
+				schemaContext.copyNamespace(this.scope.namespace).addElement(outMember);
+			}
+
+			this.outMember = outMember;
+		}
+
+		return(outMember);
+	}
+
 	getTypes(): types.TypeBase[] {
 		var typeList: types.TypeBase[];
 
@@ -39,6 +56,10 @@ export class MemberBase extends TypedBase {
 		return(typeList);
 	}
 
+	isAbstract() {
+		return(false);
+	}
+
 	id: string = null;
 	name: string = null;
 	ref: string = null;
@@ -48,4 +69,6 @@ export class MemberBase extends TypedBase {
 	max: number;
 
 	typeRef: QName | types.TypeBase;
+
+	outMember: schema.Element;
 }

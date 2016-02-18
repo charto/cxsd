@@ -23,8 +23,7 @@ export class TypeBase extends Base {
 		var outType = this.outType;
 
 		if(!outType) {
-			outType = new schema.Type();
-			outType.name = this.name;
+			outType = new schema.Type(this.name);
 
 			if(this.scope) {
 				schemaContext.copyNamespace(this.scope.namespace).addType(outType);

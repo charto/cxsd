@@ -6,6 +6,7 @@ import * as cxml from 'cxml';
 import {Context} from './Context';
 import {NamespaceRef} from './NamespaceRef';
 import {Type} from './Type';
+import {Element} from './Element';
 
 export enum TypeState {
 	anonymous,
@@ -69,6 +70,13 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 		type.namespace = this;
 	}
 
+	addElement(element: Element) {
+		var id = element.surrogateKey;
+		this.elementList[id] = element;
+
+		element.namespace = this;
+	}
+
 	exportType(type: Type) {
 		this.typeStateList[type.surrogateKey] = TypeState.exported;
 	}
@@ -80,6 +88,8 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 
 	/** All types used in the document. */
 	typeList: Type[] = [];
+
+	elementList: Element[] = [];
 
 	typeStateList: TypeState[] = [];
 

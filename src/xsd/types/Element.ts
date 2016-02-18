@@ -41,16 +41,9 @@ export class Element extends MemberBase implements ElementLike {
 			var ref = new QName(this.substitutionGroup, state.source);
 			var groupBase = this.scope.lookup(ref, 'element') as Element;
 
-			if(groupBase) groupBase.addSubstitute(element);
+			if(groupBase) this.substitutes = element;
 			else throw new types.MissingReferenceError('element', ref);
 		}
-	}
-
-	addSubstitute(element: Element) {
-		// TODO: check out the "block" attribute. It might disallow adding alternatives.
-
-		if(!this.substituteList) this.substituteList = [];
-		this.substituteList.push(element);
 	}
 
 	isAbstract() {
@@ -66,6 +59,5 @@ export class Element extends MemberBase implements ElementLike {
 	  * and another member of the same substitution group should be used. */
 	abstract: string = null; // boolean
 	substitutionGroup: string = null;
-
-	substituteList: Element[];
+	substitutes: Element;
 }

@@ -2,26 +2,21 @@
 // Released under the MIT license, see LICENSE.
 
 import {Namespace} from './Namespace';
+import {Element} from './Element';
 import {Type} from './Type';
 
+// TODO: Rename to MemberRef!
+
 export class Member {
-	constructor(name: string, min: number, max: number) {
-		this.name = name;
+	constructor(element: Element, min: number, max: number) {
+		this.element = element;
 		this.min = min;
 		this.max = max;
 	}
 
-	name: string;
-	namespace: Namespace;
-	safeName: string;
-	prefix: string;
-
+	element: Element;
 	min: number;
 	max: number;
-
-	typeList: Type[];
-
-	comment: string;
 
 	static optionalFlag = 1;
 	static arrayFlag = 2;

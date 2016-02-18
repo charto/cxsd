@@ -1,7 +1,9 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {Namespace} from '../Namespace';
 import {Type} from '../Type';
+import {Element} from '../Element';
 import {Member} from '../Member';
 import {Transform} from './Transform';
 
@@ -16,32 +18,36 @@ export class AddImports extends Transform<AddImports, void, void> {
 		return(true);
 	}
 
-	visitType(type: Type) {
-		var member: Member;
+	addRef(namespace: Namespace, element?: Element) {
+		if(namespace && namespace != this.namespace) {
+			// Type from another, imported namespace.
 
+			var id = namespace.id;
+			var short = this.namespace.getShortRef(id);
+
+			if(!short) {
+				short = (element && element.namespace.getShortRef(id)) || namespace.short;
+				if(short) this.namespace.addRef(short, namespace);
+			}
+		}
+	}
+
+	visitElement(element: Element) {
+		this.addRef(element.namespace, element);
+
+		if(element.substitutes) this.addRef(element.substitutes.namespace, element);
+
+		for(var type of element.typeList) this.addRef(type.namespace, element);
+	}
+
+	visitType(type: Type) {
 		// Types holding primitives should inherit from them.
 		// NOTE: This makes base primitive types inherit themselves.
 		if(type.primitiveType && !type.parent) type.parent = type.primitiveType;
 
-		if(type.parent) this.visitTypeRef(type.parent);
+		if(type.parent) this.addRef(type.parent.namespace);
 
-		for(var member of this.getTypeMembers(type)) {
-			for(var memberType of member.typeList) this.visitTypeRef(memberType, member);
-		}
-	}
-
-	visitTypeRef(type: Type, member?: Member) {
-		if(type.namespace && type.namespace != this.namespace) {
-			// Type from another, imported namespace.
-
-			var id = type.namespace.id;
-			var short = this.namespace.getShortRef(id);
-
-			if(!short) {
-				short = (member && member.namespace.getShortRef(id)) || type.namespace.short;
-				if(short) this.namespace.addRef(short, type.namespace);
-			}
-		}
+		for(var member of this.getTypeMembers(type)) this.visitElement(member.element);
 	}
 
 	construct = AddImports;

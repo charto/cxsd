@@ -21,15 +21,15 @@ export class JS extends Exporter {
 	}
 
 	writeMember(member: Member, typeNumTbl: NumTbl, importNumTbl: NumTbl) {
-		var name = member.safeName;
-		if(member.name != name) name += ':' + member.name;
+		var name = member.element.safeName;
+		if(member.element.name != name) name += ':' + member.element.name;
 
 		var flags = 0;
 		if(member.min < 1) flags |= Member.optionalFlag;
 		if(member.max > 1) flags |= Member.arrayFlag;
-		if(member.name == '*') flags |= Member.anyFlag;
+		if(member.element.name == '*') flags |= Member.anyFlag;
 
-		var memberTypeList = member.typeList.map((memberType: Type) =>
+		var memberTypeList = member.element.typeList.map((memberType: Type) =>
 			typeNumTbl[memberType.surrogateKey]
 		);
 
@@ -38,7 +38,7 @@ export class JS extends Exporter {
 			"'" + name + "', " +
 			flags + ', ' +
 			'[' + memberTypeList.join(', ') + ']' +
-			((member.namespace != this.namespace) ? ', ' + importNumTbl[member.namespace.id] : '') +
+			((member.element.namespace != this.namespace) ? ', ' + importNumTbl[member.element.namespace.id] : '') +
 			']'
 		);
 	}
@@ -55,7 +55,7 @@ export class JS extends Exporter {
 
 		if(type.isList) {
 			flags |= Type.listFlag | Type.primitiveFlag | Type.plainPrimitiveFlag;
-			parentNum = typeNumTbl[type.childList[0].typeList[0].surrogateKey];
+			parentNum = typeNumTbl[type.childList[0].element.typeList[0].surrogateKey];
 		} else {
 			if(type.childList) {
 				for(var member of type.childList) {

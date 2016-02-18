@@ -92,7 +92,7 @@ export class TS extends Exporter {
 	}
 
 	writeTypeList(member: Member) {
-		var outTypeList = member.typeList.map(
+		var outTypeList = member.element.typeList.map(
 			(type: Type) => {
 				if(type.isPlainPrimitive && (!type.literalList || !type.literalList.length)) {
 					return(type.primitiveType.name);
@@ -110,20 +110,22 @@ export class TS extends Exporter {
 		} else return(outTypes);
 	}
 
-	writeMember(member: Member, isExported: boolean) {
+	writeMember(member: Member, isGlobal: boolean) {
 		var output: string[] = [];
-		var comment = member.comment;
-		var indent = isExported ? '' : '\t';
-		var exportPrefix = isExported ? 'export var ' : '';
+		var comment = member.element.comment;
+		var indent = isGlobal ? '' : '\t';
+		var exportPrefix = isGlobal ? 'export var ' : '';
 
-		if(member.name == '*') return('');
+		if(isGlobal && member.element.isAbstract) return('');
+		if(member.element.name == '*') return('');
+
 		if(comment) {
 			output.push(TS.formatComment(indent, comment));
 			output.push('\n');
 		}
 
-		output.push(indent + exportPrefix + member.safeName);
-		if(!isExported && member.min == 0) output.push('?');
+		output.push(indent + exportPrefix + member.element.safeName);
+		if(!isGlobal && member.min == 0) output.push('?');
 		output.push(': ');
 
 		var outTypes = this.writeTypeList(member);

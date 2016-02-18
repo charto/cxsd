@@ -1,7 +1,9 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {Namespace} from '../Namespace';
 import {Type} from '../Type';
+import {Element} from '../Element';
 import {Transform} from './Transform';
 
 function sanitizeName(name: string) {
@@ -24,36 +26,34 @@ export class ListImports extends Transform<ListImports, Output, void> {
 	}
 
 	visitType(type: Type) {
-		if(type.parent) this.visitTypeRef(type.parent);
+		if(type.parent) this.addRef(type.parent.namespace, type.parent);
 
 		for(var member of this.getTypeMembers(type)) {
-			if(member.namespace && member.namespace != this.namespace) {
-				// Member from another, imported namespace.
-
-				var id = member.namespace.id;
-				var short = this.namespace.getShortRef(id);
-
-				if(short) {
-					if(!this.output[id]) this.output[id] = {};
-				}
-			}
-			for(var memberType of member.typeList) this.visitTypeRef(memberType);
+			this.visitElement(member.element);
 		}
 	}
 
-	visitTypeRef(type: Type) {
-		if(type.namespace && type.namespace != this.namespace) {
+	visitElement(element: Element) {
+		this.addRef(element.namespace);
+
+		if(element.substitutes) this.addRef(element.substitutes.namespace);
+
+		for(var type of element.typeList) this.addRef(type.namespace, type);
+	}
+
+	addRef(namespace: Namespace, type?: Type) {
+		if(namespace && namespace != this.namespace) {
 			// Type from another, imported namespace.
 
 			// Make sure it gets exported.
-			type.namespace.exportType(type);
+			if(type) namespace.exportType(type);
 
-			var id = type.namespace.id;
+			var id = namespace.id;
 			var short = this.namespace.getShortRef(id);
 
 			if(short) {
 				if(!this.output[id]) this.output[id] = {};
-				this.output[id][type.safeName] = type;
+				if(type) this.output[id][type.safeName] = type;
 			}
 		}
 	}

@@ -5,8 +5,9 @@ import {Namespace} from './Namespace';
 import {Member} from './Member';
 
 export class Type {
-	constructor() {
+	constructor(name: string) {
 		this.surrogateKey = Type.nextKey++;
+		this.name = name;
 	}
 
 	// TODO: handle naming collisions between attributes and children,
@@ -14,8 +15,8 @@ export class Type {
 	buildMemberTbl() {
 		var member: Member;
 
-		if(this.attributeList) for(member of this.attributeList) this.attributeTbl[member.name] = member;
-		if(this.childList) for(member of this.childList) this.childTbl[member.name] = member;
+		if(this.attributeList) for(member of this.attributeList) this.attributeTbl[member.element.name] = member;
+		if(this.childList) for(member of this.childList) this.childTbl[member.element.name] = member;
 	}
 
 	name: string;
