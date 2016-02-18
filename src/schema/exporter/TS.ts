@@ -4,7 +4,7 @@
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
 import {Namespace, TypeState} from '../Namespace';
-import {Member} from '../Member';
+import {MemberRef} from '../MemberRef';
 import {Type} from '../Type';
 
 /** Export parsed schema to a TypeScript d.ts definition file. */
@@ -91,8 +91,8 @@ export class TS extends Exporter {
 		return(output.join(''));
 	}
 
-	writeTypeList(member: Member) {
-		var outTypeList = member.element.typeList.map(
+	writeTypeList(ref: MemberRef) {
+		var outTypeList = ref.member.typeList.map(
 			(type: Type) => {
 				if(type.isPlainPrimitive && (!type.literalList || !type.literalList.length)) {
 					return(type.primitiveType.name);
@@ -104,31 +104,32 @@ export class TS extends Exporter {
 
 		var outTypes = outTypeList.sort().join(' | ');
 
-		if(member.max > 1) {
+		if(ref.max > 1) {
 			if(outTypeList.length > 1) return('(' + outTypes + ')[]');
 			else return(outTypes + '[]');
 		} else return(outTypes);
 	}
 
-	writeMember(member: Member, isGlobal: boolean) {
+	writeMember(ref: MemberRef, isGlobal: boolean) {
 		var output: string[] = [];
-		var comment = member.element.comment;
+		var member = ref.member;
+		var comment = member.comment;
 		var indent = isGlobal ? '' : '\t';
 		var exportPrefix = isGlobal ? 'export var ' : '';
 
-		if(isGlobal && member.element.isAbstract) return('');
-		if(member.element.name == '*') return('');
+		if(isGlobal && member.isAbstract) return('');
+		if(member.name == '*') return('');
 
 		if(comment) {
 			output.push(TS.formatComment(indent, comment));
 			output.push('\n');
 		}
 
-		output.push(indent + exportPrefix + member.element.safeName);
-		if(!isGlobal && member.min == 0) output.push('?');
+		output.push(indent + exportPrefix + member.safeName);
+		if(!isGlobal && ref.min == 0) output.push('?');
 		output.push(': ');
 
-		var outTypes = this.writeTypeList(member);
+		var outTypes = this.writeTypeList(ref);
 		if(!outTypes) return('');
 
 		output.push(outTypes);

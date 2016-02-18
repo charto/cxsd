@@ -26,14 +26,14 @@ export class MemberBase extends TypedBase {
 		return(member);
 	}
 
-	getOutMember(schemaContext: schema.Context): schema.Element {
+	getOutMember(schemaContext: schema.Context): schema.Member {
 		var outMember = this.outMember;
 
 		if(!outMember) {
-			outMember = new schema.Element(this.name);
+			outMember = new schema.Member(this.name);
 
 			if(this.scope) {
-				schemaContext.copyNamespace(this.scope.namespace).addElement(outMember);
+				schemaContext.copyNamespace(this.scope.namespace).addMember(outMember);
 			}
 
 			this.outMember = outMember;
@@ -70,5 +70,5 @@ export class MemberBase extends TypedBase {
 
 	typeRef: QName | types.TypeBase;
 
-	outMember: schema.Element;
+	outMember: schema.Member;
 }

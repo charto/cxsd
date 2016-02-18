@@ -5,7 +5,7 @@ import * as Promise from 'bluebird';
 
 import {Namespace, TypeState} from '../Namespace';
 import {Type} from '../Type';
-import {Member} from '../Member';
+import {MemberRef} from '../MemberRef';
 
 /** TransformType is a class derived from Transform, used like CRTP in C++. */
 
@@ -16,15 +16,15 @@ export abstract class Transform<TransformType extends Transform<TransformType, O
 	}
 
 	getTypeMembers(type: Type) {
-		var memberList: Member[] = [];
-		var member: Member;
+		var memberList: MemberRef[] = [];
+		var ref: MemberRef;
 
 		if(type.attributeList) {
-			for(member of type.attributeList) memberList.push(member);
+			for(ref of type.attributeList) memberList.push(ref);
 		}
 
 		if(type.childList) {
-			for(member of type.childList) memberList.push(member);
+			for(ref of type.childList) memberList.push(ref);
 		}
 
 		return(memberList);

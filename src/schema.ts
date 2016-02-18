@@ -4,7 +4,7 @@
 export {Context} from './schema/Context';
 export {Namespace} from './schema/Namespace';
 export {Type} from './schema/Type';
-export {Element} from './schema/Element';
 export {Member} from './schema/Member';
+export {MemberRef} from './schema/MemberRef';
 import * as exporter from './schema/exporter';
 export {exporter}

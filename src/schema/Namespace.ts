@@ -6,7 +6,7 @@ import * as cxml from 'cxml';
 import {Context} from './Context';
 import {NamespaceRef} from './NamespaceRef';
 import {Type} from './Type';
-import {Element} from './Element';
+import {Member} from './Member';
 
 export enum TypeState {
 	anonymous,
@@ -70,11 +70,11 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 		type.namespace = this;
 	}
 
-	addElement(element: Element) {
-		var id = element.surrogateKey;
-		this.elementList[id] = element;
+	addMember(member: Member) {
+		var id = member.surrogateKey;
+		this.memberList[id] = member;
 
-		element.namespace = this;
+		member.namespace = this;
 	}
 
 	exportType(type: Type) {
@@ -89,7 +89,7 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 	/** All types used in the document. */
 	typeList: Type[] = [];
 
-	elementList: Element[] = [];
+	memberList: Member[] = [];
 
 	typeStateList: TypeState[] = [];
 

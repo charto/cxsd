@@ -3,6 +3,7 @@
 
 import {Namespace} from './Namespace';
 import {Member} from './Member';
+import {MemberRef} from './MemberRef';
 
 export class Type {
 	constructor(name: string) {
@@ -13,10 +14,10 @@ export class Type {
 	// TODO: handle naming collisions between attributes and children,
 	// and between namespaces.
 	buildMemberTbl() {
-		var member: Member;
+		var ref: MemberRef;
 
-		if(this.attributeList) for(member of this.attributeList) this.attributeTbl[member.element.name] = member;
-		if(this.childList) for(member of this.childList) this.childTbl[member.element.name] = member;
+		if(this.attributeList) for(ref of this.attributeList) this.attributeTbl[ref.member.name] = ref;
+		if(this.childList) for(ref of this.childList) this.childTbl[ref.member.name] = ref;
 	}
 
 	name: string;
@@ -35,12 +36,12 @@ export class Type {
 
 	isList: boolean;
 
-	attributeTbl: {[name: string]: Member} = {};
-	childTbl: {[name: string]: Member} = {};
+	attributeTbl: {[name: string]: MemberRef} = {};
+	childTbl: {[name: string]: MemberRef} = {};
 	/** XML attributes in an element of this type. */
-	attributeList: Member[];
+	attributeList: MemberRef[];
 	/** Allowed child elements for an element of this type. */
-	childList: Member[];
+	childList: MemberRef[];
 	/** TODO: Other types added as mixins. */
 	// groupList: Member[];
 

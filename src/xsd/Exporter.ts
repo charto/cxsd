@@ -27,7 +27,6 @@ function exportMember(spec: TypeMember, parentScope: Scope, namespace: schema.Na
 	var scope = member.getScope();
 	var otherNamespace = scope.namespace;
 	var outMember = member.getOutMember(context);
-	var outMemberRef = new schema.Member(outMember, spec.min, spec.max);
 
 	outMember.comment = scope.getComments();
 
@@ -43,7 +42,7 @@ function exportMember(spec: TypeMember, parentScope: Scope, namespace: schema.Na
 			if(!qName && !type.name && !type.exported) {
 				// Anonymous type defined only within this element.
 
-				outType.containingMember = outMemberRef;
+				outType.containingMember = outMember;
 
 				// Look through parent scopes for a containing type,
 				// If the member was referenced from another namespace,
@@ -62,7 +61,7 @@ function exportMember(spec: TypeMember, parentScope: Scope, namespace: schema.Na
 
 	outMember.isAbstract = member.isAbstract();
 
-	return(outMemberRef);
+	return(new schema.MemberRef(outMember, spec.min, spec.max));
 }
 
 function exportMembers(kind: string, groupKind: string, scope: Scope, namespace: schema.Namespace, context: schema.Context) {
@@ -140,8 +139,8 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 
 	if(listType) {
 		for(var spec of listType) {
-			var outMember = new schema.Element('');
-			var outMemberRef = new schema.Member(outMember, spec.min, spec.max);
+			var outMember = new schema.Member('');
+			var outMemberRef = new schema.MemberRef(outMember, spec.min, spec.max);
 
 			outMember.namespace = namespace;
 			outMember.typeList = [

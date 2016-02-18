@@ -3,8 +3,8 @@
 
 import {Namespace} from '../Namespace';
 import {Type} from '../Type';
-import {Element} from '../Element';
 import {Member} from '../Member';
+import {MemberRef} from '../MemberRef';
 import {Transform} from './Transform';
 
 export type Output = { [namespaceId: string]: { [key: string]: Type } };
@@ -39,7 +39,7 @@ export class AddImports extends Transform<AddImports, Output, void> {
 		}
 	}
 
-	addRef(namespace: Namespace, element?: Element, type?: Type) {
+	addRef(namespace: Namespace, member?: Member, type?: Type) {
 		if(namespace && namespace != this.namespace) {
 			// Type from another, imported namespace.
 
@@ -50,7 +50,7 @@ export class AddImports extends Transform<AddImports, Output, void> {
 			var short = this.namespace.getShortRef(id);
 
 			if(!short) {
-				short = (element && element.namespace.getShortRef(id)) || namespace.short;
+				short = (member && member.namespace.getShortRef(id)) || namespace.short;
 
 				if(short) this.namespace.addRef(short, namespace);
 			}
@@ -62,12 +62,12 @@ export class AddImports extends Transform<AddImports, Output, void> {
 		}
 	}
 
-	visitElement(element: Element) {
-		this.addRef(element.namespace, element);
+	visitMember(member: Member) {
+		this.addRef(member.namespace, member);
 
-		if(element.substitutes) this.addRef(element.substitutes.namespace, element);
+		if(member.substitutes) this.addRef(member.substitutes.namespace, member);
 
-		for(var type of element.typeList) this.addRef(type.namespace, element, type);
+		for(var type of member.typeList) this.addRef(type.namespace, member, type);
 	}
 
 	visitType(type: Type) {
@@ -77,7 +77,7 @@ export class AddImports extends Transform<AddImports, Output, void> {
 
 		if(type.parent) this.addRef(type.parent.namespace, null, type.parent);
 
-		for(var member of this.getTypeMembers(type)) this.visitElement(member.element);
+		for(var member of this.getTypeMembers(type)) this.visitMember(member.member);
 	}
 
 	construct = AddImports;
