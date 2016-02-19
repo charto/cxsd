@@ -1,34 +1,66 @@
 cxsd
 ====
 
-(Currently incomplete and not operational) streaming XSD parser using node-expat (requires node-gyp to compile).
+![Atom screenshot](src/screenshot.png)
 
-Downloads schema files and keeps a local cache in the file system.
+`cxsd` is a streaming XSD parser and XML parser generator for Node.js and
+(optionally but highly recommended) [TypeScript](http://www.typescriptlang.org/).
+It automatically downloads all referenced `.xsd` files and outputs two files for each defined namespace:
 
-Handles arbitrarily large files using streaming.
+- `.js` JavaScript code for Node.js containing a compact state machine table for the [cxml](https://github.com/charto/cxml) parser.
+- `.d.ts` TypeScript definition with JSDoc comments to help editors with tab completion, type verification and tooltips.
+
+Since namespaces map to source files, compiled namespaces can import others like normal JavaScript files.
+
+[cxml](https://github.com/charto/cxml) itself is highly advanced and unlike other JavaScript XML parsers.
+It fully supports namespaces, derived types and (soon) substitution groups.
+Output structure is defined mainly by schema, not the XML input.
+You can correctly parse files with completely unexpected structures (conditions apply) and element names,
+if they refer to a schema mapping the contents to supported equivalents.
+
+Usage
+-----
+
+```bash
+echo '{ "scripts": { "cxsd": "cxsd" } }' > package.json
+npm install cxsd
+npm run cxsd http://schemas.opengis.net/wfs/1.1.0/wfs.xsd
+```
+
+The first line just sets up NPM to allow calling `cxsd` without installing it globally. It also works on Windows if you omit the single quotes (`'`).
+
+This downloads 96 `.xsd` files (total about 720 kilobytes) and produces 9 `.js` files for the XML parser (total about 90 kilobytes)
+and 9 `.d.ts` files (total about 480 kilobytes) for TypeScript editors to statically verify the parser output is correctly used and generally help the programmer.
+
+You can import the resulting `.d.ts` and `.js` files from TypeScript:
+
+```TypeScript
+import * as wfs from './xmlns/www.opengis.net/wfs';
+import * as ows from './xmlns/www.opengis.net/ows';
+
+var metadata = wfs.document.WFS_Capabilities.OperationsMetadata;
+```
+
+See how the [Atom](https://atom.io/) editor with [atom-typescript](https://atom.io/packages/atom-typescript) understands the code in the screenshot at the top.
+
+Features
+--------
+
+- Automatically download and cache to disk all imported .xsd files
+- Convert XSD contents to ES6 equivalents (generated `.js` files call `cxml` to parse themselves into JavaScript structures)
+  - Types to classes
+    - Deriving from other types to inheriting other classes
+  - Imports from remote URLs to imports from local relative paths
+  - Strings, numbers and dates to matching primitive types
+  - Lists to arrays
+- To TypeScript equivalents (defined in `.d.ts` for working with source code)
+  - Annotations to JSDoc comments
+  - Enumerations to unions of string literals
 
 Related projects
 ----------------
 
 - [CodeSynthesis XSD](http://codesynthesis.com/projects/xsd/) generates `C++`-based parsers out of XSD schema definitions.
-- [node-xml4js](https://github.com/peerlibrary/node-xml4js) uses schema information to read XML into nicely structured objects.
-
-Parsing XSD schema files
-------------------------
-
-Schema handling is implemented in the `xsd` directory. Supported syntax elements are defined in its `types` subdirectory. Each element in the xsd namespace inherits from `types.Base` which has static and dynamic members that affect parser initialization. The `Base` class and its derived classes shouldn't have manually defined constructors, because the parser will instantiate objects to inspect the dynamic properties. Instead, an `init` function is called on constructed objects when creating them during actual parsing.
-
-The static members are mirrored as dynamic members of `BaseClass`. Any constructor of a class derived from `Base` can then be used as if it was a `BaseClass` instance.
-
-The static `mayContain` member function of syntax element types (classes derived from `types.base`) returns a list of other element types (defined as `BaseClass` instances) that it supports as direct children. The parser uses these to create a kind of state machine.
-
-Syntax elements may also have attributes. They should be initialized to `null` in the class definition (the TypeScript compiler will automatically generate a constructor to initialize them). The parser will construct an instance of each class it finds, and examine its automatically constructed dynamic members. During parsing, they will then be automatically initialized to attributes found in the schema being parsed. Unknown attributes will be ignored.
-
-The XSD parser proceeds in stages (the parser and all syntax element classes have correspondingly named methods):
-
-- `init` which calls `define` to bind named elements, attributes, types etc. to their scope and handles `import` and `include` declarations. The imports form a directed, possibly cyclic graph and can modify root scopes of arbitrary namespaces, so it's impossible to generally resolve references to other named things visible in scope before all imports have been processed.
-- `resolve` which resolves references by name and finds out how many times they may appear. Because possible attributes and child elements can be defined through deeply nested references that can point to other namespaces, it's generally impossible to know them all before all references in all namespaces have been resolved.
-- TODO: `transform` which renames things to avoid naming conflicts between child elements and attributes (which will be merged into members of a single JSON object) and possibly deals with scope issues for TypeScript definition output.
 
 License
 =======
