@@ -24,7 +24,7 @@ interface ICommand extends _ICommand {
 	.description('XSD download and conversion tool')
 	.option('-H, --force-host <host>', 'Fetch all xsd files from <host>\n    (original host is passed in GET parameter "host")')
 	.option('-P, --force-port <port>', 'Connect to <port> when using --force-host')
-	.option('-c, --cache-xsd <path>', 'Cache downloaded XSD filed under <path>')
+	// .option('-c, --cache-xsd <path>', 'Cache downloaded XSD filed under <path>')
 	.option('-t, --out-ts <path>', 'Output TypeScript definitions under <path>')
 	.option('-j, --out-js <path>', 'Output JavaScript modules under <path>')
 	.action(handleConvert)
@@ -44,8 +44,8 @@ function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
 		Cache.patchRequest();
 	}
 
-	var jsCache = new Cache(opts['outJs'] || 'cache/js', '_index.js');
-	var tsCache = new Cache(opts['outTs'] || 'cache/js', '_index.d.ts');
+	var jsCache = new Cache(opts['outJs'] || 'xmlns', '_index.js');
+	var tsCache = new Cache(opts['outTs'] || 'xmlns', '_index.d.ts');
 
 	var loader = new Loader(xsdContext, fetchOptions);
 
