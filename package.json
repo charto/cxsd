@@ -23,7 +23,7 @@
   "homepage": "https://github.com/charto/cxsd#readme",
   "dependencies": {
     "bluebird": "~3.2.2",
-    "cget": "~0.0.4",
+    "cget": "~0.0.5",
     "commander": "~2.9.0",
     "cxml": "~0.0.5",
     "node-expat": "~2.3.13"
