@@ -90,7 +90,9 @@ export class JS extends Exporter {
 		var namespace = doc.namespace;
 
 		var typeNumTbl: NumTbl = {};
+		var memberNumTbl: NumTbl = {};
 		var typeNum = 1;
+		var memberNum = 1;
 
 		var importTbl = namespace.getUsedImportTbl();
 		var importSpecList: string[] = [];
@@ -99,22 +101,29 @@ export class JS extends Exporter {
 
 		for(var importName of Object.keys(importTbl)) {
 			var otherNamespaceId = importTbl[importName].id;
-			var typeTbl = namespace.importContentTbl[otherNamespaceId].typeTbl;
+			var content = namespace.importContentTbl[otherNamespaceId];
 			var importTypeNameList: string[] = [];
+			var importMemberNameList: string[] = [];
 
-			if(typeTbl) {
-				for(var name of Object.keys(typeTbl).sort()) {
-					var type = typeTbl[name];
+			for(var name of Object.keys(content.typeTbl || {}).sort()) {
+				var type = content.typeTbl[name];
 
-					importTypeNameList.push("'" + type.safeName + "'");
-					typeNumTbl[type.surrogateKey] = typeNum++;
-				}
+				importTypeNameList.push("'" + type.safeName + "'");
+				typeNumTbl[type.surrogateKey] = typeNum++;
+			}
+
+			for(var name of Object.keys(content.memberTbl || {}).sort()) {
+				var member = content.memberTbl[name];
+
+				importMemberNameList.push("'" + member.name + "'");
+				memberNumTbl[member.surrogateKey] = memberNum++;
 			}
 
 			importSpecList.push(
-				'\n\t' + '[' + importName + ', [' +
-				importTypeNameList.join(', ') +
-				']]'
+				'\n\t' + '[' + importName + ', ' +
+				'[' + importTypeNameList.join(', ') + '], ' +
+				'[' + importMemberNameList.join(', ') + ']' +
+				']'
 			);
 
 			importNumTbl[otherNamespaceId] = num++;
