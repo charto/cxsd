@@ -7,6 +7,9 @@ import {Namespace, TypeState} from '../Namespace';
 import {MemberRef} from '../MemberRef';
 import {Type} from '../Type';
 
+var docName = 'document';
+var baseName = 'BaseType';
+
 /** Export parsed schema to a TypeScript d.ts definition file. */
 
 export class TS extends Exporter {
@@ -197,7 +200,8 @@ export class TS extends Exporter {
 		var content = this.writeTypeContent(type);
 
 		if(namespace.isPrimitiveSpace) {
-			output.push(exportPrefix + 'interface _' + name + ' { ' + 'content' + ': ' + type.primitiveType.name + '; }' + '\n');
+			parentDef = ' extends ' + baseName;
+			output.push(exportPrefix + 'interface _' + name + parentDef + ' { ' + 'content' + ': ' + type.primitiveType.name + '; }' + '\n');
 		} else if(type.isList) {
 			output.push(exportPrefix + 'type ' + name + ' = ' + content + ';' + '\n');
 		} else if(type.isPlainPrimitive) {
@@ -212,9 +216,10 @@ export class TS extends Exporter {
 		} else {
 			if(type.parent) {
 				parentDef = ' extends ' + this.writeTypeRef(type.parent, '_');
+			} else {
+				parentDef = ' extends ' + baseName;
 			}
 			output.push('interface _' + name + parentDef + ' ' + content + '\n');
-			//output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { new(): ' + name + '; }' + '\n');
 			output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { constructor: { new(): ' + name + ' }; }' + '\n');
 			if(visible) output.push(exportPrefix + 'var ' + name + ': { new(): ' + name + ' };' + '\n');
 		}
@@ -231,6 +236,11 @@ export class TS extends Exporter {
 		output.push('');
 		output = output.concat(this.exportSourceList(namespace.sourceList));
 
+		output.push('interface ' + baseName + ' {');
+		output.push('\t_exists: boolean;');
+		output.push('\t_namespace: string;');
+		output.push('}');
+
 		for(var type of namespace.typeList.slice(0).sort((a: Type, b: Type) => a.safeName.localeCompare(b.safeName))) {
 			if(!type) continue;
 
@@ -239,7 +249,7 @@ export class TS extends Exporter {
 			output.push(this.writeType(type, isExported));
 		}
 
-		output.push('export interface ' + doc.name + ' {');
+		output.push('export interface ' + docName + ' extends ' + baseName + ' {');
 
 		for(var child of doc.childList) {
 			var outElement = this.writeMember(child, true);
@@ -249,7 +259,7 @@ export class TS extends Exporter {
 		}
 
 		output.push('}');
-		output.push('export var ' + doc.name + ': ' + doc.name + ';\n');
+		output.push('export var ' + docName + ': ' + docName + ';\n');
 
 		return(output.join('\n'));
 	}
