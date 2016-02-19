@@ -187,7 +187,7 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 			if(spec.name) outNamespace.exportType(exportType(spec.item as types.TypeBase, outNamespace, context));
 		}
 
-		doc = new schema.Type(null);
+		doc = new schema.Type('document');
 
 		doc.namespace = outNamespace;
 		doc.attributeList = exportAttributes(scope, outNamespace, context);

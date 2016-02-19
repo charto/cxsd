@@ -114,8 +114,7 @@ export class TS extends Exporter {
 		var output: string[] = [];
 		var member = ref.member;
 		var comment = member.comment;
-		var indent = isGlobal ? '' : '\t';
-		var exportPrefix = isGlobal ? 'export var ' : '';
+		var indent = '\t';
 
 		if(isGlobal && member.isAbstract) return('');
 		if(member.name == '*') return('');
@@ -125,8 +124,8 @@ export class TS extends Exporter {
 			output.push('\n');
 		}
 
-		output.push(indent + exportPrefix + ref.safeName);
-		if(!isGlobal && ref.min == 0) output.push('?');
+		output.push(indent + ref.safeName);
+		if(ref.min == 0) output.push('?');
 		output.push(': ');
 
 		var outTypes = this.writeTypeList(ref);
@@ -228,7 +227,6 @@ export class TS extends Exporter {
 		var doc = this.doc;
 		var namespace = this.namespace;
 		var prefix: string;
-		var exportCount = 0;
 
 		output.push('');
 		output = output.concat(this.exportSourceList(namespace.sourceList));
@@ -239,20 +237,19 @@ export class TS extends Exporter {
 			var isExported = (namespace.typeStateList[type.surrogateKey] == TypeState.exported);
 
 			output.push(this.writeType(type, isExported));
-			if(isExported) ++exportCount;
 		}
+
+		output.push('export interface ' + doc.name + ' {');
 
 		for(var child of doc.childList) {
 			var outElement = this.writeMember(child, true);
 			if(outElement) {
 				output.push(outElement);
-				++exportCount;
 			}
 		}
 
-		if(!exportCount) output.push('export {};');
-
-		output.push('');
+		output.push('}');
+		output.push('export var ' + doc.name + ': ' + doc.name + ';\n');
 
 		return(output.join('\n'));
 	}
