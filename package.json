@@ -9,7 +9,7 @@
     "tsc": "tsc",
     "typings": "typings",
     "prepublish": "typings install && tsc",
-    "test": "node index.js"
+    "test": "node cxsd-cli.js --help"
   },
   "author": "Juha Järvi",
   "license": "MIT",

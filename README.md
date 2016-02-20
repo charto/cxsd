@@ -1,6 +1,10 @@
 cxsd
 ====
 
+[![build status](https://travis-ci.org/charto/cxsd.svg?branch=master)](http://travis-ci.org/charto/cxsd)
+[![dependency status](https://david-dm.org/charto/cxsd.svg)](https://david-dm.org/charto/cxsd)
+[![npm version](https://img.shields.io/npm/v/cxsd.svg)](https://www.npmjs.com/package/cxsd)
+
 ![Atom screenshot](src/screenshot.png)
 
 `cxsd` is a streaming XSD parser and XML parser generator for Node.js and
