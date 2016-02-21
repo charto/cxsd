@@ -3,7 +3,7 @@
 
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
-import {Namespace, TypeState} from '../Namespace';
+import {Namespace} from '../Namespace';
 import {MemberRef} from '../MemberRef';
 import {Type} from '../Type';
 
@@ -89,9 +89,7 @@ export class JS extends Exporter {
 
 		for(var type of namespace.typeList) {
 			if(!type) continue;
-			var isExported = (namespace.typeStateList[type.surrogateKey] == TypeState.exported);
-
-			if(isExported) exportedTypeList.push(type);
+			if(type.isExported) exportedTypeList.push(type);
 			else hiddenTypeList.push(type);
 		}
 

@@ -184,7 +184,7 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 		outNamespace.sourceList = sourceList.map((source: Source) => source.url).sort();
 
 		for(var spec of scope.dumpTypes('type') || []) {
-			if(spec.name) outNamespace.exportType(exportType(spec.item as types.TypeBase, outNamespace, context));
+			if(spec.name) exportType(spec.item as types.TypeBase, outNamespace, context).isExported = true;
 		}
 
 		doc = new schema.Type(null);

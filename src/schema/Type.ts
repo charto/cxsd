@@ -36,6 +36,8 @@ export class Type {
 
 	isList: boolean;
 
+	isExported: boolean;
+
 	attributeTbl: { [name: string]: MemberRef } = {};
 	childTbl: { [name: string]: MemberRef } = {};
 	/** XML attributes in an element of this type. */

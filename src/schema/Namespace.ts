@@ -8,11 +8,6 @@ import {NamespaceRef} from './NamespaceRef';
 import {Type} from './Type';
 import {Member} from './Member';
 
-export enum TypeState {
-	anonymous,
-	exported
-}
-
 export interface ImportContent {
 	typeTbl: { [key: string]: Type },
 	memberTbl: { [key: string]: Member }
@@ -70,7 +65,6 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 	addType(type: Type) {
 		var id = type.surrogateKey;
 		this.typeList[id] = type;
-		this.typeStateList[id] = TypeState.anonymous;
 
 		type.namespace = this;
 	}
@@ -82,10 +76,6 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 		member.namespace = this;
 	}
 
-	exportType(type: Type) {
-		this.typeStateList[type.surrogateKey] = TypeState.exported;
-	}
-
 	cachePath: string;
 
 	/** Invisible document element defining the types of XML file root elements. */
@@ -93,15 +83,11 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 
 	/** All types used in the document. */
 	typeList: Type[] = [];
-
+	/** All members used in the document. */
 	memberList: Member[] = [];
-
-	typeStateList: TypeState[] = [];
 
 	/** List of URL addresses of files with definitions for this namespace. */
 	sourceList: string[];
-
-	exported: boolean;
 
 	private refList: NamespaceRef[];
 	private refTbl: { [namespaceId: number]: NamespaceRef };

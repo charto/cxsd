@@ -3,7 +3,7 @@
 
 import * as Promise from 'bluebird';
 
-import {Namespace, TypeState} from '../Namespace';
+import {Namespace} from '../Namespace';
 import {Type} from '../Type';
 import {MemberRef} from '../MemberRef';
 

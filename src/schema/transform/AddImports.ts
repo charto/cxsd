@@ -58,7 +58,7 @@ export class AddImports extends Transform<AddImports, Output, void> {
 			// Type from another, imported namespace.
 
 			// Make sure it gets exported.
-			if(type) namespace.exportType(type);
+			if(type) type.isExported = true;
 
 			var id = namespace.id;
 			var short = this.namespace.getShortRef(id);

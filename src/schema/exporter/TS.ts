@@ -3,7 +3,7 @@
 
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
-import {Namespace, TypeState} from '../Namespace';
+import {Namespace} from '../Namespace';
 import {MemberRef} from '../MemberRef';
 import {Type} from '../Type';
 
@@ -183,12 +183,12 @@ export class TS extends Exporter {
 		return(output.join(''));
 	}
 
-	writeType(type: Type, visible: boolean) {
+	writeType(type: Type) {
 		var namespace = this.namespace;
 		var output: string[] = [];
 		var comment = type.comment;
 		var parentDef = '';
-		var exportPrefix = visible ? 'export ' : '';
+		var exportPrefix = type.isExported ? 'export ' : '';
 
 		var name = type.safeName;
 
@@ -221,7 +221,7 @@ export class TS extends Exporter {
 			}
 			output.push('interface _' + name + parentDef + ' ' + content + '\n');
 			output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { constructor: { new(): ' + name + ' }; }' + '\n');
-			if(visible) output.push(exportPrefix + 'var ' + name + ': { new(): ' + name + ' };' + '\n');
+			if(type.isExported) output.push(exportPrefix + 'var ' + name + ': { new(): ' + name + ' };' + '\n');
 		}
 
 		return(output.join(''));
@@ -244,9 +244,7 @@ export class TS extends Exporter {
 		for(var type of namespace.typeList.slice(0).sort((a: Type, b: Type) => a.safeName.localeCompare(b.safeName))) {
 			if(!type) continue;
 
-			var isExported = (namespace.typeStateList[type.surrogateKey] == TypeState.exported);
-
-			output.push(this.writeType(type, isExported));
+			output.push(this.writeType(type));
 		}
 
 		output.push('export interface ' + docName + ' extends ' + baseName + ' {');
