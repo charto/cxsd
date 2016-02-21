@@ -83,6 +83,27 @@ export class JS extends Exporter {
 		);
 	}
 
+	buildTypeList(namespace: Namespace) {
+		var exportedTypeList: Type[] = [];
+		var hiddenTypeList: Type[] = [];
+
+		for(var type of namespace.typeList) {
+			if(!type) continue;
+			var isExported = (namespace.typeStateList[type.surrogateKey] == TypeState.exported);
+
+			if(isExported) exportedTypeList.push(type);
+			else hiddenTypeList.push(type);
+		}
+
+		exportedTypeList.sort((a: Type, b: Type) => a.safeName.localeCompare(b.safeName));
+		hiddenTypeList.sort((a: Type, b: Type) => a.safeName.localeCompare(b.safeName));
+
+		return({
+			all: exportedTypeList.concat(hiddenTypeList),
+			exported: exportedTypeList
+		});
+	}
+
 	/** Output namespace contents to the given cache key. */
 
 	writeContents(): string {
@@ -129,38 +150,23 @@ export class JS extends Exporter {
 			importNumTbl[otherNamespaceId] = num++;
 		}
 
-		var exportedTypeList: Type[] = [];
-		var hiddenTypeList: Type[] = [];
-		var typeSpecList: string[] = [];
+		var typeList = this.buildTypeList(namespace);
 
-		for(var type of namespace.typeList) {
-			if(!type) continue;
-			var isExported = (namespace.typeStateList[type.surrogateKey] == TypeState.exported);
-
-			if(isExported) exportedTypeList.push(type);
-			else hiddenTypeList.push(type);
-		}
-
-		exportedTypeList.sort((a: Type, b: Type) => a.safeName.localeCompare(b.safeName));
-		hiddenTypeList.sort((a: Type, b: Type) => a.safeName.localeCompare(b.safeName));
-
-		var typeList = exportedTypeList.concat(hiddenTypeList);
-
-		for(var type of typeList) {
+		for(var type of typeList.all) {
 			typeNumTbl[type.surrogateKey] = typeNum++;
 		}
 
-		var parentNum: number;
+		var typeSpecList: string[] = [];
 
 		typeSpecList.push(this.writeType(namespace.doc, typeNumTbl, importNumTbl));
 
-		for(var type of typeList) {
+		for(var type of typeList.all) {
 			typeSpecList.push(this.writeType(type, typeNumTbl, importNumTbl));
 		}
 
 		var exportSpecList: string[] = [];
 
-		for(var type of exportedTypeList) {
+		for(var type of typeList.exported) {
 			name = type.safeName;
 			if(type.name && type.name != name) name += ':' + type.name;
 

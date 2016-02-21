@@ -22,7 +22,7 @@ export class AddImports extends Transform<AddImports, Output, void> {
 		return(this.output);
 	}
 
-	/** Replace imported type IDs with sanitized names. */
+	/** Replace imported type and member IDs with sanitized names. */
 	finish(result: Output[]) {
 		for(var namespaceTbl of result) {
 			for(var namespaceId of Object.keys(namespaceTbl)) {
@@ -42,6 +42,9 @@ export class AddImports extends Transform<AddImports, Output, void> {
 
 				for(var key of Object.keys(memberTbl)) {
 					var member = memberTbl[key];
+					// Use name instead of safeName, because the latter may
+					// randomly differ between different containing types due to
+					// naming collisions (for example between attribute and element).
 					output.memberTbl[member.name] = member;
 				}
 
