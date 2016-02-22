@@ -4,6 +4,7 @@
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
 import {Namespace} from '../Namespace';
+import {Member} from '../Member';
 import {MemberRef} from '../MemberRef';
 import {Type} from '../Type';
 
@@ -20,7 +21,20 @@ export class JS extends Exporter {
 		);
 	}
 
-	writeMember(ref: MemberRef, typeNumTbl: NumTbl, importNumTbl: NumTbl) {
+	writeMember(member: Member, typeNumTbl: NumTbl) {
+		var memberTypeList = member.typeList.map((memberType: Type) =>
+			typeNumTbl[memberType.surrogateKey]
+		);
+
+		return(
+			'\n\t[' +
+			"'" + member.name + "', " +
+			'[' + memberTypeList.join(', ') + ']' +
+			']'
+		);
+	}
+
+	writeMemberRef(ref: MemberRef, typeNumTbl: NumTbl, importNumTbl: NumTbl) {
 		var member = ref.member;
 		var name = ref.safeName;
 		if(member.name != name) name += ':' + member.name;
@@ -60,13 +74,13 @@ export class JS extends Exporter {
 		} else {
 			if(type.childList) {
 				for(var member of type.childList) {
-					childSpecList.push(this.writeMember(member, typeNumTbl, importNumTbl));
+					childSpecList.push(this.writeMemberRef(member, typeNumTbl, importNumTbl));
 				}
 			}
 
 			if(type.attributeList) {
 				for(var member of type.attributeList) {
-					attributeSpecList.push(this.writeMember(member, typeNumTbl, importNumTbl));
+					attributeSpecList.push(this.writeMemberRef(member, typeNumTbl, importNumTbl));
 				}
 			}
 
@@ -99,6 +113,26 @@ export class JS extends Exporter {
 		return({
 			all: exportedTypeList.concat(hiddenTypeList),
 			exported: exportedTypeList
+		});
+	}
+
+	buildMemberList(namespace: Namespace) {
+		var exportedMemberList: Member[] = [];
+		var hiddenMemberList: Member[] = [];
+
+		for(var member of namespace.memberList) {
+			if(!member) continue;
+			if(member.isExported) exportedMemberList.push(member);
+			else hiddenMemberList.push(member);
+		}
+
+		exportedMemberList.sort((a: Member, b: Member) => a.name.localeCompare(b.name));
+		// TODO: merge identical hidden members.
+		hiddenMemberList.sort((a: Member, b: Member) => a.name.localeCompare(b.name));
+
+		return({
+			all: exportedMemberList.concat(hiddenMemberList),
+			exported: exportedMemberList
 		});
 	}
 
@@ -149,9 +183,14 @@ export class JS extends Exporter {
 		}
 
 		var typeList = this.buildTypeList(namespace);
+		var memberList = this.buildMemberList(namespace);
 
 		for(var type of typeList.all) {
 			typeNumTbl[type.surrogateKey] = typeNum++;
+		}
+
+		for(var member of memberList.all) {
+			memberNumTbl[member.surrogateKey] = memberNum++;
 		}
 
 		var typeSpecList: string[] = [];
@@ -160,6 +199,13 @@ export class JS extends Exporter {
 
 		for(var type of typeList.all) {
 			typeSpecList.push(this.writeType(type, typeNumTbl, importNumTbl));
+		}
+
+		var memberSpecList: string[] = [];
+
+		for(var member of memberList.all) {
+			/* if(member.name != '*') */
+			memberSpecList.push(this.writeMember(member, typeNumTbl));
 		}
 
 		var exportSpecList: string[] = [];
@@ -183,7 +229,8 @@ export class JS extends Exporter {
 				'exports, ' +
 				'[' + importSpecList.join(',') + '\n], ' +
 				'[' + exportSpecList.join(',') + '\n], ' +
-				'[' + typeSpecList.join(',') + '\n]' +
+				'[' + typeSpecList.join(',') + '\n], ' +
+				'[' + memberSpecList.join(',') + '\n]' +
 				');'
 			]
 		).join('\n'));

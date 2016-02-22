@@ -65,20 +65,24 @@ function exportMember(spec: TypeMember, parentScope: Scope, namespace: schema.Na
 	return(outRef);
 }
 
-function exportMembers(kind: string, groupKind: string, scope: Scope, namespace: schema.Namespace, context: schema.Context) {
+function exportMembers(kind: string, groupKind: string, scope: Scope, namespace: schema.Namespace, context: schema.Context, setExported: boolean) {
 	var attributeTbl = scope.dumpMembers(kind, groupKind);
 
-	return(Object.keys(attributeTbl).sort().map((key: string) =>
-		exportMember(attributeTbl[key], scope, namespace, context)
-	));
+	return(Object.keys(attributeTbl).sort().map((key: string) => {
+		var ref = exportMember(attributeTbl[key], scope, namespace, context)
+
+		if(setExported) ref.member.isExported = true;
+
+		return(ref);
+	}));
 }
 
 function exportAttributes(scope: Scope, namespace: schema.Namespace, context: schema.Context) {
-	return(exportMembers('attribute', 'attributegroup', scope, namespace, context));
+	return(exportMembers('attribute', 'attributegroup', scope, namespace, context, false));
 }
 
-function exportChildren(scope: Scope, namespace: schema.Namespace, context: schema.Context) {
-	return(exportMembers('element', 'group', scope, namespace, context));
+function exportChildren(scope: Scope, namespace: schema.Namespace, context: schema.Context, setExported: boolean) {
+	return(exportMembers('element', 'group', scope, namespace, context, setExported));
 }
 
 /* TODO
@@ -133,7 +137,7 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 	}
 
 	outType.attributeList = exportAttributes(scope, namespace, context);
-	outType.childList = exportChildren(scope, namespace, context);
+	outType.childList = exportChildren(scope, namespace, context, false);
 //	outType.groupList = exportGroups(scope, namespace, context);
 
 	var listType = type.getListType();
@@ -191,7 +195,7 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 
 		doc.namespace = outNamespace;
 		doc.attributeList = exportAttributes(scope, outNamespace, context);
-		doc.childList = exportChildren(scope, outNamespace, context);
+		doc.childList = exportChildren(scope, outNamespace, context, true);
 
 		outNamespace.doc = doc;
 

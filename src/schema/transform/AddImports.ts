@@ -55,10 +55,11 @@ export class AddImports extends Transform<AddImports, Output, void> {
 
 	addRef(namespace: Namespace, member?: Member, type?: Type) {
 		if(namespace && namespace != this.namespace) {
-			// Type from another, imported namespace.
+			// Type and/or member from another, imported namespace.
 
 			// Make sure it gets exported.
 			if(type) type.isExported = true;
+			if(member) member.isExported = true;
 
 			var id = namespace.id;
 			var short = this.namespace.getShortRef(id);

@@ -17,6 +17,8 @@ export class Member {
 
 	comment: string;
 
+	isExported: boolean;
+
 	isAbstract: boolean;
 	substitutes: Member;
 
