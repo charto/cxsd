@@ -22,12 +22,20 @@ function mergeDuplicateTypes(typeList: types.TypeBase[]) {
 	return(Object.keys(tbl).map((key: string) => tbl[key]));
 }
 
-function exportMember(spec: TypeMember, parentScope: Scope, namespace: schema.Namespace, context: schema.Context) {
+function exportMemberRef(spec: TypeMember, parentScope: Scope, namespace: schema.Namespace, context: schema.Context) {
 	var member = spec.item as types.MemberBase;
-	var scope = member.getScope();
-	var otherNamespace = scope.namespace;
 	var outMember = member.getOutMember(context);
 	var outRef = new schema.MemberRef(outMember, spec.min, spec.max);
+
+	if(!outMember.typeList) exportMember(member, outRef, parentScope, namespace, context);
+
+	return(outRef);
+}
+
+function exportMember(member: types.MemberBase, outRef: schema.MemberRef, parentScope: Scope, namespace: schema.Namespace, context: schema.Context) {
+	var outMember = outRef.member;
+	var scope = member.getScope();
+	var otherNamespace = scope.namespace;
 
 	outMember.comment = scope.getComments();
 
@@ -62,14 +70,16 @@ function exportMember(spec: TypeMember, parentScope: Scope, namespace: schema.Na
 
 	outMember.isAbstract = member.isAbstract();
 
-	return(outRef);
+	if(member instanceof types.Element && member.substitutes) {
+		outMember.substitutes = member.substitutes.getOutMember(context);
+	}
 }
 
 function exportMembers(kind: string, groupKind: string, scope: Scope, namespace: schema.Namespace, context: schema.Context, setExported: boolean) {
-	var attributeTbl = scope.dumpMembers(kind, groupKind);
+	var memberTbl = scope.dumpMembers(kind, groupKind);
 
-	return(Object.keys(attributeTbl).sort().map((key: string) => {
-		var ref = exportMember(attributeTbl[key], scope, namespace, context)
+	return(Object.keys(memberTbl).sort().map((key: string) => {
+		var ref = exportMemberRef(memberTbl[key], scope, namespace, context)
 
 		if(setExported) ref.member.isExported = true;
 

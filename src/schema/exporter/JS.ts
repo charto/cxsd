@@ -21,44 +21,43 @@ export class JS extends Exporter {
 		);
 	}
 
-	writeMember(member: Member, typeNumTbl: NumTbl) {
+	writeMember(member: Member, typeNumTbl: NumTbl, memberNumTbl: NumTbl) {
+		var substituteNum = 0;
 		var memberTypeList = member.typeList.map((memberType: Type) =>
 			typeNumTbl[memberType.surrogateKey]
 		);
+
+		if(member.substitutes) substituteNum = memberNumTbl[member.substitutes.surrogateKey];
 
 		return(
 			'\n\t[' +
 			"'" + member.name + "', " +
 			'[' + memberTypeList.join(', ') + ']' +
+			(substituteNum ? ', ' + substituteNum : '') +
 			']'
 		);
 	}
 
-	writeMemberRef(ref: MemberRef, typeNumTbl: NumTbl, importNumTbl: NumTbl) {
+	writeMemberRef(ref: MemberRef, memberNumTbl: NumTbl) {
 		var member = ref.member;
 		var name = ref.safeName;
-		if(member.name != name) name += ':' + member.name;
+		if(name == member.name) name = null;
 
 		var flags = 0;
 		if(ref.min < 1) flags |= MemberRef.optionalFlag;
 		if(ref.max > 1) flags |= MemberRef.arrayFlag;
 		if(member.name == '*') flags |= MemberRef.anyFlag;
 
-		var memberTypeList = member.typeList.map((memberType: Type) =>
-			typeNumTbl[memberType.surrogateKey]
-		);
-
 		return(
 			'[' +
-			"'" + name + "', " +
-			flags + ', ' +
-			'[' + memberTypeList.join(', ') + ']' +
-			((member.namespace != this.namespace) ? ', ' + importNumTbl[member.namespace.id] : '') +
+			memberNumTbl[member.surrogateKey] + ', ' +
+			flags +
+			(name ? ', ' + "'" + name + "'" : '') +
 			']'
 		);
 	}
 
-	writeType(type: Type, typeNumTbl: NumTbl, importNumTbl: NumTbl) {
+	writeType(type: Type, typeNumTbl: NumTbl, memberNumTbl: NumTbl) {
 		var childSpecList: string[] = [];
 		var attributeSpecList: string[] = [];
 
@@ -74,13 +73,13 @@ export class JS extends Exporter {
 		} else {
 			if(type.childList) {
 				for(var member of type.childList) {
-					childSpecList.push(this.writeMemberRef(member, typeNumTbl, importNumTbl));
+					childSpecList.push(this.writeMemberRef(member, memberNumTbl));
 				}
 			}
 
 			if(type.attributeList) {
 				for(var member of type.attributeList) {
-					attributeSpecList.push(this.writeMemberRef(member, typeNumTbl, importNumTbl));
+					attributeSpecList.push(this.writeMemberRef(member, memberNumTbl));
 				}
 			}
 
@@ -195,17 +194,17 @@ export class JS extends Exporter {
 
 		var typeSpecList: string[] = [];
 
-		typeSpecList.push(this.writeType(namespace.doc, typeNumTbl, importNumTbl));
+		typeSpecList.push(this.writeType(namespace.doc, typeNumTbl, memberNumTbl));
 
 		for(var type of typeList.all) {
-			typeSpecList.push(this.writeType(type, typeNumTbl, importNumTbl));
+			typeSpecList.push(this.writeType(type, typeNumTbl, memberNumTbl));
 		}
 
 		var memberSpecList: string[] = [];
 
 		for(var member of memberList.all) {
 			/* if(member.name != '*') */
-			memberSpecList.push(this.writeMember(member, typeNumTbl));
+			memberSpecList.push(this.writeMember(member, typeNumTbl, memberNumTbl));
 		}
 
 		var exportSpecList: string[] = [];
