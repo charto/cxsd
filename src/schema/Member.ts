@@ -1,17 +1,16 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import * as cxml from 'cxml';
+
 import {Namespace} from './Namespace';
 import {Type} from './Type';
 
-export class Member {
+export class Member extends cxml.MemberBase<Member, Namespace, cxml.ItemBase<Member>> {
 	constructor(name: string) {
+		super(null, name);
 		this.surrogateKey = Member.nextKey++;
-		this.name = name;
 	}
-
-	name: string;
-	namespace: Namespace;
 
 	typeList: Type[];
 
@@ -19,14 +18,6 @@ export class Member {
 
 	isExported: boolean;
 
-	isAbstract: boolean;
-	isSubstituted: boolean;
-	substitutes: Member;
-
 	surrogateKey: number;
 	private static nextKey = 0;
-
-	static abstractFlag = 1;
-	static substitutedFlag = 2;
-	static anyFlag = 4;
 }
