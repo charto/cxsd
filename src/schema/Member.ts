@@ -24,4 +24,7 @@ export class Member {
 
 	surrogateKey: number;
 	private static nextKey = 0;
+
+	static abstractFlag = 1;
+	static anyFlag = 2;
 }

@@ -27,12 +27,17 @@ export class JS extends Exporter {
 			typeNumTbl[memberType.surrogateKey]
 		);
 
+		var flags = 0;
+		if(member.isAbstract) flags |= Member.abstractFlag;
+		if(member.name == '*') flags |= Member.anyFlag;
+
 		if(member.substitutes) substituteNum = memberNumTbl[member.substitutes.surrogateKey];
 
 		return(
 			'\n\t[' +
 			"'" + member.name + "', " +
-			'[' + memberTypeList.join(', ') + ']' +
+			'[' + memberTypeList.join(', ') + ']' + ', ' +
+			flags +
 			(substituteNum ? ', ' + substituteNum : '') +
 			']'
 		);
@@ -46,7 +51,6 @@ export class JS extends Exporter {
 		var flags = 0;
 		if(ref.min < 1) flags |= MemberRef.optionalFlag;
 		if(ref.max > 1) flags |= MemberRef.arrayFlag;
-		if(member.name == '*') flags |= MemberRef.anyFlag;
 
 		return(
 			'[' +
