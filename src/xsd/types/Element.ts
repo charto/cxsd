@@ -41,7 +41,7 @@ export class Element extends MemberBase implements ElementLike {
 			var ref = new QName(this.substitutionGroup, state.source);
 			var groupBase = this.scope.lookup(ref, 'element') as Element;
 
-			if(groupBase) this.substitutes = element;
+			if(groupBase) this.substitutes = groupBase;
 			else throw new types.MissingReferenceError('element', ref);
 		}
 	}
