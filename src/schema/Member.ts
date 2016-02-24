@@ -20,11 +20,13 @@ export class Member {
 	isExported: boolean;
 
 	isAbstract: boolean;
+	isSubstituted: boolean;
 	substitutes: Member;
 
 	surrogateKey: number;
 	private static nextKey = 0;
 
 	static abstractFlag = 1;
-	static anyFlag = 2;
+	static substitutedFlag = 2;
+	static anyFlag = 4;
 }

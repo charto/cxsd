@@ -29,6 +29,7 @@ export class JS extends Exporter {
 
 		var flags = 0;
 		if(member.isAbstract) flags |= Member.abstractFlag;
+		if(member.isSubstituted) flags |= Member.substitutedFlag;
 		if(member.name == '*') flags |= Member.anyFlag;
 
 		if(member.substitutes) substituteNum = memberNumTbl[member.substitutes.surrogateKey];

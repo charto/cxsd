@@ -70,8 +70,9 @@ function exportMember(member: types.MemberBase, outRef: schema.MemberRef, parent
 
 	outMember.isAbstract = member.isAbstract();
 
-	if(member instanceof types.Element && member.substitutes) {
-		outMember.substitutes = member.substitutes.getOutMember(context);
+	if(member instanceof types.Element) {
+		if(member.substitutes) outMember.substitutes = member.substitutes.getOutMember(context);
+		if(member.isSubstituted) outMember.isSubstituted = true;
 	}
 }
 
