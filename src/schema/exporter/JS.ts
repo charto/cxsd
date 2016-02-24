@@ -143,7 +143,9 @@ export class JS extends Exporter {
 
 		var typeNumTbl: NumTbl = {};
 		var memberNumTbl: NumTbl = {};
+		// Separately defined document type is number 0.
 		var typeNum = 1;
+		// Member number 0 is skipped.
 		var memberNum = 1;
 
 		var importTbl = namespace.getUsedImportTbl();
@@ -207,13 +209,13 @@ export class JS extends Exporter {
 			memberSpecList.push(this.writeMember(member, typeNumTbl, memberNumTbl));
 		}
 
-		var exportSpecList: string[] = [];
+		var exportTypeNameList: string[] = [];
 
 		for(var type of typeList.exported) {
 			name = type.safeName;
 			if(type.name && type.name != name) name += ':' + type.name;
 
-			exportSpecList.push('\n\t' + "'" + name + "'");
+			exportTypeNameList.push('\n\t' + "'" + name + "'");
 		}
 
 		return([].concat(
@@ -227,7 +229,7 @@ export class JS extends Exporter {
 				"'" + namespace.name+ "', " +
 				'exports, ' +
 				'[' + importSpecList.join(',') + '\n], ' +
-				'[' + exportSpecList.join(',') + '\n], ' +
+				'[' + exportTypeNameList.join(',') + '\n], ' +
 				'[' + typeSpecList.join(',') + '\n], ' +
 				'[' + memberSpecList.join(',') + '\n]' +
 				');'
