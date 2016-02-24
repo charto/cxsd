@@ -1,24 +1,10 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {Namespace} from './Namespace';
+import * as cxml from 'cxml';
+
 import {Member} from './Member';
-import {Type} from './Type';
 
-export class MemberRef {
-	constructor(member: Member, min: number, max: number) {
-		this.member = member;
-		this.min = min;
-		this.max = max;
-	}
-
-	member: Member;
-	min: number;
-	max: number;
-
-	safeName: string;
+export class MemberRef extends cxml.MemberRefBase<Member> {
 	prefix: string;
-
-	static optionalFlag = 1;
-	static arrayFlag = 2;
 }
