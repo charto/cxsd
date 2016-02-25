@@ -92,7 +92,7 @@ export class AddImports extends Transform<AddImports, Output, void> {
 	visitMember(member: Member) {
 		this.addRef(member.namespace, member);
 
-		if(member.substitutes) this.addRef(member.substitutes.namespace, member);
+		if(member.substitutes) this.addRef(member.substitutes.namespace, member.substitutes);
 
 		for(var type of member.typeList) this.addRef(type.namespace, member, type);
 	}
