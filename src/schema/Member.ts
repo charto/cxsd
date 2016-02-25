@@ -13,6 +13,7 @@ export class Member extends cxml.MemberBase<Member, Namespace, cxml.ItemBase<Mem
 	}
 
 	typeList: Type[];
+	substitutes: Member;
 
 	comment: string;
 

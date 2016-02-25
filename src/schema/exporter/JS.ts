@@ -27,6 +27,9 @@ export class JS extends Exporter {
 			typeNumTbl[memberType.surrogateKey]
 		);
 
+		var name = member.safeName;
+		if(member.name != name) name += ':' + member.name;
+
 		var flags = 0;
 		if(member.isAbstract) flags |= Member.abstractFlag;
 		if(member.isSubstituted) flags |= Member.substitutedFlag;
@@ -36,7 +39,7 @@ export class JS extends Exporter {
 
 		return(
 			'\n\t[' +
-			"'" + member.name + "', " +
+			"'" + name + "', " +
 			'[' + memberTypeList.join(', ') + ']' + ', ' +
 			flags +
 			(substituteNum ? ', ' + substituteNum : '') +
@@ -47,7 +50,7 @@ export class JS extends Exporter {
 	writeMemberRef(ref: MemberRef, memberNumTbl: NumTbl) {
 		var member = ref.member;
 		var name = ref.safeName;
-		if(name == member.name) name = null;
+		if(name == member.safeName) name = null;
 
 		var flags = 0;
 		if(ref.min < 1) flags |= MemberRef.optionalFlag;

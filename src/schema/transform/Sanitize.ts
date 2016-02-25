@@ -171,8 +171,17 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 		for(var ref of refList) {
 			// TODO: Detect duplicate names from other namespaces and prefix them.
 
-			if(ref.member.name == '*') ref.safeName = '*';
-			else ref.safeName = (ref.prefix || '') + sanitizeName(ref.member.name);
+			var safeName = ref.member.safeName;
+
+			if(!safeName) {
+				if(ref.member.name == '*') safeName = '*';
+				else safeName = sanitizeName(ref.member.name);
+
+				ref.member.safeName = safeName;
+			}
+
+			if(safeName == '*') ref.safeName = safeName;
+			else ref.safeName = (ref.prefix || '') + safeName;
 
 			this.addNameToMemberTypes(type, ref.member);
 		}
