@@ -42,7 +42,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 
 		for(var member of memberList) {
 			if(member.isSubstituted) {
-				var proxy = new Type(null);
+				var proxy = member.getProxy();
 				var ref = new MemberRef(member, 0, 1);
 
 				proxy.isProxy = true;
@@ -51,7 +51,6 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 				ref.safeName = sanitizeName(member.name);
 
 				proxy.containingRef = ref;
-				member.proxy = proxy;
 
 				this.namespace.typeList.push(proxy);
 			}
@@ -65,6 +64,9 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 					} else {
 						member.substitutes.proxy.addChild(new MemberRef(member, 0, 1));
 					}
+				} else {
+					member.safeName = sanitizeName(member.name);
+					member.namespace.addAugmentation(member.substitutes.getProxy(), member);
 				}
 			}
 		}

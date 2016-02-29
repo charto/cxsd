@@ -76,7 +76,25 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 		member.namespace = this;
 	}
 
-	cachePath: string;
+	/** Augment type in another namespace with member from this namespace. */
+
+	addAugmentation(type: Type, member: Member) {
+		var augmentTbl = this.augmentTbl[type.namespace.id];
+
+		if(!augmentTbl) {
+			augmentTbl = {};
+			this.augmentTbl[type.namespace.id] = augmentTbl;
+		}
+
+		var augmentSpec = augmentTbl[type.surrogateKey];
+
+		if(!augmentSpec) {
+			augmentSpec = { type: type, memberList: [] };
+			augmentTbl[type.surrogateKey] = augmentSpec;
+		}
+
+		augmentSpec.memberList.push(member);
+	}
 
 	/** Invisible document element defining the types of XML file root elements. */
 	doc: Type;
@@ -85,14 +103,15 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 	typeList: Type[] = [];
 	/** All members used in the document. */
 	memberList: Member[] = [];
+	/** Types from other namespaces augmented with members from this namespace. */
+	augmentTbl: {
+		[namespaceId: string]: {
+			[typeId: string]: { type: Type, memberList: Member[] }
+		}
+	} = {};
 
 	/** List of URL addresses of files with definitions for this namespace. */
 	sourceList: string[];
-
-	private refList: NamespaceRef[];
-	private refTbl: { [namespaceId: number]: NamespaceRef };
-
-	private cacheDir: string;
 
 	/** Short names used to reference other namespaces in schemas defining this namespace. */
 	shortNameTbl: { [namespaceId: string]: string[] } = {};

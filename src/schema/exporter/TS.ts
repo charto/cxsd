@@ -242,6 +242,42 @@ export class TS extends Exporter {
 		return(output.join(''));
 	}
 
+	writeAugmentations(output: string[]) {
+		var namespace = this.namespace;
+
+		for(var namespaceId of Object.keys(namespace.augmentTbl)) {
+			var augmentTbl = namespace.augmentTbl[namespaceId];
+			var typeIdList = Object.keys(augmentTbl);
+			var type = augmentTbl[typeIdList[0]].type;
+			var other = type.namespace;
+
+			output.push('declare module ' + "'" + this.getPathTo(other.name) + "'" + ' {');
+
+			for(var typeId of typeIdList) {
+				type = augmentTbl[typeId].type;
+
+				output.push('export interface _' + type.safeName + ' {');
+
+				for(var member of augmentTbl[typeId].memberList) {
+					if(member.isSubstituted) {
+						// TODO: can we add a new parent interface?
+						// Otherwise output contents of member.proxy
+						// (and recursively proxy contents of its members).
+					} else {
+						var ref = new MemberRef(member, 0, 1);
+						ref.safeName = member.safeName;
+
+						output.push(this.writeMember(ref, false));
+					}
+				}
+
+				output.push('}');
+			}
+
+			output.push('}');
+		}
+	}
+
 	writeContents(): string {
 		var output = this.writeHeader();
 		var doc = this.doc;
@@ -250,6 +286,9 @@ export class TS extends Exporter {
 
 		output.push('');
 		output = output.concat(this.exportSourceList(namespace.sourceList));
+
+		output.push('');
+		this.writeAugmentations(output);
 
 		output.push('interface ' + baseName + ' {');
 		output.push('\t_exists: boolean;');

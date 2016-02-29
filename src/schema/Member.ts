@@ -12,6 +12,15 @@ export class Member extends cxml.MemberBase<Member, Namespace, cxml.ItemBase<Mem
 		this.surrogateKey = Member.nextKey++;
 	}
 
+	getProxy() {
+		if(!this.proxy) {
+			this.proxy = new Type(null);
+			this.proxy.namespace = this.namespace;
+		}
+
+		return(this.proxy);
+	}
+
 	typeList: Type[];
 	substitutes: Member;
 
