@@ -15,6 +15,9 @@ export class Member extends cxml.MemberBase<Member, Namespace, cxml.ItemBase<Mem
 	typeList: Type[];
 	substitutes: Member;
 
+	/** Proxy type containing other substitution group members. */
+	proxy: Type;
+
 	comment: string;
 
 	isExported: boolean;

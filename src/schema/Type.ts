@@ -20,6 +20,15 @@ export class Type {
 		for(ref of this.childList || []) this.childTbl[ref.member.name] = ref;
 	}
 
+	addChild(ref: MemberRef) {
+		this.childList.push(ref);
+	}
+
+	addMixin(type: Type) {
+		if(!this.mixinList) this.mixinList = [];
+		this.mixinList.push(type);
+	}
+
 	name: string;
 	namespace: Namespace;
 	safeName: string;
@@ -36,6 +45,8 @@ export class Type {
 
 	isList: boolean;
 
+	isProxy: boolean;
+
 	isExported: boolean;
 
 	attributeTbl: { [name: string]: MemberRef } = {};
@@ -44,8 +55,8 @@ export class Type {
 	attributeList: MemberRef[];
 	/** Allowed child elements for an element of this type. */
 	childList: MemberRef[];
-	/** TODO: Other types added as mixins. */
-	// groupList: Member[];
+	/** Other types added as mixins. */
+	mixinList: Type[];
 
 	/** Parent type this is derived from. */
 	parent: Type;

@@ -123,6 +123,7 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 
 		// Check if primitive type is inherited without any additional attributes
 		// or children, so contents can be represented as a JavaScript primitive.
+		// NOTE: Substitutions won't be applied to such types!
 		parentPrimitive = type.getParent(types.Primitive, true);
 	}
 
@@ -163,7 +164,7 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 				exportType(spec.item as types.TypeBase, namespace, context)
 			];
 
-			outType.childList.push(outMemberRef);
+			outType.addChild(outMemberRef);
 		}
 
 		outType.isList = true;

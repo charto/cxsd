@@ -94,8 +94,26 @@ export class TS extends Exporter {
 		return(output.join(''));
 	}
 
+	writeParents(parentDef: string, mixinList: Type[]) {
+		var parentList: string[] = [];
+
+		if(parentDef) parentList.push(parentDef);
+
+		for(var type of mixinList || []) {
+			parentList.push(this.writeTypeRef(type, '_'));
+		}
+
+		if(!parentList.length) parentList.push(baseName);
+
+		return(' extends ' + parentList.join(', '));
+	}
+
 	writeTypeList(ref: MemberRef) {
-		var outTypeList = ref.member.typeList.map(
+		var typeList = ref.member.typeList;
+
+		if(ref.max > 1 && ref.member.proxy) typeList = [ref.member.proxy];
+
+		var outTypeList = typeList.map(
 			(type: Type) => {
 				if(type.isPlainPrimitive && (!type.literalList || !type.literalList.length)) {
 					return(type.primitiveType.name);
@@ -187,7 +205,7 @@ export class TS extends Exporter {
 		var namespace = this.namespace;
 		var output: string[] = [];
 		var comment = type.comment;
-		var parentDef = '';
+		var parentDef: string;
 		var exportPrefix = type.isExported ? 'export ' : '';
 
 		var name = type.safeName;
@@ -200,8 +218,7 @@ export class TS extends Exporter {
 		var content = this.writeTypeContent(type);
 
 		if(namespace.isPrimitiveSpace) {
-			parentDef = ' extends ' + baseName;
-			output.push(exportPrefix + 'interface _' + name + parentDef + ' { ' + 'content' + ': ' + type.primitiveType.name + '; }' + '\n');
+			output.push(exportPrefix + 'interface _' + name + this.writeParents(null, type.mixinList) + ' { ' + 'content' + ': ' + type.primitiveType.name + '; }' + '\n');
 		} else if(type.isList) {
 			output.push(exportPrefix + 'type ' + name + ' = ' + content + ';' + '\n');
 		} else if(type.isPlainPrimitive) {
@@ -209,17 +226,15 @@ export class TS extends Exporter {
 
 			output.push(exportPrefix + 'type ' + name + ' = ' + content + ';' + '\n');
 			if(type.literalList && type.literalList.length) {
-				output.push('interface _' + name + ' extends ' + parentDef + ' { ' + 'content' + ': ' + name + '; }' + '\n');
+				output.push('interface _' + name + this.writeParents(parentDef, type.mixinList) + ' { ' + 'content' + ': ' + name + '; }' + '\n');
 			} else {
+				// NOTE: Substitution groups are ignored here!
 				output.push('type _' + name + ' = ' + parentDef + ';' + '\n');
 			}
 		} else {
-			if(type.parent) {
-				parentDef = ' extends ' + this.writeTypeRef(type.parent, '_');
-			} else {
-				parentDef = ' extends ' + baseName;
-			}
-			output.push('interface _' + name + parentDef + ' ' + content + '\n');
+			if(type.parent) parentDef = this.writeTypeRef(type.parent, '_');
+
+			output.push('interface _' + name + this.writeParents(parentDef, type.mixinList) + ' ' + content + '\n');
 			output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { constructor: { new(): ' + name + ' }; }' + '\n');
 			if(type.isExported) output.push(exportPrefix + 'var ' + name + ': { new(): ' + name + ' };' + '\n');
 		}

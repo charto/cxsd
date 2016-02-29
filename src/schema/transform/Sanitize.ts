@@ -6,8 +6,13 @@ import {Member} from '../Member';
 import {MemberRef} from '../MemberRef';
 import {Transform} from './Transform';
 
+export interface AnonType {
+	type: Type;
+	memberTypeList: Type[];
+}
+
 export interface State {
-	pendingAnonTbl: { [typeId: string]: { type: Type, memberTypeList: Type[] } };
+	pendingAnonTbl: { [typeId: string]: AnonType };
 	pendingAnonList: Type[];
 	typeListList: Type[][];
 }
@@ -33,10 +38,40 @@ function sanitizeName(name: string) {
 
 export class Sanitize extends Transform<Sanitize, void, State> {
 	prepare() {
-		var typeList = this.namespace.typeList.filter((type: Type) => !!type);
-		var type: Type;
+		var memberList = this.namespace.memberList.filter((member: Member) => !!member);
 
-		for(type of typeList) {
+		for(var member of memberList) {
+			if(member.isSubstituted) {
+				var proxy = new Type(null);
+				var ref = new MemberRef(member, 0, 1);
+
+				proxy.isProxy = true;
+				proxy.attributeList = [];
+				proxy.childList = [];
+				ref.safeName = sanitizeName(member.name);
+
+				proxy.containingRef = ref;
+				member.proxy = proxy;
+
+				this.namespace.typeList.push(proxy);
+			}
+		}
+
+		for(var member of memberList) {
+			if(member.substitutes) {
+				if(member.substitutes.namespace == member.namespace) {
+					if(member.isSubstituted) {
+						member.substitutes.proxy.addMixin(member.proxy);
+					} else {
+						member.substitutes.proxy.addChild(new MemberRef(member, 0, 1));
+					}
+				}
+			}
+		}
+
+		var typeList = this.namespace.typeList.filter((type: Type) => !!type);
+
+		for(var type of typeList) {
 			type.buildMemberTbl();
 		}
 
@@ -190,42 +225,53 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 	addNameToType(type: Type) {
 		var containingType = type.containingType;
 		var containingRef = type.containingRef;
+		var spec: AnonType;
 
-		if(containingRef) {
-			type.namespace = containingRef.member.namespace;
+		if(containingType && !containingType.safeName) {
+			// Type is inside another which is not named (yet) so try again later.
 
-			type.safeName = (containingType ? containingType.safeName : '') + (containingRef.safeName || '').replace(/^([a-z])/, capitalize) + 'Type';
-		}
+			spec = this.state.pendingAnonTbl[memberType.containingType.surrogateKey];
 
-		var spec = this.state.pendingAnonTbl[type.surrogateKey];
-
-		if(spec) {
-			for(var memberType of spec.memberTypeList) {
-				this.addNameToType(memberType);
+			if(!spec) {
+				spec = { type: memberType.containingType, memberTypeList: [] };
+				this.state.pendingAnonTbl[memberType.containingType.surrogateKey] = spec;
 			}
 
-			this.state.pendingAnonTbl[type.surrogateKey] = null;
+			spec.memberTypeList.push(memberType);
+		} else if(containingType || (containingRef && containingRef.safeName)) {
+			// Type is inside a named type or referenced by a named member.
+			// Give it a name based on those.
+
+			if(containingRef) {
+				type.namespace = containingRef.member.namespace;
+
+				type.safeName = [
+					containingType ? containingType.safeName : '',
+					(containingRef.safeName || '').replace(/^([a-z])/, capitalize),
+					type.isProxy ? 'Proxy' : '',
+					'Type'
+				].join('');
+			}
+
+			spec = this.state.pendingAnonTbl[type.surrogateKey];
+
+			if(spec) {
+				for(var memberType of spec.memberTypeList) {
+					this.addNameToType(memberType);
+				}
+
+				this.state.pendingAnonTbl[type.surrogateKey] = null;
+			}
 		}
 	}
 
 	addNameToMemberTypes(type: Type, member: Member) {
+		if(member.proxy && !member.proxy.safeName && member.namespace == this.namespace) {
+			this.addNameToType(member.proxy);
+		}
 		for(var memberType of member.typeList) {
 			if(!memberType.safeName && memberType.namespace == this.namespace) {
-				if(memberType.containingType) {
-					if(memberType.containingType.safeName) this.addNameToType(memberType);
-					else {
-						var spec = this.state.pendingAnonTbl[memberType.containingType.surrogateKey];
-
-						if(!spec) {
-							spec = { type: memberType.containingType, memberTypeList: [] };
-							this.state.pendingAnonTbl[memberType.containingType.surrogateKey] = spec;
-						}
-
-						spec.memberTypeList.push(memberType);
-					}
-				} else if(memberType.containingRef) {
-					if(memberType.containingRef.safeName) this.addNameToType(memberType);
-				}
+				this.addNameToType(memberType);
 			}
 		}
 	}
