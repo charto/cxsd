@@ -113,6 +113,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 	visitType(type: Type) {
 		var refList: MemberRef[] = [];
 		var ref: MemberRef;
+		var member: Member;
 		var other: Type;
 		var otherMember: MemberRef;
 		var iter: number;
@@ -146,9 +147,10 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 
 			other = type;
 			iter = 100;
+			member = ref.member;
 
 			while((other = other.parent) && --iter) {
-				otherMember = other.attributeTbl[ref.member.name];
+				otherMember = other.attributeTbl[member.name];
 				if(otherMember && !otherMember.prefix) {
 					otherMember.prefix = '$';
 					if(otherMember.safeName) otherMember.safeName = otherMember.prefix + otherMember.safeName;
@@ -167,12 +169,21 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 				// to avoid continuing search after one parent with a matching member is found.
 
 				while((other = other.parent) && --iter) {
-					otherMember = other.childTbl[ref.member.name];
+					otherMember = other.childTbl[member.name];
 					if(otherMember && otherMember.max > ref.max) {
 						ref.max = otherMember.max;
 						if(ref.max > 1) break;
 					}
 				}
+			}
+
+			if(ref.max <= 1 && !type.isProxy && (member.isSubstituted || member.isAbstract)) {
+				var proxy = member.getProxy();
+
+				type.addMixin(proxy);
+
+				// TODO: Remove following line!
+				(ref as any).isHidden = true;
 			}
 
 			refList.push(ref);
@@ -196,6 +207,13 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 			else ref.safeName = (ref.prefix || '') + safeName;
 
 			this.addNameToMemberTypes(type, ref.member);
+
+			var proxy = ref.member.proxy;
+
+			if(proxy && !(proxy as any).sanitized) {
+				(proxy as any).sanitized = true;
+				this.visitType(proxy);
+			}
 		}
 	}
 

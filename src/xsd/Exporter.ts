@@ -88,28 +88,20 @@ function exportAttributes(scope: Scope, namespace: schema.Namespace, context: sc
 	}
 }
 
-function exportChildren(scope: Scope, namespace: schema.Namespace, context: schema.Context, type: schema.Type, setExported: boolean) {
+function exportChildren(
+	scope: Scope,
+	namespace: schema.Namespace,
+	context: schema.Context,
+	outType: schema.Type,
+	setExported: boolean
+) {
 	var memberTbl = scope.dumpMembers('element', 'group');
 
 	for(var key of Object.keys(memberTbl).sort()) {
-		var spec = memberTbl[key];
-		var member = spec.item as types.Element;
 		var ref = exportMemberRef(memberTbl[key], scope, namespace, context);
-		var outMember = member.getOutMember(context);
 
-		if(spec.max <= 1 && (member.isSubstituted || outMember.isAbstract)) {
-			var proxy = outMember.getProxy();
-
-			type.addMixin(proxy);
-
-			// TODO: Remove following lines!
-			(ref as any).isHidden = true;
-			if(setExported) ref.member.isExported = true;
-			type.addChild(ref);
-		} else {
-			if(setExported) ref.member.isExported = true;
-			type.addChild(ref);
-		}
+		if(setExported) ref.member.isExported = true;
+		outType.addChild(ref);
 	}
 }
 
