@@ -11,21 +11,24 @@ export class Type {
 		this.name = name;
 	}
 
-	// TODO: handle naming collisions between attributes and children,
-	// and between namespaces.
-	buildMemberTbl() {
-		var ref: MemberRef;
-
-		for(ref of this.attributeList || []) this.attributeTbl[ref.member.name] = ref;
-		for(ref of this.childList || []) this.childTbl[ref.member.name] = ref;
+	addAttribute(ref: MemberRef) {
+		this.attributeList.push(ref);
+		this.attributeTbl[ref.member.name] = ref;
 	}
 
 	addChild(ref: MemberRef) {
 		this.childList.push(ref);
+		this.childTbl[ref.member.name] = ref;
+	}
+
+	addChildSpec(spec: Member) {
+		var ref = spec.getRef();
+
+		this.childList.push(ref);
+		this.childTbl[spec.name] = ref;
 	}
 
 	addMixin(type: Type) {
-		if(!this.mixinList) this.mixinList = [];
 		this.mixinList.push(type);
 	}
 
@@ -52,11 +55,11 @@ export class Type {
 	attributeTbl: { [name: string]: MemberRef } = {};
 	childTbl: { [name: string]: MemberRef } = {};
 	/** XML attributes in an element of this type. */
-	attributeList: MemberRef[];
+	attributeList: MemberRef[] = [];
 	/** Allowed child elements for an element of this type. */
-	childList: MemberRef[];
+	childList: MemberRef[] = [];
 	/** Other types added as mixins. */
-	mixinList: Type[];
+	mixinList: Type[] = [];
 
 	/** Parent type this is derived from. */
 	parent: Type;

@@ -41,45 +41,20 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 		var memberList = this.namespace.memberList.filter((member: Member) => !!member);
 
 		for(var member of memberList) {
-			if(member.isSubstituted) {
-				var proxy = member.getProxy();
-				var ref = new MemberRef(member, 0, 1);
-
-				proxy.isProxy = true;
-				proxy.attributeList = [];
-				proxy.childList = [];
-				ref.safeName = sanitizeName(member.name);
-
-				proxy.containingRef = ref;
-
-				this.namespace.typeList.push(proxy);
+			if((member.isSubstituted || member.isAbstract)) {
+				member.getProxy().containingRef.safeName = sanitizeName(member.name);
 			}
-		}
 
-		for(var member of memberList) {
 			if(member.substitutes) {
-				if(member.substitutes.namespace == member.namespace) {
-					if(member.isSubstituted) {
-						member.substitutes.proxy.addMixin(member.proxy);
-					} else {
-						member.substitutes.proxy.addChild(new MemberRef(member, 0, 1));
-					}
-				} else {
-					member.safeName = sanitizeName(member.name);
-					member.namespace.addAugmentation(member.substitutes.getProxy(), member);
-				}
+				member.safeName = sanitizeName(member.name);
 			}
 		}
 
 		var typeList = this.namespace.typeList.filter((type: Type) => !!type);
 
-		for(var type of typeList) {
-			type.buildMemberTbl();
-		}
-
 		this.visitType(this.doc);
 
-		for(type of typeList) {
+		for(var type of typeList) {
 			this.visitType(type);
 		}
 
@@ -145,7 +120,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 		if(type.name) type.safeName = sanitizeName(type.name);
 		else this.state.pendingAnonList.push(type);
 
-		for(ref of type.attributeList || []) {
+		for(ref of type.attributeList) {
 			// Add a $ prefix to attributes of this type
 			// conflicting with children of this or parent types.
 
@@ -165,7 +140,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 			refList.push(ref);
 		}
 
-		for(ref of type.childList || []) {
+		for(ref of type.childList) {
 			// Add a $ prefix to attributes of parent types
 			// conflicting with children of this type.
 

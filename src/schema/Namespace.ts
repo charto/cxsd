@@ -7,6 +7,7 @@ import {Context} from './Context';
 import {NamespaceRef} from './NamespaceRef';
 import {Type} from './Type';
 import {Member} from './Member';
+import {MemberRef} from './MemberRef';
 
 export interface ImportContent {
 	typeTbl: { [key: string]: Type },
@@ -79,6 +80,9 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 	/** Augment type in another namespace with member from this namespace. */
 
 	addAugmentation(type: Type, member: Member) {
+		// TODO: Adding a member with an identical name but different namespace should be handled somehow!
+		if(type.childTbl[member.name]) return;
+
 		var augmentTbl = this.augmentTbl[type.namespace.id];
 
 		if(!augmentTbl) {
@@ -89,11 +93,11 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 		var augmentSpec = augmentTbl[type.surrogateKey];
 
 		if(!augmentSpec) {
-			augmentSpec = { type: type, memberList: [] };
+			augmentSpec = { type: type, refList: [] };
 			augmentTbl[type.surrogateKey] = augmentSpec;
 		}
 
-		augmentSpec.memberList.push(member);
+		augmentSpec.refList.push(member.getRef());
 	}
 
 	/** Invisible document element defining the types of XML file root elements. */
@@ -106,9 +110,11 @@ export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
 	/** Types from other namespaces augmented with members from this namespace. */
 	augmentTbl: {
 		[namespaceId: string]: {
-			[typeId: string]: { type: Type, memberList: Member[] }
+			[typeId: string]: { type: Type, refList: MemberRef[] }
 		}
 	} = {};
+
+	pendingSubstituteList: Member[] = [];
 
 	/** List of URL addresses of files with definitions for this namespace. */
 	sourceList: string[];

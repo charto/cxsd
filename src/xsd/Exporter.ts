@@ -71,29 +71,46 @@ function exportMember(member: types.MemberBase, outRef: schema.MemberRef, parent
 	outMember.isAbstract = member.isAbstract();
 
 	if(member instanceof types.Element) {
-		if(member.substitutes) outMember.substitutes = member.substitutes.getOutMember(context);
+		if(member.substitutes) {
+			outMember.substitutes = member.substitutes.getOutMember(context);
+			outMember.namespace.pendingSubstituteList.push(outMember);
+		}
 		if(member.isSubstituted) outMember.isSubstituted = true;
 	}
 }
 
-function exportMembers(kind: string, groupKind: string, scope: Scope, namespace: schema.Namespace, context: schema.Context, setExported: boolean) {
-	var memberTbl = scope.dumpMembers(kind, groupKind);
+function exportAttributes(scope: Scope, namespace: schema.Namespace, context: schema.Context, type: schema.Type) {
+	var memberTbl = scope.dumpMembers('attribute', 'attributegroup');
 
-	return(Object.keys(memberTbl).sort().map((key: string) => {
-		var ref = exportMemberRef(memberTbl[key], scope, namespace, context)
-
-		if(setExported) ref.member.isExported = true;
-
-		return(ref);
-	}));
+	for(var key of Object.keys(memberTbl).sort()) {
+		var ref = exportMemberRef(memberTbl[key], scope, namespace, context);
+		type.addAttribute(ref);
+	}
 }
 
-function exportAttributes(scope: Scope, namespace: schema.Namespace, context: schema.Context) {
-	return(exportMembers('attribute', 'attributegroup', scope, namespace, context, false));
-}
+function exportChildren(scope: Scope, namespace: schema.Namespace, context: schema.Context, type: schema.Type, setExported: boolean) {
+	var memberTbl = scope.dumpMembers('element', 'group');
 
-function exportChildren(scope: Scope, namespace: schema.Namespace, context: schema.Context, setExported: boolean) {
-	return(exportMembers('element', 'group', scope, namespace, context, setExported));
+	for(var key of Object.keys(memberTbl).sort()) {
+		var spec = memberTbl[key];
+		var member = spec.item as types.Element;
+		var ref = exportMemberRef(memberTbl[key], scope, namespace, context);
+		var outMember = member.getOutMember(context);
+
+		if(spec.max <= 1 && (member.isSubstituted || outMember.isAbstract)) {
+			var proxy = outMember.getProxy();
+
+			type.addMixin(proxy);
+
+			// TODO: Remove following lines!
+			(ref as any).isHidden = true;
+			if(setExported) ref.member.isExported = true;
+			type.addChild(ref);
+		} else {
+			if(setExported) ref.member.isExported = true;
+			type.addChild(ref);
+		}
+	}
 }
 
 /* TODO
@@ -148,8 +165,8 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 		outType.parent = parent.getOutType(context);
 	}
 
-	outType.attributeList = exportAttributes(scope, namespace, context);
-	outType.childList = exportChildren(scope, namespace, context, false);
+	exportAttributes(scope, namespace, context, outType);
+	exportChildren(scope, namespace, context, outType, false);
 //	outType.groupList = exportGroups(scope, namespace, context);
 
 	var listType = type.getListType();
@@ -179,7 +196,9 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 	var outNamespace = context.copyNamespace(namespace);
 	var doc = outNamespace.doc;
 
-	if(!doc) {
+	if(doc) return(doc);
+
+//	if(!doc) {
 		var scope = namespace.getScope();
 
 		var sourceList = namespace.getSourceList();
@@ -206,15 +225,29 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 		doc = new schema.Type(null);
 
 		doc.namespace = outNamespace;
-		doc.attributeList = exportAttributes(scope, outNamespace, context);
-		doc.childList = exportChildren(scope, outNamespace, context, true);
+		exportAttributes(scope, outNamespace, context, doc);
+		exportChildren(scope, outNamespace, context, doc, true);
 
 		outNamespace.doc = doc;
 
 		for(var namespaceId of Object.keys(importTbl)) {
 			exportNamespace(importTbl[namespaceId], context);
 		}
-	}
+
+		for(var member of outNamespace.pendingSubstituteList) {
+			var proxy = member.substitutes.getProxy();
+
+			if(member.substitutes.namespace == member.namespace) {
+				if(member.isSubstituted || member.isAbstract) {
+					proxy.addMixin(member.getProxy());
+				} else {
+					proxy.addChildSpec(member);
+				}
+			} else {
+				member.namespace.addAugmentation(proxy, member);
+			}
+		}
+//	}
 
 	return(doc);
 }

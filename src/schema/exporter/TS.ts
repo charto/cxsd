@@ -4,6 +4,7 @@
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
 import {Namespace} from '../Namespace';
+import {Member} from '../Member';
 import {MemberRef} from '../MemberRef';
 import {Type} from '../Type';
 
@@ -137,6 +138,7 @@ export class TS extends Exporter {
 		var comment = member.comment;
 		var indent = '\t';
 
+		if((ref as any).isHidden) return('');
 		if(isGlobal && member.isAbstract) return('');
 		if(member.name == '*') return('');
 
@@ -242,6 +244,20 @@ export class TS extends Exporter {
 		return(output.join(''));
 	}
 
+	writeSubstitutions(type: Type, refList: MemberRef[], output: string[]) {
+		for(var ref of refList) {
+			var proxy = ref.member.proxy;
+
+			if(!ref.member.isAbstract) output.push(this.writeMember(ref, false));
+
+			if(proxy && proxy != type) this.writeSubstitutions(proxy, proxy.childList, output);
+		}
+
+		for(var mixin of type.mixinList) {
+			if(mixin != type) this.writeSubstitutions(mixin, mixin.childList, output);
+		}
+	}
+
 	writeAugmentations(output: string[]) {
 		var namespace = this.namespace;
 
@@ -258,18 +274,11 @@ export class TS extends Exporter {
 
 				output.push('export interface _' + type.safeName + ' {');
 
-				for(var member of augmentTbl[typeId].memberList) {
-					if(member.isSubstituted) {
-						// TODO: can we add a new parent interface?
-						// Otherwise output contents of member.proxy
-						// (and recursively proxy contents of its members).
-					} else {
-						var ref = new MemberRef(member, 0, 1);
-						ref.safeName = member.safeName;
-
-						output.push(this.writeMember(ref, false));
-					}
+				for(var ref of augmentTbl[typeId].refList) {
+					ref.safeName = ref.member.safeName;
 				}
+
+				this.writeSubstitutions(type, augmentTbl[typeId].refList, output);
 
 				output.push('}');
 			}

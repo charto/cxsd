@@ -5,6 +5,7 @@ import * as cxml from 'cxml';
 
 import {Namespace} from './Namespace';
 import {Type} from './Type';
+import {MemberRef} from './MemberRef';
 
 export class Member extends cxml.MemberBase<Member, Namespace, cxml.ItemBase<Member>> {
 	constructor(name: string) {
@@ -12,13 +13,27 @@ export class Member extends cxml.MemberBase<Member, Namespace, cxml.ItemBase<Mem
 		this.surrogateKey = Member.nextKey++;
 	}
 
+	getRef() {
+		return(new MemberRef(this, 0, 1));
+	}
+
 	getProxy() {
-		if(!this.proxy) {
-			this.proxy = new Type(null);
-			this.proxy.namespace = this.namespace;
+		var proxy = this.proxy;
+		if(!proxy) {
+			var proxy = new Type(null);
+			proxy.namespace = this.namespace;
+			proxy.isProxy = true;
+			proxy.containingRef = this.getRef();
+
+			this.proxy = proxy;
+			this.namespace.addType(proxy);
+
+			if(!this.isAbstract) {
+				proxy.addChildSpec(this);
+			}
 		}
 
-		return(this.proxy);
+		return(proxy);
 	}
 
 	typeList: Type[];
