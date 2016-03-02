@@ -5,7 +5,7 @@ import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
 
-/** <xsd:attributegroup>
+/** <xsd:attributeGroup>
   * Defines several attributes that can be included together in type definitions. */
 
 export class AttributeGroup extends types.Base {
@@ -16,7 +16,7 @@ export class AttributeGroup extends types.Base {
 	];
 
 	init(state: State) {
-		this.define(state, 'attributegroup', 0, 0);
+		this.define(state, 'attributeGroup', 0, 0);
 	}
 
 	resolve(state: State) {
@@ -24,7 +24,7 @@ export class AttributeGroup extends types.Base {
 
 		if(this.ref) {
 			var ref = new QName(this.ref, state.source);
-			attributeGroup = this.scope.lookup(ref, 'attributegroup') as AttributeGroup;
+			attributeGroup = this.scope.lookup(ref, 'attributeGroup') as AttributeGroup;
 		}
 
 		// Named attribute groups are only models for referencing elsewhere.
@@ -33,7 +33,7 @@ export class AttributeGroup extends types.Base {
 			if(attributeGroup) {
 				// if(attributeGroup != this && !attributeGroup.resolved) console.log('OH NOES! AttributeGroup ' + attributeGroup.name);
 				// attributeGroup.scope.addAllToParent('attribute', 1, 1, this.scope);
-				attributeGroup.define(state, 'attributegroup', 1, 1, this.scope);
+				attributeGroup.define(state, 'attributeGroup', 1, 1, this.scope);
 			} else throw new types.MissingReferenceError('attributeGroup', ref);
 		}
 	}

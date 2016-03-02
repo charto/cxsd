@@ -48,7 +48,10 @@ export class TypeBase extends Base {
 
 			if(!(type instanceof TypeBase)) break;
 			else if(type instanceof base) return(type);
-			else if(breakAtContent && type.scope && type.scope.dumpTypes('attribute')) break;
+			else if(breakAtContent && type.scope && (
+				type.scope.dumpTypes('attribute') ||
+				type.scope.dumpTypes('attributeGroup')
+			)) break;
 			else next = type.parent;
 		}
 

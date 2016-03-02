@@ -80,7 +80,7 @@ function exportMember(member: types.MemberBase, outRef: schema.MemberRef, parent
 }
 
 function exportAttributes(scope: Scope, namespace: schema.Namespace, context: schema.Context, type: schema.Type) {
-	var memberTbl = scope.dumpMembers('attribute', 'attributegroup');
+	var memberTbl = scope.dumpMembers('attribute', 'attributeGroup');
 
 	for(var key of Object.keys(memberTbl).sort()) {
 		var ref = exportMemberRef(memberTbl[key], scope, namespace, context);
