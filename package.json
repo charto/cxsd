@@ -21,6 +21,14 @@
     "url": "https://github.com/charto/cxsd/issues"
   },
   "homepage": "https://github.com/charto/cxsd#readme",
+  "keywords": [
+    "xsd",
+    "dts",
+    "xml",
+    "schema",
+    "parser",
+    "typescript"
+  ],
   "dependencies": {
     "bluebird": "~3.3.3",
     "cget": "~0.0.5",

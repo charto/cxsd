@@ -2,6 +2,8 @@ node_modules/
 typings/
 cache/
 src/
+.travis.yml
+*.png
 *.log.*
 *.log
 *.tgz
