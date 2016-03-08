@@ -31,6 +31,8 @@ interface ICommand extends _ICommand {
 	.parse(process.argv)
 );
 
+if(process.argv.length < 3) cmd.help();
+
 function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
 	var schemaContext = new schema.Context();
 	var xsdContext = new Context(schemaContext);
