@@ -1,12 +1,11 @@
 {
+  "name": "cxsd",
   "dependencies": {
-    "bluebird": "github:unional/typed-bluebird#ce35f299e5313994c0b8e9f0f31e94e115ec791f"
+    "bluebird": "registry:npm/bluebird#3.4.1+20160811213708",
+    "request": "registry:npm/request#2.69.0+20160428223725"
   },
-  "devDependencies": {},
-  "ambientDependencies": {
-    "commander": "github:DefinitelyTyped/DefinitelyTyped/commander/commander.d.ts#6d09e1a5aea3240e7290be602ed03c88e38cd07d",
-    "form-data": "github:DefinitelyTyped/DefinitelyTyped/form-data/form-data.d.ts#bb1b99052bf1d697f0368fbff56898bc1f5a525c",
-    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#1c56e368e17bb28ca57577250624ca5bd561aa81",
-    "request": "github:DefinitelyTyped/DefinitelyTyped/request/request.d.ts#e252a088123eb595d9d772eb373f41c084360278"
+  "globalDependencies": {
+    "commander": "registry:dt/commander#2.3.0+20160317120654",
+    "node": "registry:dt/node#6.0.0+20160807145350"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "cxsd",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Streaming XSD parser and XML parser generator with TypeScript output",
   "bin": {
     "cxsd": "cxsd-cli.js"
@@ -30,14 +30,14 @@
     "typescript"
   ],
   "dependencies": {
-    "bluebird": "~3.3.3",
+    "bluebird": "^3.4.1",
     "cget": "~0.0.5",
     "commander": "~2.9.0",
     "cxml": "~0.1.0",
-    "node-expat": "~2.3.13"
+    "node-expat": "~2.3.15"
   },
   "devDependencies": {
-    "typescript": "~1.8.7",
-    "typings": "~0.6.9"
+    "typescript": "^1.8.10",
+    "typings": "^1.3.2"
   }
 }
