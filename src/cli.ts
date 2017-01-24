@@ -46,8 +46,8 @@ function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
 		Cache.patchRequest();
 	}
 
-	var jsCache = new Cache(opts['outJs'] || 'xmlns', '_index.js');
-	var tsCache = new Cache(opts['outTs'] || 'xmlns', '_index.d.ts');
+	var jsCache = new Cache(opts['outJs'] || 'xmlns', { indexName: '_index.js' });
+	var tsCache = new Cache(opts['outTs'] || 'xmlns', { indexName: '_index.d.ts' });
 
 	var loader = new Loader(xsdContext, fetchOptions);
 

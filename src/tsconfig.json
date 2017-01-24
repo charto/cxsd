@@ -8,7 +8,6 @@
 		"noImplicitThis": true,
 		"outDir": "../dist",
 		"removeComments": false,
-		"strictNullChecks": true,
 		"target": "es5"
 	},
 	"files": [
