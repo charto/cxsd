@@ -55,12 +55,12 @@ export class Element extends MemberBase implements ElementLike {
 	minOccurs: string = "1";
 	maxOccurs: string = "1";
 
-	default: string = null;
+	default: string | null = null;
 
 	/** Abstract elements are disallowed in the XML document,
 	  * and another member of the same substitution group should be used. */
-	abstract: string = null; // boolean
-	substitutionGroup: string = null;
+	abstract: string | null = null; // boolean
+	substitutionGroup: string | null = null;
 
 	substitutes: Element;
 	isSubstituted: boolean;

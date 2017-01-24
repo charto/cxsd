@@ -28,6 +28,6 @@ export class Attribute extends MemberBase {
 		var attribute = this.resolveMember(state, 'attribute') as Attribute;
 	}
 
-	use: string = null;
-	default: XmlAttribute = null;
+	use: string | null = null;
+	default: XmlAttribute | null = null;
 }
