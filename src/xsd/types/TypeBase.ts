@@ -7,6 +7,8 @@ import {QName} from '../QName';
 import {NamedTypeMember} from '../Scope';
 import * as schema from '../../schema';
 
+export interface TypeBaseChild extends TypeBase {}
+
 export class TypeBase extends Base {
 	init(state: State) {
 		if(!this.scope) this.scope = state.getScope();
@@ -37,9 +39,9 @@ export class TypeBase extends Base {
 
 	/** Find parent type inheriting from a base type. */
 
-	getParent(base: BaseClass, breakAtContent: boolean) {
-		var next: TypeBase | QName = this;
-		var type: TypeBase | QName;
+	getParent(base: BaseClass, breakAtContent: boolean): TypeBase {
+		var next: TypeBaseChild | QName = this;
+		var type: TypeBaseChild | QName;
 		/** Maximum iterations in case type inheritance forms a loop. */
 		var iter = 100;
 
@@ -48,11 +50,11 @@ export class TypeBase extends Base {
 
 			if(!(type instanceof TypeBase)) break;
 			else if(type instanceof base) return(type);
-			else if(breakAtContent && type.scope && (
-				type.scope.dumpTypes('attribute') ||
-				type.scope.dumpTypes('attributeGroup')
+			else if(breakAtContent && (type as TypeBase).scope && (
+				(type as TypeBase).scope.dumpTypes('attribute') ||
+				(type as TypeBase).scope.dumpTypes('attributeGroup')
 			)) break;
-			else next = type.parent;
+			else next = (type as TypeBase).parent;
 		}
 
 		return(null);

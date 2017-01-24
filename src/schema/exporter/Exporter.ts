@@ -46,7 +46,7 @@ export abstract class Exporter extends Transform<Exporter, boolean, State> {
 
 		var outName = this.getOutName(doc.namespace.name);
 
-		return(this.state.cache.ifCached(outName).then((isCached: boolean) => {
+		return((this.state.cache.isCached(outName) as Promise<boolean>).then((isCached: boolean) => {
 			if(isCached) return(null)
 
 			return(this.state.cache.store(
