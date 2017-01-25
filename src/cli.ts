@@ -9,9 +9,9 @@ import {Context} from './xsd/Context';
 import {Namespace} from './xsd/Namespace';
 import {Loader} from './xsd/Loader';
 import {exportNamespace} from './xsd/Exporter';
-import * as schema from './schema';
 import {AddImports} from './schema/transform/AddImports';
 import {Sanitize} from './schema/transform/Sanitize';
+import * as schema from './schema';
 
 type _ICommand = typeof cmd;
 interface ICommand extends _ICommand {
@@ -72,9 +72,9 @@ function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
 			).then(() =>
 				addImports.finish(importsAdded.value())
 			).then(() =>
-				new schema.exporter.JS(spec, jsCache).exec()
+				new schema.JS(spec, jsCache).exec()
 			).then(() =>
-				new schema.exporter.TS(spec, tsCache).exec()
+				new schema.TS(spec, tsCache).exec()
 			);
 		} catch(err) {
 			console.error(err);

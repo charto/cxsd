@@ -1,6 +1,8 @@
 // This file is part of cxsd, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {MemberSpec} from 'cxml';
+
 import {State} from '../State';
 import {QName} from '../QName';
 import * as types from '../types';
@@ -26,11 +28,11 @@ export class MemberBase extends TypedBase {
 		return(member);
 	}
 
-	getOutMember(schemaContext: schema.Context): schema.Member {
+	getOutMember(schemaContext: schema.Context): MemberSpec {
 		var outMember = this.outMember;
 
 		if(!outMember) {
-			outMember = new schema.Member(this.name);
+			outMember = new MemberSpec(this.name);
 
 			if(this.scope) {
 				schemaContext.copyNamespace(this.scope.namespace).addMember(outMember);
@@ -70,5 +72,5 @@ export class MemberBase extends TypedBase {
 
 	typeRef: QName | types.TypeBase;
 
-	outMember: schema.Member;
+	outMember: MemberSpec;
 }

@@ -1,10 +1,9 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {MemberRef} from 'cxml';
+import {MemberSpec as Member, MemberRef} from 'cxml';
 
 import {Type} from '../Type';
-import {Member} from '../Member';
 import {Transform} from './Transform';
 
 export interface AnonType {
@@ -43,7 +42,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 
 		for(var member of memberList) {
 			if((member.isSubstituted || member.isAbstract)) {
-				member.getProxy().containingRef.safeName = sanitizeName(member.name);
+				member.getProxy(Type).containingRef.safeName = sanitizeName(member.name);
 			}
 
 			if(member.substitutes) {
@@ -182,9 +181,9 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 			}
 
 			if(ref.max <= 1 && !type.isProxy && (member.isSubstituted || member.isAbstract)) {
-				let proxy = member.getProxy();
+				let proxy = member.getProxy(Type);
 
-				type.addMixin(proxy);
+				type.addMixin(proxy as any);
 
 				// TODO: Remove following line!
 				(ref as any).isHidden = true;
@@ -265,12 +264,12 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 	}
 
 	addNameToMemberTypes(type: Type, member: Member) {
-		if(member.proxy && !member.proxy.safeName && member.namespace == this.namespace) {
-			this.addNameToType(member.proxy);
+		if(member.proxySpec && !member.proxySpec.safeName && member.namespace as any == this.namespace) {
+			this.addNameToType(member.proxySpec as any);
 		}
-		for(var memberType of member.typeList) {
-			if(!memberType.safeName && memberType.namespace == this.namespace) {
-				this.addNameToType(memberType);
+		for(var memberType of member.typeSpecList) {
+			if(!memberType.safeName && memberType.namespace as any == this.namespace) {
+				this.addNameToType(memberType as any);
 			}
 		}
 	}

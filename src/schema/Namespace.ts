@@ -1,12 +1,10 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {NamespaceBase, MemberRef} from 'cxml';
+import {NamespaceBase, MemberSpec as Member, MemberRef} from 'cxml';
 
 import {Context} from './Context';
-import {NamespaceRef} from './NamespaceRef';
 import {Type} from './Type';
-import {Member} from './Member';
 
 export interface ImportContent {
 	typeTbl: { [key: string]: Type },

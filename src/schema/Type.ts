@@ -1,10 +1,9 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {MemberRef} from 'cxml';
+import {MemberSpec as Member, MemberRef} from 'cxml';
 
 import {Namespace} from './Namespace';
-import {Member} from './Member';
 
 export class Type {
 	constructor(name: string) {

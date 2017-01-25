@@ -1,9 +1,10 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {MemberSpec as Member} from 'cxml';
+
 import {Namespace, ImportContent} from '../Namespace';
 import {Type} from '../Type';
-import {Member} from '../Member';
 import {Transform} from './Transform';
 
 export type Output = { [namespaceId: string]: ImportContent };
@@ -64,7 +65,7 @@ export class AddImports extends Transform<AddImports, Output, void> {
 			var short = this.namespace.getShortRef(id);
 
 			if(!short) {
-				short = (member && member.namespace.getShortRef(id)) || namespace.short;
+				short = (member && (member.namespace as any).getShortRef(id)) || namespace.short;
 
 				if(short) this.namespace.addRef(short, namespace);
 			}
@@ -89,11 +90,11 @@ export class AddImports extends Transform<AddImports, Output, void> {
 	}
 
 	visitMember(member: Member) {
-		this.addRef(member.namespace, member);
+		this.addRef(member.namespace as any, member);
 
-		if(member.substitutes) this.addRef(member.substitutes.namespace, member.substitutes);
+		if(member.substitutes) this.addRef(member.substitutes.namespace as any, member.substitutes);
 
-		for(var type of member.typeList) this.addRef(type.namespace, member, type);
+		for(var type of member.typeSpecList) this.addRef(type.namespace as any, member, type as any);
 	}
 
 	visitType(type: Type) {

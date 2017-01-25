@@ -1,12 +1,11 @@
 // This file is part of cxsd, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {MemberRef} from 'cxml';
+import {MemberSpec as Member, MemberRef} from 'cxml';
 
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
 import {Namespace} from '../Namespace';
-import {Member} from '../Member';
 import {Type} from '../Type';
 
 var docName = 'document';
@@ -75,7 +74,7 @@ export class TS extends Exporter {
 	writeTypeRef(type: Type, namePrefix: string) {
 		var output: string[] = [];
 
-		var namespace = type.namespace;
+		var namespace = type.namespace as any;
 		var name = namePrefix + type.safeName;
 
 		if(!namespace || namespace == this.namespace) {
@@ -112,9 +111,9 @@ export class TS extends Exporter {
 
 	// writeTypeList(ref: MemberRef) {
 	writeTypeList(ref: any) {
-		var typeList = ref.member.typeList;
+		var typeList = ref.member.typeSpecList;
 
-		if(ref.max > 1 && ref.member.proxy) typeList = [ref.member.proxy];
+		if(ref.max > 1 && ref.member.proxySpec) typeList = [ref.member.proxySpec];
 
 		var outTypeList = typeList.map(
 			(type: Type) => {
@@ -249,7 +248,7 @@ export class TS extends Exporter {
 	// writeSubstitutions(type: Type, refList: MemberRef[], output: string[]) {
 	writeSubstitutions(type: Type, refList: any[], output: string[]) {
 		for(var ref of refList) {
-			var proxy = ref.member.proxy;
+			var proxy = ref.member.proxySpec;
 
 			if(!ref.member.isAbstract) output.push(this.writeMember(ref, false));
 

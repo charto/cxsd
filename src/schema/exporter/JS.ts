@@ -1,12 +1,11 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {MemberRef, MemberRefFlag} from 'cxml';
+import {MemberSpec as Member, MemberFlag, MemberRef, MemberRefFlag} from 'cxml';
 
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
 import {Namespace} from '../Namespace';
-import {Member} from '../Member';
 import {Type} from '../Type';
 
 export type NumTbl = { [id: string]: number };
@@ -24,7 +23,8 @@ export class JS extends Exporter {
 
 	writeMember(member: Member, typeNumTbl: NumTbl, memberNumTbl: NumTbl) {
 		var substituteNum = 0;
-		var memberTypeList = member.typeList.map((memberType: Type) =>
+		// var memberTypeList = member.typeSpecList.map((memberType: TypeSpec) =>
+		var memberTypeList = member.typeSpecList.map((memberType: any) =>
 			typeNumTbl[memberType.surrogateKey]
 		);
 
@@ -32,9 +32,9 @@ export class JS extends Exporter {
 		if(member.name != name) name += ':' + member.name;
 
 		var flags = 0;
-		if(member.isAbstract) flags |= Member.abstractFlag;
-		if(member.isSubstituted) flags |= Member.substitutedFlag;
-		if(member.name == '*') flags |= Member.anyFlag;
+		if(member.isAbstract) flags |= MemberFlag.abstract;
+		if(member.isSubstituted) flags |= MemberFlag.substituted;
+		if(member.name == '*') flags |= MemberFlag.any;
 
 		if(member.substitutes) substituteNum = memberNumTbl[member.substitutes.surrogateKey];
 
@@ -79,7 +79,7 @@ export class JS extends Exporter {
 
 		if(type.isList) {
 			flags |= Type.listFlag | Type.primitiveFlag | Type.plainPrimitiveFlag;
-			parentNum = typeNumTbl[type.childList[0].member.typeList[0].surrogateKey];
+			parentNum = typeNumTbl[type.childList[0].member.typeSpecList[0].surrogateKey];
 		} else {
 			if(type.childList) {
 				for(var member of type.childList) {

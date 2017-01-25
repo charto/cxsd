@@ -1,7 +1,7 @@
 // This file is part of cxsd, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {MemberRef} from 'cxml';
+import {MemberSpec, MemberRef} from 'cxml';
 
 import {Namespace} from './Namespace';
 import {Scope, TypeMember} from './Scope';
@@ -29,7 +29,7 @@ function exportMemberRef(spec: TypeMember, parentScope: Scope, namespace: schema
 	var outMember = member.getOutMember(context);
 	var outRef = new MemberRef(outMember as any, spec.min, spec.max);
 
-	if(!outMember.typeList) exportMember(member, outRef, parentScope, namespace, context);
+	if(!outMember.typeSpecList) exportMember(member, outRef, parentScope, namespace, context);
 
 	return(outRef);
 }
@@ -46,7 +46,7 @@ function exportMember(member: types.MemberBase, outRef: any, parentScope: Scope,
 		outMember.namespace = context.copyNamespace(otherNamespace);
 	} else outMember.namespace = namespace;
 
-	outMember.typeList = mergeDuplicateTypes(member.getTypes()).map(
+	outMember.typeSpecList = mergeDuplicateTypes(member.getTypes()).map(
 		(type: types.TypeBase) => {
 			var outType = type.getOutType(context);
 			var qName = type.qName;
@@ -168,13 +168,13 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 
 	if(listType) {
 		for(var spec of listType) {
-			var outMember = new schema.Member('');
+			var outMember = new MemberSpec('');
 			var outMemberRef = new MemberRef(outMember as any, spec.min, spec.max);
 
 			outMember.namespace = namespace;
-			outMember.typeList = [
+			outMember.typeSpecList = [
 				exportType(spec.item as types.TypeBase, namespace, context)
-			];
+			] as any;
 
 			outType.addChild(outMemberRef);
 		}
@@ -229,12 +229,12 @@ export function exportNamespace(namespace: Namespace, context: schema.Context): 
 			exportNamespace(importTbl[namespaceId], context);
 		}
 
-		for(var member of outNamespace.pendingSubstituteList) {
-			var proxy = member.substitutes.getProxy();
+		for(var member of outNamespace.pendingSubstituteList as any) {
+			var proxy = member.substitutes.getProxy(schema.Type);
 
 			if(member.substitutes.namespace == member.namespace) {
 				if(member.isSubstituted || member.isAbstract) {
-					proxy.addMixin(member.getProxy());
+					proxy.addMixin(member.getProxy(schema.Type));
 				} else {
 					proxy.addChildSpec(member);
 				}
