@@ -1,9 +1,10 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {MemberRef} from 'cxml';
+
 import {Type} from '../Type';
 import {Member} from '../Member';
-import {MemberRef} from '../MemberRef';
 import {Transform} from './Transform';
 
 export interface AnonType {
@@ -111,11 +112,14 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 	}
 
 	visitType(type: Type) {
-		var refList: MemberRef[] = [];
-		var ref: MemberRef;
+		// var refList: MemberRef[] = [];
+		var refList: any[] = [];
+		// var ref: MemberRef;
+		var ref: any;
 		var member: Member;
 		var other: Type;
-		var otherMember: MemberRef;
+		// var otherMember: MemberRef;
+		var otherMember: any;
 		var iter: number;
 
 		if(type.name) type.safeName = sanitizeName(type.name);
@@ -178,7 +182,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 			}
 
 			if(ref.max <= 1 && !type.isProxy && (member.isSubstituted || member.isAbstract)) {
-				var proxy = member.getProxy();
+				let proxy = member.getProxy();
 
 				type.addMixin(proxy);
 
@@ -208,7 +212,7 @@ export class Sanitize extends Transform<Sanitize, void, State> {
 
 			this.addNameToMemberTypes(type, ref.member);
 
-			var proxy = ref.member.proxy;
+			let proxy = ref.member.proxy;
 
 			if(proxy && !(proxy as any).sanitized) {
 				(proxy as any).sanitized = true;

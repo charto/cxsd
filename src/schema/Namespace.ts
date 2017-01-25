@@ -1,20 +1,19 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import {NamespaceBase} from 'cxml';
+import {NamespaceBase, MemberRef} from 'cxml';
 
 import {Context} from './Context';
 import {NamespaceRef} from './NamespaceRef';
 import {Type} from './Type';
 import {Member} from './Member';
-import {MemberRef} from './MemberRef';
 
 export interface ImportContent {
 	typeTbl: { [key: string]: Type },
 	memberTbl: { [key: string]: Member }
 }
 
-export class Namespace extends NamespaceBase<Context, Namespace> {
+export class Namespace extends NamespaceBase<Context> {
 	addRef(shortName: string, namespace: Namespace) {
 		var id = namespace.id;
 
@@ -110,7 +109,8 @@ export class Namespace extends NamespaceBase<Context, Namespace> {
 	/** Types from other namespaces augmented with members from this namespace. */
 	augmentTbl: {
 		[namespaceId: string]: {
-			[typeId: string]: { type: Type, refList: MemberRef[] }
+			// [typeId: string]: { type: Type, refList: MemberRef[] }
+			[typeId: string]: { type: Type, refList: any[] }
 		}
 	} = {};
 

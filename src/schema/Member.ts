@@ -1,9 +1,10 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {MemberRef} from 'cxml';
+
 import {Namespace} from './Namespace';
 import {Type} from './Type';
-import {MemberRef} from './MemberRef';
 
 import {MemberBase} from './MemberBase';
 import {ItemBase} from './Item';
@@ -15,7 +16,7 @@ export class Member extends MemberBase<Member, Namespace, ItemBase<Member>> {
 	}
 
 	getRef() {
-		return(new MemberRef(this, 0, 1));
+		return(new MemberRef(this as any, 0, 1));
 	}
 
 	getProxy() {

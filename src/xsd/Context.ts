@@ -14,7 +14,7 @@ import * as schema from '../schema';
 
 /** XML parser context, holding definitions of all imported namespaces. */
 
-export class Context extends ContextBase<Context, Namespace> {
+export class Context extends ContextBase<Namespace> {
 	constructor(schemaContext: schema.Context) {
 		super(Namespace);
 

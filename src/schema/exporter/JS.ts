@@ -1,11 +1,12 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {MemberRef, MemberRefFlag} from 'cxml';
+
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
 import {Namespace} from '../Namespace';
 import {Member} from '../Member';
-import {MemberRef} from '../MemberRef';
 import {Type} from '../Type';
 
 export type NumTbl = { [id: string]: number };
@@ -47,14 +48,15 @@ export class JS extends Exporter {
 		);
 	}
 
-	writeMemberRef(ref: MemberRef, memberNumTbl: NumTbl) {
+	// writeMemberRef(ref: MemberRef, memberNumTbl: NumTbl) {
+	writeMemberRef(ref: any, memberNumTbl: NumTbl) {
 		var member = ref.member;
 		var name = ref.safeName;
 		if(name == member.safeName) name = null;
 
 		var flags = 0;
-		if(ref.min < 1) flags |= MemberRef.optionalFlag;
-		if(ref.max > 1) flags |= MemberRef.arrayFlag;
+		if(ref.min < 1) flags |= MemberRefFlag.optional;
+		if(ref.max > 1) flags |= MemberRefFlag.array;
 
 		return(
 			'[' +

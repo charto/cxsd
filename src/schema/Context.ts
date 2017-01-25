@@ -5,7 +5,7 @@ import {ContextBase} from 'cxml';
 
 import {Namespace} from './Namespace';
 
-export class Context extends ContextBase<Context, Namespace> {
+export class Context extends ContextBase<Namespace> {
 	constructor() {
 		super(Namespace);
 	}

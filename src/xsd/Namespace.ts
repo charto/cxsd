@@ -10,7 +10,7 @@ import {Scope} from './Scope';
 
 /** XML namespace, binding it to syntax definitions. */
 
-export class Namespace extends NamespaceBase<Context, Namespace> {
+export class Namespace extends NamespaceBase<Context> {
 	constructor(name: string, id: number, context: Context) {
 		super(name, id, context);
 

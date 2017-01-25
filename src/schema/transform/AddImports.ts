@@ -4,7 +4,6 @@
 import {Namespace, ImportContent} from '../Namespace';
 import {Type} from '../Type';
 import {Member} from '../Member';
-import {MemberRef} from '../MemberRef';
 import {Transform} from './Transform';
 
 export type Output = { [namespaceId: string]: ImportContent };

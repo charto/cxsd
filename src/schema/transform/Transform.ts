@@ -2,10 +2,10 @@
 // Released under the MIT license, see LICENSE.
 
 import * as Promise from 'bluebird';
+import {MemberRef} from 'cxml';
 
 import {Namespace} from '../Namespace';
 import {Type} from '../Type';
-import {MemberRef} from '../MemberRef';
 
 /** TransformType is a class derived from Transform, used like CRTP in C++. */
 
@@ -16,8 +16,10 @@ export abstract class Transform<TransformType extends Transform<TransformType, O
 	}
 
 	getTypeMembers(type: Type) {
-		var memberList: MemberRef[] = [];
-		var ref: MemberRef;
+		// var memberList: MemberRef[] = [];
+		var memberList: any[] = [];
+		// var ref: MemberRef;
+		var ref: any;
 
 		if(type.attributeList) {
 			for(ref of type.attributeList) memberList.push(ref);

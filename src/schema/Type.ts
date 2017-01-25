@@ -1,9 +1,10 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {MemberRef} from 'cxml';
+
 import {Namespace} from './Namespace';
 import {Member} from './Member';
-import {MemberRef} from './MemberRef';
 
 export class Type {
 	constructor(name: string) {
@@ -55,9 +56,11 @@ export class Type {
 	attributeTbl: { [name: string]: MemberRef } = {};
 	childTbl: { [name: string]: MemberRef } = {};
 	/** XML attributes in an element of this type. */
-	attributeList: MemberRef[] = [];
+	// attributeList: MemberRef[] = [];
+	attributeList: any[] = [];
 	/** Allowed child elements for an element of this type. */
-	childList: MemberRef[] = [];
+	// childList: MemberRef[] = [];
+	childList: any[] = [];
 	/** Other types added as mixins. */
 	mixinList: Type[] = [];
 
@@ -67,7 +70,8 @@ export class Type {
 	/** For an anonymous type, the member (of another type) that it defines.
 	  * Used for giving the type a descriptive name. */
 	containingType: Type;
-	containingRef: MemberRef;
+	// containingRef: MemberRef;
+	containingRef: any;
 
 	comment: string;
 

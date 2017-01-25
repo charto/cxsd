@@ -1,6 +1,8 @@
 // This file is part of cxsd, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {MemberRef} from 'cxml';
+
 import {Namespace} from './Namespace';
 import {Scope, TypeMember} from './Scope';
 import {Source} from './Source';
@@ -25,14 +27,15 @@ function mergeDuplicateTypes(typeList: types.TypeBase[]) {
 function exportMemberRef(spec: TypeMember, parentScope: Scope, namespace: schema.Namespace, context: schema.Context) {
 	var member = spec.item as types.MemberBase;
 	var outMember = member.getOutMember(context);
-	var outRef = new schema.MemberRef(outMember, spec.min, spec.max);
+	var outRef = new MemberRef(outMember as any, spec.min, spec.max);
 
 	if(!outMember.typeList) exportMember(member, outRef, parentScope, namespace, context);
 
 	return(outRef);
 }
 
-function exportMember(member: types.MemberBase, outRef: schema.MemberRef, parentScope: Scope, namespace: schema.Namespace, context: schema.Context) {
+// function exportMember(member: types.MemberBase, outRef: MemberRef, parentScope: Scope, namespace: schema.Namespace, context: schema.Context) {
+function exportMember(member: types.MemberBase, outRef: any, parentScope: Scope, namespace: schema.Namespace, context: schema.Context) {
 	var outMember = outRef.member;
 	var scope = member.getScope();
 	var otherNamespace = scope.namespace;
@@ -166,7 +169,7 @@ function exportType(type: types.TypeBase, namespace: schema.Namespace, context: 
 	if(listType) {
 		for(var spec of listType) {
 			var outMember = new schema.Member('');
-			var outMemberRef = new schema.MemberRef(outMember, spec.min, spec.max);
+			var outMemberRef = new MemberRef(outMember as any, spec.min, spec.max);
 
 			outMember.namespace = namespace;
 			outMember.typeList = [

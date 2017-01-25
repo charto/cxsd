@@ -1,11 +1,12 @@
 // This file is part of cxsd, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
+import {MemberRef} from 'cxml';
+
 import {Cache} from 'cget'
 import {Exporter} from './Exporter';
 import {Namespace} from '../Namespace';
 import {Member} from '../Member';
-import {MemberRef} from '../MemberRef';
 import {Type} from '../Type';
 
 var docName = 'document';
@@ -109,7 +110,8 @@ export class TS extends Exporter {
 		return(' extends ' + parentList.join(', '));
 	}
 
-	writeTypeList(ref: MemberRef) {
+	// writeTypeList(ref: MemberRef) {
+	writeTypeList(ref: any) {
 		var typeList = ref.member.typeList;
 
 		if(ref.max > 1 && ref.member.proxy) typeList = [ref.member.proxy];
@@ -244,7 +246,8 @@ export class TS extends Exporter {
 		return(output.join(''));
 	}
 
-	writeSubstitutions(type: Type, refList: MemberRef[], output: string[]) {
+	// writeSubstitutions(type: Type, refList: MemberRef[], output: string[]) {
+	writeSubstitutions(type: Type, refList: any[], output: string[]) {
 		for(var ref of refList) {
 			var proxy = ref.member.proxy;
 
