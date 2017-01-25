@@ -1,7 +1,7 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as cxml from 'cxml';
+import {NamespaceBase} from 'cxml';
 
 import {Context} from './Context';
 import {NamespaceRef} from './NamespaceRef';
@@ -14,7 +14,7 @@ export interface ImportContent {
 	memberTbl: { [key: string]: Member }
 }
 
-export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
+export class Namespace extends NamespaceBase<Context, Namespace> {
 	addRef(shortName: string, namespace: Namespace) {
 		var id = namespace.id;
 

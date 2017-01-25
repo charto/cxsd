@@ -63,7 +63,7 @@ export class Source {
 	/** Find a namespace according to its full name or the short name as used in this source file. */
 
 	lookupNamespace(ref: string) {
-		return(this.namespaceRefTbl[ref] || this.context.getNamespace(ref));
+		return(this.namespaceRefTbl[ref] || this.context.namespaceByName(ref));
 	}
 
 	/** Resolve a possible relative URL in the context of this source file. */

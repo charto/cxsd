@@ -1,7 +1,7 @@
 // This file is part of cxsd, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as cxml from 'cxml';
+import {NamespaceBase} from 'cxml';
 
 import {Context} from './Context';
 import {Loader} from './Loader';
@@ -10,7 +10,7 @@ import {Scope} from './Scope';
 
 /** XML namespace, binding it to syntax definitions. */
 
-export class Namespace extends cxml.NamespaceBase<Context, Namespace> {
+export class Namespace extends NamespaceBase<Context, Namespace> {
 	constructor(name: string, id: number, context: Context) {
 		super(name, id, context);
 

@@ -1,7 +1,7 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as cxml from 'cxml';
+import {ContextBase} from 'cxml';
 
 import {Namespace} from './Namespace';
 import {Scope} from './Scope';
@@ -14,7 +14,7 @@ import * as schema from '../schema';
 
 /** XML parser context, holding definitions of all imported namespaces. */
 
-export class Context extends cxml.ContextBase<Context, Namespace> {
+export class Context extends ContextBase<Context, Namespace> {
 	constructor(schemaContext: schema.Context) {
 		super(Namespace);
 

@@ -1,13 +1,14 @@
 // This file is part of cxsd, copyright (c) 2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
-import * as cxml from 'cxml';
-
 import {Namespace} from './Namespace';
 import {Type} from './Type';
 import {MemberRef} from './MemberRef';
 
-export class Member extends cxml.MemberBase<Member, Namespace, cxml.ItemBase<Member>> {
+import {MemberBase} from './MemberBase';
+import {ItemBase} from './Item';
+
+export class Member extends MemberBase<Member, Namespace, ItemBase<Member>> {
 	constructor(name: string) {
 		super(null, name);
 		this.surrogateKey = Member.nextKey++;

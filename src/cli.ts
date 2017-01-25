@@ -4,7 +4,6 @@
 import * as cmd from 'commander';
 
 import {Cache, FetchOptions} from 'cget';
-import * as cxml from 'cxml';
 
 import {Context} from './xsd/Context';
 import {Namespace} from './xsd/Namespace';
