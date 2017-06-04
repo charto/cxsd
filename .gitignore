@@ -4,3 +4,8 @@ dist/
 *.log.*
 *.log
 *.tgz
+cget/
+cxml/
+test/cache/
+test/xmlns/
+test/spec.js
