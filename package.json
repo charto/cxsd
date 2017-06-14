@@ -7,18 +7,15 @@
   },
   "scripts": {
     "tsc": "tsc",
-    "postinstall-cget": "mkdir -p cget && rm -rf cget && git clone https://github.com/charto/cget.git && cd cget && git checkout 5c16eef4f59e0fe6b65ce5f9d176739be5ba58c0 && npm install && cd .. && npm link ./cget",
-    "postinstall-cxml": "mkdir -p cxml && rm -rf cxml && git clone https://github.com/charto/cxml.git && cd cxml && git checkout 1f55f2fbe9e5e70ee4b98352078500f4a9bed6d6 && npm install && cd .. && npm link ./cxml",
+    "old-postinstall-cget": "mkdir -p cget && rm -rf cget && git clone https://github.com/charto/cget.git && cd cget && git checkout 5c16eef4f59e0fe6b65ce5f9d176739be5ba58c0 && npm install && cd .. && npm link ./cget",
+    "old-postinstall-cxml": "mkdir -p cxml && rm -rf cxml && git clone https://github.com/charto/cxml.git && cd cxml && git checkout 1f55f2fbe9e5e70ee4b98352078500f4a9bed6d6 && npm install && cd .. && npm link ./cxml",
     "build": "tsc -p tsconfig.json",
     "test": "npm-run-all test:*",
-    "test:xsd": "npm-run-all test:xsd:*",
-    "test:xsd:clean": "cd test && mkdir -p xmlns && rm -rf xmlns && cd ..",
-    "test:xsd:compile": "cd test && node ../bin/cxsd https://raw.githubusercontent.com/ariutta/GPML/e427899e179919e220280f5cf93948c8d9ae7dc8/GPML2013a.xsd && cd ..",
-    "test:xsd:rename": "cd test && mv ./xmlns/www.biopax.org/release/biopax-level3.owl_.d.ts ./xmlns/www.biopax.org/release/biopax-level3.owl.d.ts && mv ./xmlns/www.biopax.org/release/biopax-level3.owl_.js ./xmlns/www.biopax.org/release/biopax-level3.owl.js && cd ..",
-    "test:spec": "npm-run-all test:spec:*",
-    "test:spec:compile": "cd test && tsc spec.ts && cd ..",
-    "test:spec:jest": "jest",
-    "test:spec:run": "node test/spec.js"
+    "test:build": "npm-run-all test:build:*",
+    "test:build:clean": "cd test && mkdir -p xmlns && rm -rf xmlns && cd ..",
+    "test:build:compile": "cd test && node ../bin/cxsd https://raw.githubusercontent.com/ariutta/GPML/e427899e179919e220280f5cf93948c8d9ae7dc8/GPML2013a.xsd && cd ..",
+    "test:build:rename": "cd test && mv ./xmlns/www.biopax.org/release/biopax-level3.owl_.d.ts ./xmlns/www.biopax.org/release/biopax-level3.owl.d.ts && mv ./xmlns/www.biopax.org/release/biopax-level3.owl_.js ./xmlns/www.biopax.org/release/biopax-level3.owl.js && cd ..",
+    "test:run": "jest"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -29,7 +26,7 @@
     "transform": {
       "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },
-    "testRegex": "/src/.*\\.test\\.(ts|tsx|js)$"
+    "testRegex": "((/src/.*\\.test\\.(ts|tsx|js))|(/test/spec/.*\\.(ts|tsx|js)))$"
   },
   "author": "Juha Järvi",
   "license": "MIT",

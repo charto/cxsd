@@ -257,27 +257,31 @@ export class JS extends Exporter {
     }
 
     return []
-      .concat(['var cxml = require("cxml");'], this.writeHeader(), [
-        "",
-        "cxml.register(" +
-          "'" +
-          namespace.name +
-          "', " +
-          "exports, " +
-          "[" +
-          importSpecList.join(",") +
-          "\n], " +
-          "[" +
-          exportTypeNameList.join(",") +
-          "\n], " +
-          "[" +
-          typeSpecList.join(",") +
-          "\n], " +
-          "[" +
-          memberSpecList.join(",") +
-          "\n]" +
-          ");"
-      ])
+      .concat(
+        ['var cxml = require("@wikipathways/cxml");'],
+        this.writeHeader(),
+        [
+          "",
+          "cxml.register(" +
+            "'" +
+            namespace.name +
+            "', " +
+            "exports, " +
+            "[" +
+            importSpecList.join(",") +
+            "\n], " +
+            "[" +
+            exportTypeNameList.join(",") +
+            "\n], " +
+            "[" +
+            typeSpecList.join(",") +
+            "\n], " +
+            "[" +
+            memberSpecList.join(",") +
+            "\n]" +
+            ");"
+        ]
+      )
       .join("\n");
   }
 

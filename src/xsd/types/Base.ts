@@ -13,8 +13,12 @@ export interface BaseClass {
   /** Returns other classes allowed as children. */
   mayContain(): BaseClass[];
 
-  name: string;
   rule: Rule;
+
+  // TODO I made the name property optional, because if I don't, I get the following error:
+  // src/xsd/Exporter.ts|152 col 40 error| Argument of type 'typeof Primitive' is not assignable to parameter of type 'BaseClass'. Property 'name' is missing in type 'typeof Primitive'.
+  // But should it be optional?
+  name?: string;
 }
 
 /** Common handler base class for all schema tags. */
