@@ -1,14 +1,11 @@
 {
-  "name": "cxsd",
-  "version": "0.2.0",
+  "name": "@wikipathways/cxsd",
+  "version": "0.2.1",
   "description": "Streaming XSD parser and XML parser generator with TypeScript output",
   "bin": {
     "cxsd": "bin/cxsd"
   },
   "scripts": {
-    "tsc": "tsc",
-    "old-postinstall-cget": "mkdir -p cget && rm -rf cget && git clone https://github.com/charto/cget.git && cd cget && git checkout 5c16eef4f59e0fe6b65ce5f9d176739be5ba58c0 && npm install && cd .. && npm link ./cget",
-    "old-postinstall-cxml": "mkdir -p cxml && rm -rf cxml && git clone https://github.com/charto/cxml.git && cd cxml && git checkout 1f55f2fbe9e5e70ee4b98352078500f4a9bed6d6 && npm install && cd .. && npm link ./cxml",
     "build": "tsc -p tsconfig.json",
     "test": "npm-run-all test:*",
     "test:build": "npm-run-all test:build:*",
