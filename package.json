@@ -3,21 +3,17 @@
   "version": "0.2.0",
   "description": "Streaming XSD parser and XML parser generator with TypeScript output",
   "bin": {
-    "cxsd": "cxsd-cli.js"
+    "cxsd": "bin/cxsd"
   },
   "scripts": {
     "tsc": "tsc",
-    "preinstall": "npm-run-all preinstall:*",
-    "preinstall:cget": "mkdir -p node_modules/cget && rm -rf node_modules/cget",
-    "preinstall:cxml": "mkdir -p node_modules/cxml && rm -rf node_modules/cxml",
-    "postinstall": "npm-run-all postinstall:*",
-    "postinstall:cget": "mkdir -p cget && rm -rf cget && git clone https://github.com/charto/cget.git && cd cget && git checkout 5c16eef4f59e0fe6b65ce5f9d176739be5ba58c0 && npm install && cd .. && npm link ./cget",
-    "postinstall:cxml": "mkdir -p cxml && rm -rf cxml && git clone https://github.com/charto/cxml.git && cd cxml && git checkout 1f55f2fbe9e5e70ee4b98352078500f4a9bed6d6 && npm install && cd .. && npm link ./cxml",
-    "build": "tsc -p src",
+    "postinstall-cget": "mkdir -p cget && rm -rf cget && git clone https://github.com/charto/cget.git && cd cget && git checkout 5c16eef4f59e0fe6b65ce5f9d176739be5ba58c0 && npm install && cd .. && npm link ./cget",
+    "postinstall-cxml": "mkdir -p cxml && rm -rf cxml && git clone https://github.com/charto/cxml.git && cd cxml && git checkout 1f55f2fbe9e5e70ee4b98352078500f4a9bed6d6 && npm install && cd .. && npm link ./cxml",
+    "build": "tsc -p tsconfig.json",
     "test": "npm-run-all test:*",
     "test:xsd": "npm-run-all test:xsd:*",
     "test:xsd:clean": "cd test && mkdir -p xmlns && rm -rf xmlns && cd ..",
-    "test:xsd:compile": "cd test && node ../cxsd-cli.js https://raw.githubusercontent.com/ariutta/GPML/e427899e179919e220280f5cf93948c8d9ae7dc8/GPML2013a.xsd && cd ..",
+    "test:xsd:compile": "cd test && node ../bin/cxsd https://raw.githubusercontent.com/ariutta/GPML/e427899e179919e220280f5cf93948c8d9ae7dc8/GPML2013a.xsd && cd ..",
     "test:xsd:rename": "cd test && mv ./xmlns/www.biopax.org/release/biopax-level3.owl_.d.ts ./xmlns/www.biopax.org/release/biopax-level3.owl.d.ts && mv ./xmlns/www.biopax.org/release/biopax-level3.owl_.js ./xmlns/www.biopax.org/release/biopax-level3.owl.js && cd ..",
     "test:spec": "npm-run-all test:spec:*",
     "test:spec:compile": "cd test && tsc spec.ts && cd ..",
@@ -58,9 +54,9 @@
     "@types/commander": "^2.9.1",
     "@types/node": "^7.0.31",
     "bluebird": "^3.5.0",
-    "cget": "^0.1.0",
+    "@wikipathways/cget": "^0.1.0-1",
     "commander": "^2.9.0",
-    "cxml": "^0.1.1",
+    "@wikipathways/cxml": "^0.2.1-1",
     "node-expat": "^2.3.15"
   },
   "devDependencies": {
