@@ -46,6 +46,7 @@ function exportMember(member: types.MemberBase, outRef: any, parentScope: Scope,
 		outMember.namespace = context.copyNamespace(otherNamespace);
 	} else outMember.namespace = namespace;
 
+	//outMember.typeSpecList = member.getTypes().map(
 	outMember.typeSpecList = mergeDuplicateTypes(member.getTypes()).map(
 		(type: types.TypeBase) => {
 			var outType = type.getOutType(context);

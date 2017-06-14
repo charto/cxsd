@@ -10,8 +10,41 @@ var result = parser.parse(
   example.document
 );
 
-result.then(doc => {
-  console.log("\n=== 123 ===\n");
+parser.attach(
+  class CustomHandlerPathwayComment extends example.document.Pathway.Comment[0]
+    .constructor {
+    _before() {
+      console.log("_before");
+      console.log(this);
+    }
 
-  console.log(JSON.stringify(doc, null, 2));
+    _after() {
+      console.log("_after");
+      console.log(this);
+    }
+  }
+);
+
+parser.attach(
+  class CustomHandlerDataNodeComment extends example.document.Pathway
+    .DataNode[0].Comment[0].constructor {
+    _before() {
+      console.log("_before");
+      console.log(this);
+    }
+
+    _after() {
+      console.log("_after");
+      console.log(this);
+    }
+  }
+);
+
+test("the data is peanut butter", () => {
+  expect.assertions(1);
+  return result.then(doc => {
+    //console.log("\n=== 123 ===\n");
+    //console.log(JSON.stringify(doc, null, 2));
+    expect(typeof doc).toBe("object");
+  });
 });

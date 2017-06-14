@@ -13,7 +13,7 @@
     "postinstall": "npm-run-all postinstall:*",
     "postinstall:cget": "mkdir -p cget && rm -rf cget && git clone https://github.com/charto/cget.git && cd cget && git checkout 5c16eef4f59e0fe6b65ce5f9d176739be5ba58c0 && npm install && cd .. && npm link ./cget",
     "postinstall:cxml": "mkdir -p cxml && rm -rf cxml && git clone https://github.com/charto/cxml.git && cd cxml && git checkout 1f55f2fbe9e5e70ee4b98352078500f4a9bed6d6 && npm install && cd .. && npm link ./cxml",
-    "prepublish": "tsc -p src",
+    "build": "tsc -p src",
     "test": "npm-run-all test:*",
     "test:xsd": "npm-run-all test:xsd:*",
     "test:xsd:clean": "cd test && mkdir -p xmlns && rm -rf xmlns && cd ..",
@@ -21,7 +21,19 @@
     "test:xsd:rename": "cd test && mv ./xmlns/www.biopax.org/release/biopax-level3.owl_.d.ts ./xmlns/www.biopax.org/release/biopax-level3.owl.d.ts && mv ./xmlns/www.biopax.org/release/biopax-level3.owl_.js ./xmlns/www.biopax.org/release/biopax-level3.owl.js && cd ..",
     "test:spec": "npm-run-all test:spec:*",
     "test:spec:compile": "cd test && tsc spec.ts && cd ..",
+    "test:spec:jest": "jest",
     "test:spec:run": "node test/spec.js"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "/src/.*\\.test\\.(ts|tsx|js)$"
   },
   "author": "Juha Järvi",
   "license": "MIT",
@@ -42,17 +54,20 @@
     "typescript"
   ],
   "dependencies": {
-    "@types/bluebird": "^3.0.37",
-    "@types/commander": "^2.3.31",
-    "@types/node": "^7.0.0",
-    "bluebird": "^3.4.7",
+    "@types/bluebird": "^3.5.5",
+    "@types/commander": "^2.9.1",
+    "@types/node": "^7.0.31",
+    "bluebird": "^3.5.0",
     "cget": "^0.1.0",
-    "commander": "~2.9.0",
+    "commander": "^2.9.0",
     "cxml": "^0.1.1",
-    "node-expat": "~2.3.15"
+    "node-expat": "^2.3.15"
   },
   "devDependencies": {
+    "@types/jest": "^19.2.4",
+    "jest": "^20.0.4",
     "npm-run-all": "^4.0.2",
+    "ts-jest": "^20.0.6",
     "tslint": "^4.3.1",
     "typescript": "^2.3.4"
   }
