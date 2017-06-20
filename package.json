@@ -1,6 +1,6 @@
 {
   "name": "@wikipathways/cxsd",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Streaming XSD parser and XML parser generator with TypeScript output",
   "bin": {
     "cxsd": "bin/cxsd"
@@ -9,9 +9,12 @@
     "build": "tsc -p tsconfig.json",
     "test": "npm-run-all test:*",
     "test:build": "npm-run-all test:build:*",
-    "test:build:clean": "cd test && mkdir -p xmlns && rm -rf xmlns && cd ..",
-    "test:build:compile": "cd test && node ../bin/cxsd https://raw.githubusercontent.com/ariutta/GPML/e427899e179919e220280f5cf93948c8d9ae7dc8/GPML2013a.xsd && cd ..",
-    "test:build:rename": "cd test && mv ./xmlns/www.biopax.org/release/biopax-level3.owl_.d.ts ./xmlns/www.biopax.org/release/biopax-level3.owl.d.ts && mv ./xmlns/www.biopax.org/release/biopax-level3.owl_.js ./xmlns/www.biopax.org/release/biopax-level3.owl.js && cd ..",
+    "test:build:clean": "mkdir -p cache && rm -rf cache && cd test && mkdir -p cache && rm -rf cache && mkdir -p xmlns && rm -rf xmlns && cd ..",
+    "test:build:compile": "cd test && node ../bin/cxsd https://cdn.rawgit.com/ariutta/GPML/e869fe1dcd824348bc4e00ef283547ff8b7b371c/GPML2013a.xsd && cd ..",
+    "test1:build:compile": "cd test && node ../bin/cxsd http://localhost:8080/GPML2013a.xsd && cd ..",
+    "test2:build:rename": "npm-run-all test:build:rename:*",
+    "test2:build:rename:rdf": "mv ./test/xmlns/www.w3.org/1999/02/22-rdf-syntax-ns_.js ./test/xmlns/www.w3.org/1999/02/22-rdf-syntax-ns.js && mv ./test/xmlns/www.w3.org/1999/02/22-rdf-syntax-ns_.d.ts ./test/xmlns/www.w3.org/1999/02/22-rdf-syntax-ns.d.ts",
+    "test2:build:rename:bp": "mv ./test/xmlns/www.biopax.org/release/biopax-level3.owl_.d.ts ./test/xmlns/www.biopax.org/release/biopax-level3.owl.d.ts && mv ./test/xmlns/www.biopax.org/release/biopax-level3.owl_.js ./test/xmlns/www.biopax.org/release/biopax-level3.owl.js",
     "test:run": "jest"
   },
   "jest": {
@@ -20,6 +23,7 @@
       "tsx",
       "js"
     ],
+    "testEnvironment": "node",
     "transform": {
       "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     },

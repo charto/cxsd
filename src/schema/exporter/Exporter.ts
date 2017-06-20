@@ -44,11 +44,11 @@ export abstract class Exporter extends Transform<Exporter, boolean, State> {
     var doc = this.doc;
     if (!doc) return null;
 
-    this.cacheDir = path.dirname(
-      this.state.cache.getCachePathSync(new Address(doc.namespace.name))
-    );
+    const address = new Address(doc.namespace.name);
 
-    var outName = this.getOutName(doc.namespace.name);
+    this.cacheDir = path.dirname(this.state.cache.getCachePathSync(address));
+
+    var outName = this.getOutName(address.uri);
 
     return (this.state.cache.isCached(outName) as Promise<
       boolean

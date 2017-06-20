@@ -5,294 +5,41 @@
   <BiopaxRef>af5</BiopaxRef>
   <BiopaxRef>bc1</BiopaxRef>
   <BiopaxRef>e3e</BiopaxRef>
-  <Graphics BoardWidth="1130.0" BoardHeight="1170.0" />
-  <DataNode TextLabel="GeneProduct" GraphId="b5cd6" Type="GeneProduct">
-    <Comment>DataNode: anotherComment</Comment>
-    <Graphics CenterX="65.10084033613452" CenterY="71.65546218487401" Width="80.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
+  <Graphics BoardWidth="507.08491343775756" BoardHeight="539.2366034624897" />
+  <DataNode TextLabel="GeneProduct" GraphId="c18fe" Type="GeneProduct" GroupRef="cac6b">
+    <Graphics CenterX="259.0806974293723" CenterY="251.9612715958568" Width="80.0" Height="20.0" ZOrder="32768" FontWeight="Bold" FontStyle="Italic" FontSize="10" Valign="Middle" />
     <Xref Database="" ID="" />
   </DataNode>
-  <DataNode TextLabel="Cholesterol Ester" GraphId="da15c" Type="Metabolite">
-    <Graphics CenterX="239.31512605042036" CenterY="108.16806722689088" Width="97.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" Color="0000ff" />
-    <Xref Database="ChEBI" ID="CHEBI:17002" />
-  </DataNode>
-  <DataNode TextLabel="Pathway" GraphId="ec531" Type="Pathway">
-    <Graphics CenterX="386.0" CenterY="65.0" Width="80.0" Height="20.0" ZOrder="32768" FontWeight="Bold" FontSize="12" Valign="Middle" ShapeType="None" Color="14961e" />
+  <DataNode TextLabel="GeneProduct" GraphId="d3ef3" Type="GeneProduct" GroupRef="cac6b">
+    <Graphics CenterX="258.40871587904337" CenterY="316.3025109843138" Width="80.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
     <Xref Database="" ID="" />
   </DataNode>
-  <DataNode TextLabel="Protein" GraphId="a28dd" Type="Protein">
-    <BiopaxRef>d79</BiopaxRef>
-    <BiopaxRef>d51</BiopaxRef>
-    <BiopaxRef>ce6</BiopaxRef>
-    <Graphics CenterX="576.6554621848742" CenterY="99.56302521008408" Width="80.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
-    <Xref Database="" ID="" />
-  </DataNode>
-  <DataNode TextLabel="Rna" GraphId="fbe18" Type="Rna">
-    <BiopaxRef>bed</BiopaxRef>
-    <Graphics CenterX="751.0" CenterY="68.0" Width="80.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
-    <Xref Database="" ID="" />
-  </DataNode>
-  <DataNode TextLabel="Unknown" GraphId="efe87">
-    <Graphics CenterX="911.0" CenterY="68.0" Width="80.0" Height="20.0" ZOrder="32768" FontSize="10" Valign="Middle" />
-    <Xref Database="" ID="" />
-  </DataNode>
-  <State GraphRef="a28dd" TextLabel="P" GraphId="ca03f">
-    <BiopaxRef>f90</BiopaxRef>
-    <Graphics RelX="1.0" RelY="1.0" Width="15.0" Height="15.0" ShapeType="Oval" />
-    <Xref Database="" ID="" />
-  </State>
-  <Interaction GraphId="id66cc2f94">
-    <BiopaxRef>faa</BiopaxRef>
-    <BiopaxRef>d45</BiopaxRef>
-    <Graphics ConnectorType="Curved" ZOrder="12288" LineThickness="1.0">
-      <Point X="65.10084033613452" Y="81.65546218487401" GraphRef="b5cd6" RelX="0.0" RelY="1.0" />
-      <Point X="152.20798319327744" Y="131.20176405733187" />
-      <Point X="239.31512605042036" Y="118.16806722689088" GraphRef="da15c" RelX="0.0" RelY="1.0" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="idfdf4834b">
+  <Interaction GraphId="id1f19cc2c" GroupRef="cac6b">
     <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="287.81512605042036" Y="108.16806722689088" GraphRef="da15c" RelX="1.0" RelY="0.0" />
-      <Point X="346.0" Y="65.0" GraphRef="ec531" RelX="-1.0" RelY="0.0" ArrowHead="Arrow" />
+      <Point X="259.0806974293723" Y="261.96127159585683" GraphRef="c18fe" RelX="0.0" RelY="1.0" />
+      <Point X="159.93404781533388" Y="282.7699917559769" ArrowHead="Arrow" />
     </Graphics>
     <Xref Database="" ID="" />
   </Interaction>
-  <Interaction GraphId="id69d9d462">
-    <Graphics ConnectorType="Elbow" ZOrder="12288" LineStyle="Broken" LineThickness="1.0">
-      <Point X="386.0" Y="75.0" GraphRef="ec531" RelX="0.0" RelY="1.0" />
-      <Point X="481.3277310924371" Y="134.0" />
-      <Point X="576.6554621848742" Y="109.56302521008408" GraphRef="a28dd" RelX="0.0" RelY="1.0" />
-      <Anchor Position="0.4" Shape="None" GraphId="f612d" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="id673562ba">
-    <Graphics ConnectorType="Elbow" ZOrder="12288" LineStyle="Broken" LineThickness="1.0">
-      <Point X="536.6554621848742" Y="99.56302521008408" GraphRef="a28dd" RelX="-1.0" RelY="0.0" />
-      <Point X="711.0" Y="68.0" GraphRef="fbe18" RelX="-1.0" RelY="0.0" ArrowHead="Arrow" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="id400d3f0e">
-    <Graphics ConnectorType="Elbow" ZOrder="12288" LineThickness="1.0">
-      <Point X="604.0" Y="156.0" />
-      <Point X="558.0" Y="179.0" />
-      <Point X="622.5" Y="202.0" />
-      <Point X="687.0" Y="211.0" />
-      <Point X="667.0" Y="220.0" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="idc8dde9ad">
-    <Graphics ConnectorType="Curved" ZOrder="12288" LineThickness="1.0">
-      <Point X="743.0" Y="136.0" />
-      <Point X="824.0" Y="263.0" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="id7751ea14">
-    <Graphics ConnectorType="Curved" ZOrder="12288" LineThickness="1.0">
-      <Point X="911.0" Y="78.0" GraphRef="efe87" RelX="0.0" RelY="1.0" />
-      <Point X="791.0" Y="68.0" GraphRef="fbe18" RelX="1.0" RelY="0.0" ArrowHead="TBar" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="id6b355758">
+  <Interaction>
     <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="40.0" Y="251.0" />
-      <Point X="48.0" Y="319.0" ArrowHead="mim-necessary-stimulation" />
+      <Point X="258.40871587904337" Y="306.3025109843138" GraphRef="d3ef3" RelX="0.0" RelY="-1.0" />
+      <Point X="151.93404781533388" Y="309.2172011371996" GraphRef="da757" RelX="-1.0" RelY="0.5" ArrowHead="Arrow" />
     </Graphics>
     <Xref Database="" ID="" />
   </Interaction>
-  <Interaction GraphId="id8724133c">
-    <Graphics ConnectorType="Elbow" ZOrder="12288" LineThickness="1.0">
-      <Point X="556.6554621848742" Y="109.56302521008408" GraphRef="a28dd" RelX="-0.5" RelY="1.0" />
-      <Point X="522.0252100840337" Y="129.56302521008408" />
-      <Point X="487.39495798319325" Y="83.78151260504204" />
-      <Point X="689.1974789915967" Y="38.0" />
-      <Point X="891.0" Y="58.0" GraphRef="efe87" RelX="-0.5" RelY="-1.0" ArrowHead="mim-binding" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="id946069a2">
-    <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="436.63697478991605" Y="134.0" GraphRef="f612d" RelX="0.0" RelY="0.0" />
-      <Point X="350.0" Y="357.0" ArrowHead="mim-conversion" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="id98f6a5c7">
-    <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="579.0" Y="266.0" />
-      <Point X="524.0" Y="359.0" ArrowHead="mim-stimulation" />
-      <Anchor Position="0.4" Shape="None" GraphId="b4be3" />
-      <Anchor Position="0.12566386842556118" Shape="None" GraphId="c0865" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="id7d368dc7">
-    <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="572.0884872365941" Y="277.6867397635772" GraphRef="c0865" RelX="0.0" RelY="0.0" />
-      <Point X="598.5" Y="412.92" GraphRef="e99f7" RelX="0.0" RelY="0.0" ArrowHead="mim-modification" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="idf987f11d">
-    <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="769.0" Y="285.0" />
-      <Point X="769.0" Y="373.0" ArrowHead="mim-catalysis" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="id70627ee7">
-    <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="907.0" Y="302.0" />
-      <Point X="907.0" Y="384.0" ArrowHead="mim-inhibition" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="id39f80688">
-    <Graphics ConnectorType="Segmented" ZOrder="12288" LineThickness="1.0">
-      <Point X="873.0" Y="631.25" GraphRef="c3cb4" RelX="1.0" RelY="0.0" />
-      <Point X="910.6945975744211" Y="566.7034178610804" />
-      <Point X="985.875" Y="595.5" GraphRef="a46f2" RelX="-0.5" RelY="-1.0" ArrowHead="mim-cleavage" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="id8ffb8c94">
-    <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="46.0" Y="420.0" />
-      <Point X="47.0" Y="506.0" ArrowHead="mim-covalent-bond" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="id2c1a31bd">
-    <Graphics ConnectorType="Elbow" ZOrder="12288" LineThickness="1.0">
-      <Point X="263.56512605042036" Y="118.16806722689088" GraphRef="da15c" RelX="0.5" RelY="1.0" />
-      <Point X="122.0" Y="598.5" GraphRef="d095c" RelX="-0.5" RelY="-1.0" ArrowHead="mim-branching-left" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="idb2cded2a">
-    <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="258.0" Y="404.0" />
-      <Point X="213.8" Y="637.05" GraphRef="ab597" RelX="0.0" RelY="0.0" ArrowHead="mim-branching-right" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="idfe284934">
-    <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="402.0" Y="399.0" />
-      <Point X="395.0" Y="523.0" ArrowHead="mim-transcription-translation" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <Interaction GraphId="ida94a52c5">
-    <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="557.0" Y="303.2" GraphRef="b4be3" RelX="0.0" RelY="0.0" />
-      <Point X="660.75" Y="577.5" GraphRef="d9356" RelX="0.0" RelY="-1.0" ArrowHead="mim-gap" />
-      <Anchor Position="0.4" Shape="None" GraphId="e99f7" />
-    </Graphics>
-    <Xref Database="" ID="" />
-  </Interaction>
-  <GraphicalLine GraphId="id736165ae" GroupRef="becd2">
-    <Graphics ZOrder="12288" LineThickness="1.0">
-      <Point X="98.0" Y="621.0" GraphRef="cc249" RelX="1.0" RelY="0.0" />
-      <Point X="387.5" Y="661.125" GraphRef="d7660" RelX="-1.0" RelY="0.5" />
-      <Anchor Position="0.4" Shape="None" GraphId="ab597" />
-    </Graphics>
-  </GraphicalLine>
-  <Label TextLabel="Label" GraphId="cc249" GroupRef="becd2">
-    <Graphics CenterX="58.0" CenterY="621.0" Width="80.0" Height="20.0" ZOrder="28672" FillColor="ffffff" FontSize="10" Valign="Middle" />
-  </Label>
-  <Shape GraphId="d7660" GroupRef="becd2">
-    <Graphics CenterX="422.75" CenterY="644.25" Width="70.5" Height="67.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Arc" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="cec26" GroupRef="b879e">
-    <Graphics CenterX="596.75" CenterY="642.25" Width="76.5" Height="81.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Rectangle" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="e2604" GroupRef="b879e">
-    <Graphics CenterX="728.25" CenterY="616.75" Width="69.5" Height="62.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Oval" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="c3cb4">
-    <Graphics CenterX="848.75" CenterY="631.25" Width="48.5" Height="59.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="RoundedRectangle" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="a46f2">
-    <Graphics CenterX="1004.25" CenterY="627.75" Width="73.5" Height="64.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Triangle" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="cdcee">
-    <Graphics CenterX="82.25" CenterY="789.25" Width="97.5" Height="83.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Pentagon" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="d10be">
-    <Graphics CenterX="274.75" CenterY="793.75" Width="76.5" Height="78.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Hexagon" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="fc342">
-    <Graphics CenterX="468.25" CenterY="787.25" Width="51.5" Height="73.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Brace" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="fdd0b">
-    <Graphics CenterX="686.75" CenterY="767.25" Width="96.5" Height="69.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="mim-degradation" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="ca2ea">
-    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Cell" />
-    <Attribute Key="org.pathvisio.DoubleLineProperty" Value="Double" />
-    <Graphics CenterX="86.25" CenterY="956.75" Width="81.5" Height="56.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="RoundedRectangle" LineThickness="3.0" Color="c0c0c0" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="a4521">
-    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Nucleus" />
-    <Attribute Key="org.pathvisio.DoubleLineProperty" Value="Double" />
-    <Graphics CenterX="265.75" CenterY="946.75" Width="52.5" Height="78.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Oval" LineThickness="3.0" Color="c0c0c0" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="ed059">
-    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Endoplasmic Reticulum" />
-    <Graphics CenterX="425.75" CenterY="957.75" Width="104.5" Height="72.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Endoplasmic Reticulum" LineThickness="3.0" Color="c0c0c0" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="a3c07">
-    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Golgi Apparatus" />
-    <Graphics CenterX="638.25" CenterY="960.75" Width="121.5" Height="82.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Golgi Apparatus" LineThickness="3.0" Color="c0c0c0" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="f6f1c">
-    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Mitochondria" />
-    <Graphics CenterX="860.25" CenterY="920.9183673469387" Width="111.5" Height="359.6938775510205" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Mitochondria" LineThickness="3.0" Color="c0c0c0" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="c9dff">
-    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Sarcoplasmic Reticulum" />
-    <Graphics CenterX="1053.75" CenterY="959.75" Width="92.5" Height="104.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Sarcoplasmic Reticulum" LineThickness="3.0" Color="c0c0c0" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="d0be3">
-    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Organelle" />
-    <Attribute Key="org.pathvisio.DoubleLineProperty" Value="Double" />
-    <Graphics CenterX="89.25" CenterY="1110.25" Width="69.5" Height="59.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="RoundedRectangle" LineThickness="3.0" Color="c0c0c0" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="c13b8">
-    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Vesicle" />
-    <Graphics CenterX="248.25" CenterY="1097.25" Width="101.5" Height="57.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="Oval" LineThickness="3.0" Color="c0c0c0" Rotation="0.0" />
-  </Shape>
-  <Shape GraphId="ab14a">
-    <Attribute Key="org.pathvisio.CellularComponentProperty" Value="Extracellular region" />
-    <Graphics CenterX="453.75" CenterY="1089.75" Width="82.5" Height="62.5" ZOrder="16384" FontSize="10" Valign="Middle" ShapeType="RoundedRectangle" LineStyle="Broken" Color="c0c0c0" Rotation="0.0" />
-  </Shape>
-  <Group GroupId="b879e" GraphId="d9356" Style="Group" />
-  <Group GroupId="becd2" GraphId="d095c" Style="Complex">
-    <BiopaxRef>cba</BiopaxRef>
-  </Group>
+  <Group GroupId="cac6b" GraphId="da757" Style="Group" />
   <InfoBox CenterX="0.0" CenterY="0.0" />
   <Biopax>
-    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="faa">
-      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">35623</bp:ID>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="f90">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2345234</bp:ID>
       <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
-      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Re: the impalpable testis: a rational approach to management.</bp:TITLE>
-      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">J Urol</bp:SOURCE>
-      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1979</bp:YEAR>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Berg OC</bp:AUTHORS>
-    </bp:PublicationXref>
-    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="e3e">
-      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">325234</bp:ID>
-      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
-      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Bacteriophage proteins associated with the bacterial membrane after bacteriophage T7 infection.</bp:TITLE>
-      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">J Virol</bp:SOURCE>
-      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1977</bp:YEAR>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ennis HL</bp:AUTHORS>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kievitt KD</bp:AUTHORS>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Responses of cultured smooth muscle cells from human nonatherosclerotic arteries and primary stenosing lesions after photoradiation: implications for photodynamic therapy of vascular stenoses.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">J Am Coll Cardiol</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1990</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Dartsch PC</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ischinger T</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Betz E</bp:AUTHORS>
     </bp:PublicationXref>
     <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="cba">
       <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">3425234</bp:ID>
@@ -307,16 +54,6 @@
       <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Schatten C</bp:AUTHORS>
       <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pollak A</bp:AUTHORS>
     </bp:PublicationXref>
-    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="f90">
-      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2345234</bp:ID>
-      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
-      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Responses of cultured smooth muscle cells from human nonatherosclerotic arteries and primary stenosing lesions after photoradiation: implications for photodynamic therapy of vascular stenoses.</bp:TITLE>
-      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">J Am Coll Cardiol</bp:SOURCE>
-      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1990</bp:YEAR>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Dartsch PC</bp:AUTHORS>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ischinger T</bp:AUTHORS>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Betz E</bp:AUTHORS>
-    </bp:PublicationXref>
     <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="bed">
       <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">6433456</bp:ID>
       <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
@@ -324,6 +61,45 @@
       <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Scand J Haematol Suppl</bp:SOURCE>
       <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1984</bp:YEAR>
       <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Tabor E</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="e3e">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">325234</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Bacteriophage proteins associated with the bacterial membrane after bacteriophage T7 infection.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">J Virol</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1977</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ennis HL</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kievitt KD</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="bc1">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">432523</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Effect of pinealectomy on testosterone, cholesterol and ascorbic acid in the rat testis.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Endocrinologie</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1979</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Damian E</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ianăş O</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Bădescu I</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="ce6">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">34252</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[Drug therapy of uric acid calculi--litholysis].</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ugeskr Laeger</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1979</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Christoffersen JC</bp:AUTHORS>
+    </bp:PublicationXref>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="d51">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">3452</bp:ID>
+      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Purification of an immunosuppressive principle from Ehrlich carcinoma ascites.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gann</bp:SOURCE>
+      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1975</bp:YEAR>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Motoki H</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kurokawa T</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shiraishi H</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kitame F</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ono Y</bp:AUTHORS>
     </bp:PublicationXref>
     <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="af5">
       <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">32356</bp:ID>
@@ -353,35 +129,13 @@
       <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ripa KT</bp:AUTHORS>
       <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Mårdh PA</bp:AUTHORS>
     </bp:PublicationXref>
-    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="bc1">
-      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">432523</bp:ID>
+    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="faa">
+      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">35623</bp:ID>
       <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
-      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Effect of pinealectomy on testosterone, cholesterol and ascorbic acid in the rat testis.</bp:TITLE>
-      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Endocrinologie</bp:SOURCE>
+      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Re: the impalpable testis: a rational approach to management.</bp:TITLE>
+      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">J Urol</bp:SOURCE>
       <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1979</bp:YEAR>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Damian E</bp:AUTHORS>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ianăş O</bp:AUTHORS>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Bădescu I</bp:AUTHORS>
-    </bp:PublicationXref>
-    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="d51">
-      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">3452</bp:ID>
-      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
-      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Purification of an immunosuppressive principle from Ehrlich carcinoma ascites.</bp:TITLE>
-      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Gann</bp:SOURCE>
-      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1975</bp:YEAR>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Motoki H</bp:AUTHORS>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kurokawa T</bp:AUTHORS>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shiraishi H</bp:AUTHORS>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Kitame F</bp:AUTHORS>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ono Y</bp:AUTHORS>
-    </bp:PublicationXref>
-    <bp:PublicationXref xmlns:bp="http://www.biopax.org/release/biopax-level3.owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:id="ce6">
-      <bp:ID rdf:datatype="http://www.w3.org/2001/XMLSchema#string">34252</bp:ID>
-      <bp:DB rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PubMed</bp:DB>
-      <bp:TITLE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">[Drug therapy of uric acid calculi--litholysis].</bp:TITLE>
-      <bp:SOURCE rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Ugeskr Laeger</bp:SOURCE>
-      <bp:YEAR rdf:datatype="http://www.w3.org/2001/XMLSchema#string">1979</bp:YEAR>
-      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Christoffersen JC</bp:AUTHORS>
+      <bp:AUTHORS rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Berg OC</bp:AUTHORS>
     </bp:PublicationXref>
   </Biopax>
 </Pathway>

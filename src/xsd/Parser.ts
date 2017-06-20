@@ -157,7 +157,7 @@ export class Parser {
         } catch (err) {
           // Exceptions escaping from node-expat's event handlers cause weird effects.
           console.error(err);
-          console.log("Stack:");
+          console.error("Stack:");
           console.error(err.stack);
         }
       }
@@ -236,7 +236,7 @@ export class Parser {
             " of " +
             state.source.url
         );
-        console.log("Stack:");
+        console.error("Stack:");
         console.error(err.stack);
       }
     }
