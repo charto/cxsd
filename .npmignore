@@ -1,4 +1,6 @@
 !dist/
+!dist/**/*
+!dist/**/**/*
 src/
 .travis.yml
 *.png

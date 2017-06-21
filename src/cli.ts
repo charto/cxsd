@@ -22,6 +22,10 @@ interface ICommand extends _ICommand {
   .arguments("<url>")
   .description("XSD download and conversion tool")
   .option(
+    "-L, --allow-local <boolean> (default true)",
+    "Allow or disallow fetching files from local filesystem"
+  )
+  .option(
     "-H, --force-host <host>",
     'Fetch all xsd files from <host>\n    (original host is passed in GET parameter "host")'
   )
@@ -42,6 +46,10 @@ function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
   var xsdContext = new Context(schemaContext);
 
   var fetchOptions: FetchOptions = {};
+
+  fetchOptions.allowLocal = opts.hasOwnProperty("allowLocal")
+    ? opts["allowLocal"]
+    : true;
 
   if (opts["forceHost"]) {
     fetchOptions.forceHost = opts["forceHost"];

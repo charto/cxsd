@@ -1,6 +1,6 @@
 {
   "name": "@wikipathways/cxsd",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Streaming XSD parser and XML parser generator with TypeScript output",
   "bin": {
     "cxsd": "bin/cxsd"
@@ -10,11 +10,9 @@
     "test": "npm-run-all test:*",
     "test:build": "npm-run-all test:build:*",
     "test:build:clean": "mkdir -p cache && rm -rf cache && cd test && mkdir -p cache && rm -rf cache && mkdir -p xmlns && rm -rf xmlns && cd ..",
-    "test:build:compile": "cd test && node ../bin/cxsd https://cdn.rawgit.com/ariutta/GPML/e869fe1dcd824348bc4e00ef283547ff8b7b371c/GPML2013a.xsd && cd ..",
-    "test1:build:compile": "cd test && node ../bin/cxsd http://localhost:8080/GPML2013a.xsd && cd ..",
-    "test2:build:rename": "npm-run-all test:build:rename:*",
-    "test2:build:rename:rdf": "mv ./test/xmlns/www.w3.org/1999/02/22-rdf-syntax-ns_.js ./test/xmlns/www.w3.org/1999/02/22-rdf-syntax-ns.js && mv ./test/xmlns/www.w3.org/1999/02/22-rdf-syntax-ns_.d.ts ./test/xmlns/www.w3.org/1999/02/22-rdf-syntax-ns.d.ts",
-    "test2:build:rename:bp": "mv ./test/xmlns/www.biopax.org/release/biopax-level3.owl_.d.ts ./test/xmlns/www.biopax.org/release/biopax-level3.owl.d.ts && mv ./test/xmlns/www.biopax.org/release/biopax-level3.owl_.js ./test/xmlns/www.biopax.org/release/biopax-level3.owl.js",
+    "test:build:compile": "npm-run-all test:build:compile:*",
+    "test:build:compile:GPML2013a": "cd test && node ../bin/cxsd https://cdn.rawgit.com/ariutta/GPML/e869fe1dcd824348bc4e00ef283547ff8b7b371c/GPML2013a.xsd && cd ..",
+    "test:build:compile:dir-example": "cd test && node ../bin/cxsd ./input/dir-example.xsd && cd ..",
     "test:run": "jest"
   },
   "jest": {
