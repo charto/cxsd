@@ -1,6 +1,6 @@
 {
   "name": "@wikipathways/cxsd",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Streaming XSD parser and XML parser generator with TypeScript output",
   "bin": {
     "cxsd": "bin/cxsd"
