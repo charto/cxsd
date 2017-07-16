@@ -29,6 +29,11 @@ export class SchemaLoader {
 		this.cache.fetch(xsdUrl).then((result: cget.CacheResult) => {
 			const xmlParser = xmlConfig.createParser();
 
+			interface StackFrame { [key: string]: any }
+			function StackFrame() {}
+
+			const scopeStack: StackFrame[] = [];
+
 			xmlParser.on('data', (chunk: cxml.TokenBuffer) => {
 				let token = chunk[0];
 
