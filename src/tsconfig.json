@@ -8,7 +8,8 @@
 		"noImplicitThis": true,
 		"outDir": "../dist",
 		"removeComments": false,
-		"target": "es5"
+		"target": "es5",
+		"lib": ["es6"]
 	},
 	"files": [
 		"node-expat.d.ts",
