@@ -13,6 +13,7 @@ import {exportNamespace} from './xsd/Exporter';
 import * as schema from './schema';
 import {AddImports} from './schema/transform/AddImports';
 import {Sanitize} from './schema/transform/Sanitize';
+import * as URL from 'url';
 
 type _ICommand = typeof cmd;
 interface ICommand extends _ICommand {
@@ -40,10 +41,12 @@ function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
 	var fetchOptions: FetchOptions = {};
 
 	if(opts['forceHost']) {
-		fetchOptions.forceHost = opts['forceHost'];
-		if(opts['forcePort']) fetchOptions.forcePort = opts['forcePort'];
-
-		Cache.patchRequest();
+		fetchOptions.rewrite = (url: string) => {
+			const currentURL = URL.parse(url);
+			currentURL.hostname = opts.forceHost;
+			if(opts['forcePort']) currentURL.port = opts['forcePort'];
+			return currentURL.toString();
+		}
 	}
 
 	var jsCache = new Cache(opts['outJs'] || 'xmlns', { indexName: '_index.js' });

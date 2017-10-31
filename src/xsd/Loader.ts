@@ -79,7 +79,7 @@ export class Loader {
 
 	getOptions() { return(this.options); }
 
-	private static cache = new Cache('cache/xsd', '_index.xsd');
+	private static cache = new Cache('cache/xsd', { indexName: '_index.xsd'});
 	private static sourceTbl: {[url: string]: Source} = {};
 
 	private context: Context;
