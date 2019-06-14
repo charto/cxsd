@@ -1,22 +1,28 @@
 // This file is part of cxsd, copyright (c) 2015-2016 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
+import { Packet } from '_debugger';
 
 import * as Promise from 'bluebird';
 import * as path from 'path';
 
 import {Address, Cache} from 'cget'
+import { FileSystemCache } from 'cget/dist/strategy';
 
 import {Transform} from '../transform/Transform';
 import {Type} from '../Type';
 
 export interface State {
 	cache: Cache;
+	fsStrategy: FileSystemCache;
 }
 
-export abstract class Exporter extends Transform<Exporter, boolean, State> {
+export abstract class Exporter extends Transform<Exporter, {}, State> {
 	constructor(doc: Type, cache: Cache) {
 		super(doc);
-		this.state = { cache: cache };
+		this.state = {
+			cache,
+			fsStrategy: cache && cache.storePipeline[0] as FileSystemCache
+		}
 	}
 
 	writeHeader() {
@@ -41,12 +47,15 @@ export abstract class Exporter extends Transform<Exporter, boolean, State> {
 		if(!doc) return(null);
 
 		this.cacheDir = path.dirname(
-			this.state.cache.getCachePathSync(new Address(doc.namespace.name))
+			this.state.fsStrategy.getCachePathSync(doc.namespace.name)
 		);
+	
+		let outName = this.getOutName(doc.namespace.name);		
+		if (doc.namespace.isPrimitiveSpace || new Address(outName).isLocal) {
+			outName = `urn:cxsd:${outName}` // FIXME: Hacl to generate "remote" UR{I,L}
+		}
 
-		var outName = this.getOutName(doc.namespace.name);
-
-		return(this.state.cache.ifCached(outName).then((isCached: boolean) => {
+		return((this.state.fsStrategy.isCached(outName) as Promise<boolean>).then((isCached: boolean) => {
 			if(isCached) return(null)
 
 			return(this.state.cache.store(
@@ -64,7 +73,7 @@ export abstract class Exporter extends Transform<Exporter, boolean, State> {
 		// Append and then strip a file extension so references to a parent
 		// directory will target the directory by name instead of .. or similar.
 
-		var targetPath = this.state.cache.getCachePathSync(new Address(name)) + '.js';
+		const targetPath = this.state.fsStrategy.getCachePathSync(name) + '.js';
 
 		// Always output forward slashes.
 		// If path.sep is a backslash as on Windows, we need to escape it (as a double-backslash) for it to be a valid Regex.

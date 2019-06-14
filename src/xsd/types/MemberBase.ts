@@ -60,10 +60,10 @@ export class MemberBase extends TypedBase {
 		return(false);
 	}
 
-	id: string = null;
-	name: string = null;
-	ref: string = null;
-	type: string = null;
+	id: string | null = null
+	name: string | null = null
+	ref: string | null = null
+	type: string | null = null
 
 	min: number;
 	max: number;

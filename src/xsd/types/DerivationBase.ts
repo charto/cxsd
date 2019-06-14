@@ -29,6 +29,6 @@ export class DerivationBase extends types.Base {
 		this.scope.addAllToParent('attributeGroup');
 	}
 
-	id: string = null;
-	base: string = null;
+	id: string | null = null;
+	base: string | null = null;
 }

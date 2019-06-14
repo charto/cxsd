@@ -3,19 +3,35 @@
 
 import * as Promise from 'bluebird';
 
-import {Address, FetchOptions, Cache, CacheResult, util} from 'cget';
+import {FetchOptions, Cache, CacheResult} from 'cget';
 
 import {Context} from './Context';
 import {Namespace} from './Namespace';
 import {Source} from './Source';
 import {Parser} from './Parser';
 
+/** Copy all members of src object to dst object. */
+
+export function extend(dst: {[key: string]: any}, src: {[key: string]: any}) {
+	for(var key of Object.keys(src)) {
+		dst[key] = src[key];
+	}
+	return(dst);
+}
+
+/** Make shallow clone of object. */
+
+export function clone(src: Object) {
+	return(extend({}, src));
+}
+
+
 /** Loader handles caching schema definitions and calling parser stages. */
 
 export class Loader {
 	constructor(context: Context, options?: FetchOptions) {
 		this.context = context;
-		this.options = util.clone(options);
+		this.options = clone(options || {});
 		this.parser = new Parser(context);
 	}
 
@@ -31,15 +47,14 @@ export class Loader {
 	}
 
 	importFile(urlRemote: string, namespace?: Namespace) {
-		var options = this.options;
-		options.address = new Address(urlRemote);
+		const options = this.options;
 
 		var source = Loader.sourceTbl[urlRemote];
 
 		if(!source) {
 			source = new Source(urlRemote, this.context, namespace);
 
-			Loader.cache.fetch(options).then((cached: CacheResult) => {
+			Loader.cache.fetch(urlRemote, options).then((cached: CacheResult) => {
 				source.updateUrl(urlRemote, cached.address.url);
 
 				return(this.parser.init(cached, source, this));
@@ -64,7 +79,7 @@ export class Loader {
 
 	getOptions() { return(this.options); }
 
-	private static cache = new Cache('cache/xsd', '_index.xsd');
+	private static cache = new Cache('cache/xsd', { indexName: '_index.xsd'});
 	private static sourceTbl: {[url: string]: Source} = {};
 
 	private context: Context;

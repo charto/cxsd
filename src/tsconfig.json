@@ -5,13 +5,15 @@
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"noImplicitAny": true,
-		"outDir": "dist",
-		"target": "es5"
+		"noImplicitThis": true,
+		"outDir": "../dist",
+		"removeComments": false,
+		"target": "es5",
+		"lib": ["es6"]
 	},
 	"files": [
-		"typings/index.d.ts",
-		"typings-custom/node-expat.d.ts",
+		"node-expat.d.ts",
 
-		"src/cli.ts"
+		"cli.ts"
 	]
 }

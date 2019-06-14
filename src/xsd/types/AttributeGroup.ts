@@ -20,10 +20,11 @@ export class AttributeGroup extends types.Base {
 	}
 
 	resolve(state: State) {
-		var attributeGroup: AttributeGroup = this;
+		let attributeGroup: AttributeGroup = this;
+		let ref: QName = null;
 
 		if(this.ref) {
-			var ref = new QName(this.ref, state.source);
+			ref = new QName(this.ref, state.source);
 			attributeGroup = this.scope.lookup(ref, 'attributeGroup') as AttributeGroup;
 		}
 
@@ -38,7 +39,7 @@ export class AttributeGroup extends types.Base {
 		}
 	}
 
-	id: string = null;
-	name: string = null;
-	ref: string = null;
+	id: string | null = null;
+	name: string | null = null;
+	ref: string | null = null;
 }
