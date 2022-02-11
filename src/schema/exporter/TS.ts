@@ -175,29 +175,39 @@ export class TS extends Exporter {
 			output.push(this.writeTypeList(type.childList[0]));
 		} else {
 			var outMemberList: string[] = [];
+			var outAttrList: string[] = [];
+			var outChildList: string[] = [];
 
 			var output: string[] = [];
 			var parentType = type.parent;
 
 			for(var attribute of type.attributeList) {
 				var outAttribute = this.writeMember(attribute, false);
-				if(outAttribute) outMemberList.push(outAttribute);
+				if(outAttribute) outAttrList.push(outAttribute);
 			}
 
 			for(var child of type.childList) {
 				var outChild = this.writeMember(child, false);
-				if(outChild) outMemberList.push(outChild);
+				if(outChild) outChildList.push(outChild);
 			}
 
 			output.push('{');
-
-			if(outMemberList.length) {
-				output.push('\n');
-				output.push(outMemberList.join('\n'));
-				output.push('\n');
+			const out = `{
+				${outAttrList.length ? `attributes: {
+					${outAttrList.join('\n')}
+				}`: ''}
+				${outChildList.length ? `children: Array<${outChildList.join(' | ')}>`:''}
 			}
+			`
+			outpush.push(out)
 
-			output.push('}');
+			// if(outMemberList.length) {
+			// 	output.push('\n');
+			// 	output
+			// 	output.push(outMemberList.join('\n'));
+			// 	output.push('\n');
+			// }
+
 		}
 
 		return(output.join(''));
@@ -236,9 +246,9 @@ export class TS extends Exporter {
 		} else {
 			if(type.parent) parentDef = this.writeTypeRef(type.parent, '_');
 
-			output.push('interface _' + name + this.writeParents(parentDef, type.mixinList) + ' ' + content + '\n');
-			output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { constructor: { new(): ' + name + ' }; }' + '\n');
-			if(type.isExported) output.push(exportPrefix + 'var ' + name + ': { new(): ' + name + ' };' + '\n');
+			output.push('export interface ' + name + this.writeParents(parentDef, type.mixinList) + ' ' + content + '\n');
+			//output.push(exportPrefix + 'interface ' + name + ' extends _' + name + ' { constructor: { new(): ' + name + ' }; }' + '\n');
+			//if(type.isExported) output.push(exportPrefix + 'var ' + name + ': { new(): ' + name + ' };' + '\n');
 		}
 
 		return(output.join(''));
