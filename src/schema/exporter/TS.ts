@@ -199,7 +199,7 @@ export class TS extends Exporter {
 				${outChildList.length ? `children: Array<${outChildList.join(' | ')}>`:''}
 			}
 			`
-			outpush.push(out)
+			output.push(out)
 
 			// if(outMemberList.length) {
 			// 	output.push('\n');
