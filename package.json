@@ -1,6 +1,6 @@
 {
   "name": "cxsd",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Streaming XSD parser and XML parser generator with TypeScript output",
   "bin": {
     "cxsd": "cxsd-cli.js"
