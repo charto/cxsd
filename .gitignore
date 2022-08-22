@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 typings/
 cache/
 *.js
@@ -6,3 +6,5 @@ cache/
 *.log.*
 *.log
 *.tgz
+dist
+xmlns

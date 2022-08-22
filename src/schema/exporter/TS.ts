@@ -9,7 +9,7 @@ import { MemberRef } from '../MemberRef';
 import { Type } from '../Type';
 
 var docName = 'document';
-var baseName = 'BaseType';
+var baseName = 'Element';
 
 /** Export parsed schema to a TypeScript d.ts definition file. */
 
@@ -70,8 +70,11 @@ export class TS extends Exporter {
     var output: string[] = [];
 
     var namespace = type.namespace;
-    var name = namePrefix + type.safeName;
-
+    var name =
+      namePrefix +
+      type.safeName
+        .replace(/(\w|_)Type/g, '$1')
+        .replace(/_(\w)/g, (_, c) => c.toUpperCase());
     if (!namespace || namespace == this.namespace) {
       output.push(name);
     } else {
@@ -95,18 +98,21 @@ export class TS extends Exporter {
   writeParents(parentDef: string, mixinList: Type[]) {
     var parentList: string[] = [];
 
-    if (parentDef) parentList.push(parentDef);
+    if (parentDef) parentList.push(parentDef.replace(/^_/, ''));
 
     for (var type of mixinList || []) {
-      parentList.push(this.writeTypeRef(type, '_'));
+      parentList.push(this.writeTypeRef(type, '_').replace(/^_/, ''));
     }
 
     if (!parentList.length) parentList.push(baseName);
 
-    return ' extends ' + parentList.join(', ');
+    return (
+      ' extends ' +
+      parentList.map((parent) => parent.replace(/^_/, '')).join(', ')
+    );
   }
 
-  writeTypeList(ref: MemberRef) {
+  writeTypeList(ref: MemberRef, isAttribute = false) {
     var typeList = ref.member.typeList;
 
     if (ref.max > 1 && ref.member.proxy) typeList = [ref.member.proxy];
@@ -116,7 +122,11 @@ export class TS extends Exporter {
         type.isPlainPrimitive &&
         (!type.literalList || !type.literalList.length)
       ) {
-        return type.primitiveType.name;
+        const primitiveName = type.primitiveType.name;
+        return !isAttribute &&
+          ['string', 'number', 'boolean'].includes(primitiveName)
+          ? 'Text'
+          : primitiveName;
       } else return this.writeTypeRef(type, '');
     });
 
@@ -130,7 +140,7 @@ export class TS extends Exporter {
     } else return outTypes;
   }
 
-  writeMember(ref: MemberRef, isGlobal: boolean) {
+  writeMember(ref: MemberRef, isGlobal: boolean, isAttribute = false) {
     var output: string[] = [];
     var member = ref.member;
     var comment = member.comment;
@@ -145,11 +155,16 @@ export class TS extends Exporter {
       output.push('\n');
     }
 
-    output.push(indent + ref.safeName);
+    output.push(
+      indent +
+        ref.safeName
+          .replace(/(\w|_)Type/g, '$1')
+          .replace(/_(\w)/g, (_, c) => c.toUpperCase())
+    );
     if (ref.min == 0) output.push('?');
     output.push(': ');
 
-    var outTypes = this.writeTypeList(ref);
+    var outTypes = this.writeTypeList(ref, isAttribute);
     if (!outTypes) return '';
 
     output.push(outTypes);
@@ -173,40 +188,57 @@ export class TS extends Exporter {
       output.push(this.writeTypeList(type.childList[0]));
     } else {
       var outMemberList: string[] = [];
-      var outAttrList: string[] = [];
-      var outChildList: string[] = [];
 
       var output: string[] = [];
       var parentType = type.parent;
+      const safeName = type.safeName.replace(/Type/g, '');
 
-      for (var attribute of type.attributeList) {
-        var outAttribute = this.writeMember(attribute, false);
-        if (outAttribute) outAttrList.push(outAttribute);
-      }
+      const outAttrList = type.attributeList
+        .map((attribute) => {
+          var outAttribute = this.writeMember(attribute, false, true);
+          if (outAttribute) {
+            return outAttribute
+              .replace(/(\w|_)Type/g, '$1')
+              .replace(/_(\w)/g, (_, c) => c.toUpperCase());
+          }
+        })
+        .filter(Boolean);
 
-      for (var child of type.childList) {
-        var outChild = this.writeMember(child, false);
-        if (outChild) outChildList.push(outChild);
-      }
+      const outChildList = type.childList
+        .map((child) => {
+          var outChild = this.writeMember(child, false);
+          if (!outChild) return;
+
+          const outChildButText = outChild.replace(
+            /\b(string|number)\b/,
+            'Text'
+          );
+          return outChildButText;
+        })
+        .filter(Boolean);
+
+      const name = (
+        type.name ||
+        (type.containingRef &&
+          type.containingRef.member &&
+          type.containingRef.member.name) ||
+        type.safeName
+      ).replace(/(\w|_)Type/g, '$1');
 
       const out = `{
-		  type: 'element',
-		  name: '${type.name}',
-		  ${
-        outAttrList.length
-          ? `attributes: {
-					${outAttrList.join('\n\t\t\t\t')}
-				}`
-          : ''
-      }
-		  ${outChildList.length ? `children: RequiredMap<${type.name}Map>` : ''}
-		}
+	type: 'element',
+	name: '${name.replace(/(\w)/, (c) => c.toLowerCase())}',
+  attributes: {
+	${outAttrList.join('\n\t')}
+	}
+	${outChildList.length ? `children: RequiredMap<${safeName}Children>` : ''}
+}
 
 ${
   outChildList.length
-    ? `export interface ${type.name}Map  {
-			${outChildList.join('\n\t\t')}
-		}`
+    ? `export interface ${safeName}Children  {
+	${outChildList.join('\n\t')}
+}`
     : ''
 }
 			`;
@@ -223,21 +255,52 @@ ${
     return output.join('');
   }
 
-  writeType(type: Type) {
+  writeType(type: Type, member?: MemberRef) {
     var namespace = this.namespace;
     var output: string[] = [];
-    var comment = type.comment;
+    var comment =
+      type.comment ||
+      (member && member.member && member.member.comment) ||
+      (type.containingRef &&
+        type.containingRef.member &&
+        type.containingRef.member.comment) ||
+      '';
+
+    if (type.safeName)
+      type.safeName = type.safeName
+        .replace(/(\w|_)Type/g, '$1')
+        .replace(/_(\w)/g, (_, c) => c.toUpperCase());
+
+    if (type.containingRef) {
+      type.containingRef.safeName = type.containingRef.safeName
+        .replace(/Type/g, '')
+        .replace(/_(\w)/g, (_, c) => c.toUpperCase());
+
+      if (type.containingRef.member && type.containingRef.member.safeName) {
+        type.containingRef.member.safeName = type.containingRef.member.safeName
+          .replace(/(\w|_)Type/g, '$1')
+          .replace(/_(\w)/g, (_, c) => c.toUpperCase());
+      }
+    }
+    if (type.parent && type.parent.safeName) {
+      type.parent.safeName = type.parent.safeName
+        .replace(/(\w|_)Type/g, '$1')
+        .replace(/_(\w)/g, (_, c) => c.toUpperCase());
+    }
+
     var parentDef: string;
     var exportPrefix = type.isExported ? 'export ' : '';
 
-    var name = type.safeName;
+    const name = type.safeName
+      .replace(/(\w|_)Type/g, '$1')
+      .replace(/_(\w)/g, (_, c) => c.toUpperCase());
 
     if (comment) {
       output.push(TS.formatComment('', comment));
       output.push('\n');
     }
 
-    var content = this.writeTypeContent(type);
+    const content = this.writeTypeContent(type);
 
     if (namespace.isPrimitiveSpace) {
       output.push(
@@ -351,10 +414,20 @@ ${
     output.push('');
     this.writeAugmentations(output);
 
-    output.push('interface ' + baseName + ' {');
-    output.push('\t_exists: boolean;');
-    output.push('\t_namespace: string;');
-    output.push('}');
+    // output.push('interface ' + baseName + ' {');
+    // output.push('\t_exists: boolean;');
+    // output.push('\t_namespace: string;');
+    // output.push('}');
+
+    output.push(`import {Element, Text} from 'xast'`);
+    output.push(`export type ValuesType<T extends ReadonlyArray<any> | ArrayLike<any> | Record<any, any>> = T extends ReadonlyArray<any> ? T[number] : T extends ArrayLike<any> ? T[number] : T extends object ? T[keyof T] : never;
+export type NoUndefined<T> = Exclude<T, undefined>
+export type ArrayValueMaybe<T> = T extends any[]
+? ValuesType<NoUndefined<T>>
+: NoUndefined<T>
+export type AllTypes<T> = ArrayValueMaybe<ValuesType<T>>
+    
+export type RequiredMap<T> = AllTypes<T>`);
 
     for (var type of namespace.typeList
       .slice(0)
