@@ -1,5 +1,4 @@
-schema
-======
+# schema
 
 Internal representation of XML schema, serializable to JSON or a TypeScript `.d.ts` definition and used when parsing XML.
 

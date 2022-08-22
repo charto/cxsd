@@ -1,5 +1,4 @@
-cxsd
-====
+# cxsd
 
 [![build status](https://travis-ci.org/charto/cxsd.svg?branch=master)](http://travis-ci.org/charto/cxsd)
 [![dependency status](https://david-dm.org/charto/cxsd.svg)](https://david-dm.org/charto/cxsd)
@@ -22,8 +21,7 @@ Output structure is defined mainly by schema, not the XML input.
 You can correctly parse files with completely unexpected structures (conditions apply) and element names,
 if they refer to a schema mapping the contents to supported equivalents.
 
-Usage
------
+## Usage
 
 ```bash
 echo '{ "scripts": { "cxsd": "cxsd" } }' > package.json
@@ -47,8 +45,7 @@ var metadata = wfs.document.WFS_Capabilities.OperationsMetadata;
 
 See how the [Atom](https://atom.io/) editor with [atom-typescript](https://atom.io/packages/atom-typescript) understands the code in the screenshot at the top.
 
-Features
---------
+## Features
 
 - Automatically download and cache to disk all imported .xsd files
 - Convert XSD contents to ES6 equivalents (generated `.js` files call `cxml` to parse themselves into JavaScript structures)
@@ -61,13 +58,11 @@ Features
   - Annotations to JSDoc comments
   - Enumerations to unions of string literals
 
-Related projects
-----------------
+## Related projects
 
 - [CodeSynthesis XSD](http://codesynthesis.com/projects/xsd/) generates `C++`-based parsers out of XSD schema definitions.
 
-License
-=======
+# License
 
 [The MIT License](https://raw.githubusercontent.com/charto/cxsd/master/LICENSE)
 

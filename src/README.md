@@ -1,5 +1,4 @@
-Parsing XSD schema files
-------------------------
+## Parsing XSD schema files
 
 Schema handling is implemented in the `xsd` directory. Supported syntax elements are defined in its `types` subdirectory. Each element in the xsd namespace inherits from `types.Base` which has static and dynamic members that affect parser initialization. The `Base` class and its derived classes shouldn't have manually defined constructors, because the parser will instantiate objects to inspect the dynamic properties. Instead, an `init` function is called on constructed objects when creating them during actual parsing.
 
