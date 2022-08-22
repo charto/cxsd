@@ -3,7 +3,6 @@
 
 import * as cmd from 'commander'
 import { exec as rawExec } from 'child_process'
-const exec = promisify(rawExec)
 
 import { Cache, FetchOptions } from 'cget'
 import * as cxml from 'cxml'
@@ -15,8 +14,9 @@ import { exportNamespace } from './xsd/Exporter'
 import * as schema from './schema'
 import { AddImports } from './schema/transform/AddImports'
 import { Sanitize } from './schema/transform/Sanitize'
-import { promisify } from 'bluebird'
+import { promisify } from 'util'
 
+const exec = promisify(rawExec)
 type _ICommand = typeof cmd
 interface ICommand extends _ICommand {
   arguments(spec: string): ICommand
@@ -77,11 +77,13 @@ function handleConvert(urlRemote: string, opts: { [key: string]: any }) {
         )
         .then(() => sanitize.finish())
         .then(() => addImports.finish(importsAdded.value()))
-        // .then(() =>
-        // new schema.exporter.JS(spec, jsCache).exec()
-        // )
+        // .then(() => new schema.exporter.JS(spec, jsCache).exec())
         .then(() => new schema.exporter.TS(spec, tsCache).exec())
-        .then(() => exec('node ./node_modules/prettier/bin-prettier.js -w'))
+        .then((res) => {
+          console.log(res)
+          return exec('yarn run prettier -w .')
+        })
+      // .then((res) => console.log(res))
     } catch (err) {
       console.error(err)
       console.log('Stack:')

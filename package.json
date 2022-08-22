@@ -6,7 +6,8 @@
     "cxsd": "cxsd-cli.js"
   },
   "scripts": {
-    "tsc": "build",
+    "tsc": "tsc",
+    "build": "tsc",
     "test": "node cxsd-cli.js --help"
   },
   "author": "Juha Järvi",
